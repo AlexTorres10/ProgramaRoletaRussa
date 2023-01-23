@@ -408,6 +408,7 @@ def seleciona_pergunta(rodada):
 
 
 def wait_until_enter(segundos):
+    global sair_do_jogo
     loop_jogo = True
     start = pygame.time.get_ticks()
     while loop_jogo:
@@ -903,7 +904,8 @@ def iniciar_jogo():
         while loop_final:
 
             if resposta is not None and resposta != '':
-                if resposta in perguntas_da_final[num_pergunta][1]:
+                if resposta in perguntas_da_final[num_pergunta][1] or \
+                        resposta.lower() in perguntas_da_final[num_pergunta][1]:
                     perguntas_da_final[num_pergunta][2] = True
                     num_pergunta = (num_pergunta + 1) % 8
                     num_certas += 1
@@ -1012,15 +1014,19 @@ def iniciar_jogo():
                 pygame.time.delay(int(sons['queda'].get_length() * 1000))
         pygame.mixer.pause()
         sons['tema'].play()
-        vermelhos_restantes = [v for v in range(6) if v not in buracos_abertos_final[:qtd_buracos_abertos + 1]]
-        blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos_restantes)
-        blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos+1])
+        if errou:
+            vermelhos_restantes = [v for v in range(6) if v not in buracos_abertos_final[:qtd_buracos_abertos + 1]]
+            blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos_restantes)
+            blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos+1])
+        elif caiu_ou_nao:
+            blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
         img_pergunta.update_image("img/grana.png")
         finalista.mostra_dinheiro(window, img_pergunta)
         pygame.display.update()
         wait_until_enter(120)
         for som in sons.keys():
             sons[som].stop()
+        return
 
 
 def configuracoes():
@@ -1049,7 +1055,7 @@ def configuracoes():
                 pygame.quit()
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 if volta_menu.check_click():
-                    loop_config = False
+                    return
                 if salvar.check_click():
                     novos_jogadores = []
                     for box in input_boxes:
@@ -1286,7 +1292,7 @@ def menu_principal():
                 if creditos.check_click():
                     mostra_creditos()
                 if sair.check_click():
-                    pygame.quit()
+                    exit()
 
 
 infoObject = pygame.display.Info()
