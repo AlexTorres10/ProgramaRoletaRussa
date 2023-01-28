@@ -10,6 +10,7 @@ from os import listdir
 from math import ceil
 from random import randrange, shuffle
 import random
+import sys
 
 pygame.init()
 
@@ -60,7 +61,7 @@ def comeco_jogo():
         frase.show_texto(window, align='center')
 
 
-def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 1), sons={}, jogadores=[]):
+def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 1), sons={}, jogadores=[], final=False):
     global sair_do_jogo
     global essentials
     global window
@@ -90,7 +91,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                 if events.type == pygame.KEYDOWN:
                     if events.key == pygame.K_SPACE:
                         return para_roleta('normal', alav, vermelhos=vermelhos, jogador_em_risco=jogador_em_risco,
-                                           sons=sons, jogadores=jogadores)
+                                           sons=sons, jogadores=jogadores, final=final)
     elif modo == 'carrasco':
         em_risco = get_em_risco(jogadores)
         pos_risco = randrange(len(em_risco))
@@ -168,7 +169,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
 
 
 def para_roleta(modo, alav, eliminado=Jogador('Zé', 1), vermelhos=[0], jogador_em_risco=Jogador('Zé', 1), jog_comeca=0,
-                sons={}, jogadores=[]):
+                sons={}, jogadores=[], final=False):
     global window
     global essentials
     global sair_do_jogo
@@ -193,14 +194,23 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1), vermelhos=[0], jogador_
             blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
             pygame.time.delay(1000)
         pygame.time.delay(500)
-        if jogador_em_risco.pos in vermelhos:
-            sons['queda'].play(0)
-            jogador_em_risco.eliminar(jogadores)
-            blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco)
-            return True
+        if not final:
+            if jogador_em_risco.pos in vermelhos:
+                sons['queda'].play(0)
+                jogador_em_risco.eliminar(jogadores)
+                blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco)
+                return True
+            else:
+                sons['escapou'].play(0)
+                return False
         else:
-            sons['escapou'].play(0)
-            return False
+            if 2 in vermelhos:
+                jogador_em_risco.eliminar(jogadores)
+                blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco, final=final)
+                return True
+            else:
+                return False
+
     elif modo == 'carrasco':
         for i in range(12, -1, -1):
             blit_all(sair_do_jogo, essentials, jogadores)
@@ -280,12 +290,15 @@ def blit_azul(s, ess, jogadores, a):
     pygame.display.update()
 
 
-def blit_queda(s, ess, jogadores, vermelhos, jogador):
+def blit_queda(s, ess, jogadores, vermelhos, jogador, final=False):
     global window
     window.fill('black')
     s.show_texto(window)
     mostra_essentials(window, ess)
-    queda(window, vermelhos, jogador.pos)
+    if not final:
+        queda(window, vermelhos, jogador.pos)
+    else:
+        queda(window, vermelhos, 2)
     mostra_jogadores(window, jogadores)
     pygame.display.update()
 
@@ -434,6 +447,8 @@ def iniciar_jogo():
     global df_perguntas
     global img_pergunta
     sons = load_sounds()
+    for som in sons.keys():
+        sons[som].stop()
     sons['tema'].play(0)
     window.fill('black')
     df_jogadores = pd.read_json("players.json")
@@ -913,6 +928,7 @@ def iniciar_jogo():
                     num_pergunta = (num_pergunta + 1) % 8
                 else:
                     sons['wrong'].play()
+                    pygame.time.delay(1000)
                     errou = True
                     break
                 resposta = None
@@ -950,7 +966,7 @@ def iniciar_jogo():
                 roleta.update_image('img/roleta_final_'+str(int(ceil(time)))+'.png')
 
             if time % 1 > 0.9:
-                if time > 5:
+                if time > 10:
                     sons['sec'].play(0)
                     pygame.time.delay(100)
                 else:
@@ -1001,7 +1017,8 @@ def iniciar_jogo():
                         if ev.key == pygame.K_SPACE:
                             if qtd_buracos_abertos > 0:
                                 caiu_ou_nao = jogar_roleta('normal', alavanca, chances_de_cair=qtd_buracos_abertos,
-                                                           jogador_em_risco=finalista, sons=sons, jogadores=jogadores)
+                                                           jogador_em_risco=finalista, sons=sons, jogadores=jogadores,
+                                                           final=True)
                             else:
                                 caiu_ou_nao = False
                             loop_500000 = False
@@ -1292,7 +1309,7 @@ def menu_principal():
                 if creditos.check_click():
                     mostra_creditos()
                 if sair.check_click():
-                    exit()
+                    sys.exit()
 
 
 infoObject = pygame.display.Info()
@@ -1322,7 +1339,7 @@ volta_menu = Botao('Voltar para o menu', 10, 10, tam=30, align='topleft')
 
 img_pergunta = Image('img/pergunta_espera.png', 310, 680)
 
-df_perguntas = pd.read_csv('base/main.csv')
+df_perguntas = pd.read_csv('base/main.csv',encoding='latin-1')
 df_perguntas['used'] = False
 
 main_loop = True

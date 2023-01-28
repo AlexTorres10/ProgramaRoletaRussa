@@ -43,7 +43,7 @@ class Jogador:
         if (self.dinheiro % 10) >= 8:
             self.dinheiro += (10 - (self.dinheiro % 10))
             w.fill('black')
-            s.show_texto(w, align='topleft')
+            s.show_texto(w)
             mostra_essentials(w, ess)
             mostra_jogadores(w, jog)
             pygame.display.update()
