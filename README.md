@@ -10,3 +10,4 @@ Não há intenção de infringimento de direitos autorais com este jogo. Todos o
 # Possíveis futuras inclusões
 - Bots
 - Menor tempo de espera (dependendo do feedback)
+- Replay das quedas, como acontecia no programa (será que é possível replicar exatamente?)
