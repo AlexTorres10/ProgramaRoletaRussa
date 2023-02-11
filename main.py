@@ -154,7 +154,6 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
             pygame.display.update()
 
         while not space:
-            print(comeca, end='\r', flush=True)
             pos_azul = (pos_azul + 1) % len(candidatos)
             for events in pygame.event.get():
                 if events.type == pygame.QUIT:
@@ -180,6 +179,12 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1), vermelhos=[0], jogador_
             pygame.display.update()
             alav.update_image('img/alavanca1-' + str(i) + '.png')
             pygame.display.update()
+        giros_dramaticos = randrange(4)
+        for giro in range(giros_dramaticos): # Não afetam porque fazem uma volta completa
+            for i in range(0, 6):
+                vermelhos = [(v + 1) % 6 for v in vermelhos]
+                blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
+                pygame.time.delay(50)
         sons['jogando_roleta'].stop()
         pygame.mixer.stop()
         for i in range(0, 10):
@@ -202,6 +207,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1), vermelhos=[0], jogador_
                 return True
             else:
                 sons['escapou'].play(0)
+                sons['aplausos2'].play()
                 return False
         else:
             if 2 in vermelhos:
@@ -217,6 +223,12 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1), vermelhos=[0], jogador_
             alav.update_image('img/alavanca2-' + str(i) + '.png')
             pygame.display.update()
         loc_vermelho = vermelhos[0]
+        giros_dramaticos = randrange(4)
+        for giro in range(giros_dramaticos):  # Não afetam porque fazem uma volta completa
+            for i in range(0, 6):
+                loc_vermelho = (loc_vermelho + 1) % 6
+                blit_vermelho(sair_do_jogo, essentials, jogadores, [loc_vermelho])
+                pygame.time.delay(50)
         pygame.mixer.stop()
         sons['jogando_roleta'].stop()
         for i in range(10):
@@ -338,6 +350,15 @@ def blit_alternativas(perg, alternativas):
         alternativa.show_texto(window, 'topleft')
 
 
+def blit_resposta_final(alternativas, num_alternativa):
+    global window
+    global img_pergunta
+    # img_pergunta.draw(window)
+    if num_alternativa > 0 & num_alternativa <= len(alternativas):
+        alternativa = Texto(alternativas[num_alternativa - 1], 'FreeSansBold', 48, 575, 960)
+        alternativa.show_texto(window, 'topleft')
+
+
 def blit_resposta_escolhida(perg, alternativas, escolhida):
     global window
     global img_pergunta
@@ -409,12 +430,12 @@ def seleciona_pergunta(rodada):
         df = df.sample(n=8)
         list_perguntas = []
         list_index = df.index.to_list()
-        for pergunta, alt1, alt2, alt3, alt4, alt5 in zip(df['pergunta'], df['resposta_certa'], df['alternativa_1'],
-                                                          df['alternativa_2'], df['alternativa_3'],
-                                                          df['alternativa_4']):
-            list_perguntas.append([pergunta, [alt1, alt1.upper(), alt1.lower(), alt2, alt2.upper(), alt2.lower(),
-                                              alt3, alt3.upper(), alt3.lower(), alt4, alt4.upper(), alt4.lower(),
-                                              alt5, alt5.upper(), alt5.lower()], False])
+        opcoes = ['A: ', 'B: ', 'C: ']
+        for pergunta, alt1 in zip(df['pergunta'], df['resposta_certa']):
+            alternativas = pergunta.split('.')[0].replace(' ou ', ', ').split(', ')
+            for i in range(len(alternativas)):
+                alternativas[i] = opcoes[i] + alternativas[i]
+            list_perguntas.append([pergunta, alt1, False, alternativas])
         for index in list_index:
             df_perguntas.loc[index, 'used'] = True
         return list_perguntas
@@ -424,6 +445,7 @@ def wait_until_enter(segundos):
     global sair_do_jogo
     loop_jogo = True
     start = pygame.time.get_ticks()
+
     while loop_jogo:
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
@@ -437,6 +459,9 @@ def wait_until_enter(segundos):
                     loop_jogo = False
                 if ev.key == pygame.K_p:
                     while loop_jogo:
+                        frase = Texto('JOGO PAUSADO', 'FreeSansBold', 72, 960, 760, cor=(255, 0, 0))
+                        frase.show_texto(window, align='center')
+                        pygame.display.update()
                         for ev in pygame.event.get():
                             if ev.type == pygame.KEYDOWN:
                                 if ev.key == pygame.K_p:
@@ -452,7 +477,7 @@ def iniciar_jogo():
     global sair_do_jogo
     global df_perguntas
     global img_pergunta
-    sons = load_sounds()
+    global sons
     for som in sons.keys():
         sons[som].stop()
     sons['tema'].play(0)
@@ -511,6 +536,7 @@ def iniciar_jogo():
         blit_all(sair_do_jogo, essentials, jogadores)
         pygame.display.update()
         pygame.time.delay(50)
+
     loop_jogo = True
     while loop_jogo:
         # RODADAS ELIMINATÓRIAS
@@ -728,14 +754,20 @@ def iniciar_jogo():
                 blit_certo_errado(pergunta, alternativas, resposta_escolhida, resposta_certa)
                 seg.show_texto(window, 'center')
                 pygame.display.update()
-                sons['right'].play(0) if resposta_escolhida == resposta_certa else sons['wrong'].play(0)
+                if resposta_escolhida == resposta_certa:
+                    sons['right'].play(0)
+                    sons['aplausos1'].play()
+                else:
+                    sons['wrong'].play(0)
                 pygame.time.delay(1000)
                 if resposta_escolhida != resposta_certa:
                     sons['bg_errado'].play(0)
                     wait_until_enter(10)
-                    sons['dinheiro'].play(0)
+                    if escolhido.dinheiro > 0:
+                        sons['dinheiro'].play(0)
                     if desafiante != escolhido:
-                        desafiante.pega_dinheiro_do_outro(escolhido, window, sair_do_jogo, essentials, jogadores)
+                        if escolhido.dinheiro > 0:
+                            desafiante.pega_dinheiro_do_outro(escolhido, window, sair_do_jogo, essentials, jogadores)
                     else:
                         for pl in jogadores:
                             if not pl.eliminado:
@@ -835,7 +867,7 @@ def iniciar_jogo():
         img_pergunta.update_image('img/grana.png')
         img_pergunta.draw(window)
         finalista.change_pos(2)
-        roleta.update_image('img/roleta.png')
+        roleta.update_image('img/roleta_inicio.png')
         blit_all(sair_do_jogo, essentials, jogadores)
         finalista.mostra_dinheiro(window, img_pergunta)
         pygame.display.update()
@@ -856,18 +888,16 @@ def iniciar_jogo():
         wait_until_enter(2)
         blit_all(sair_do_jogo, essentials, jogadores)
         frase_dist = ['Você terá 1 minuto para responder 8 perguntas. Cada resposta certa valerá R$ 5.000.',
-                      'Uma resposta errada, e você cai no buraco. Se acertar todas as 8, ganha',
-                      'um bônus de R$ 10.000 e jogará a roleta com o número de buracos abertos.',
-                      'Se escapar, ganha o PRÊMIO MÁXIMO DE R$ 500.000!!!!!']
+                      'Se errar, cai no buraco. Acertando todas, ganha um bônus de R$ 10.000 e jogará a roleta com',
+                      'o número de buracos abertos. Se escapar, ganha o PRÊMIO MÁXIMO DE R$ 500.000!!!!!',
+                      'A ou 1 seleciona a 1ª alternativa, B ou 2 a 2ª, C ou 3 a 3ª, e ENTER confirma a resposta.']
         for i in range(len(frase_dist)):
-            frase = Texto(frase_dist[i], 'FreeSans', 48, 960, 770 + 80 * i)
+            frase = Texto(frase_dist[i], 'FreeSans', 42, 960, 770 + 80 * i)
             frase.show_texto(window, align='center')
         pygame.display.update()
         wait_until_enter(20)
         sons['zonas_de_risco'].play()
         pygame.mixer.stop()
-
-        input_resposta = InputBox(610, 950, 700, 50, tam=36)
 
         botao_passar = Botao('PASSAR', 150, 860, 48, align='center')
         botao_passar.show_texto(window)
@@ -887,22 +917,36 @@ def iniciar_jogo():
         pulso = 0
         errou = False
         start = pygame.time.get_ticks()
+        num_resposta = 0
+        check_resposta = False
         while loop_1pergunta:
             blit_all(sair_do_jogo, essentials, jogadores)
             blit_pergunta(perguntas_da_final[num_pergunta][0])
+            blit_resposta_final(perguntas_da_final[num_pergunta][3], num_resposta)
 
-            input_resposta.draw(window)
             botao_passar.show_texto(window)
             pygame.display.update()
             for ev in pygame.event.get():
-                resposta = input_resposta.handle_event(ev)
                 if ev.type == pygame.MOUSEBUTTONDOWN:
                     if botao_passar.check_click():
                         num_pergunta = (num_pergunta + 1) % 8
                         loop_1pergunta = False
                 if ev.type == pygame.KEYDOWN:
-                    if ev.key == pygame.K_RETURN and resposta is not None:
+                    if ev.key == pygame.K_RETURN and num_resposta != 0:
+                        check_resposta = True
                         loop_1pergunta = False
+                    if ev.key == pygame.K_p:  # Passa
+                        num_pergunta = (num_pergunta + 1) % 8
+                        num_resposta = 0
+                        loop_1pergunta = False
+                    if ev.key == pygame.K_a or ev.key == pygame.K_1 or ev.key == pygame.K_KP1:
+                        num_resposta = 1
+                    if ev.key == pygame.K_b or ev.key == pygame.K_2 or ev.key == pygame.K_KP2:
+                        num_resposta = 2
+                    if (ev.key == pygame.K_c or ev.key == pygame.K_3 or ev.key == pygame.K_KP3) and \
+                            (len(perguntas_da_final[num_pergunta][3]) == 3):
+                        num_resposta = 3
+
             time = pygame.time.get_ticks() - start
             if time > 15000:  # Espera 15 segundos para contar o tempo
                 loop_1pergunta = False
@@ -930,20 +974,20 @@ def iniciar_jogo():
         loop_final = True
         while loop_final:
 
-            if resposta is not None and resposta != '':
-                if resposta in perguntas_da_final[num_pergunta][1] or \
-                        resposta.lower() in perguntas_da_final[num_pergunta][1]:
+            if check_resposta:
+                opcoes = ['A', 'B', 'C']
+                num_resp_certa = opcoes.index(perguntas_da_final[num_pergunta][1]) + 1
+                if num_resposta == num_resp_certa:
                     perguntas_da_final[num_pergunta][2] = True
                     num_pergunta = (num_pergunta + 1) % 8
                     num_certas += 1
-                elif resposta in respostas_passa:
-                    num_pergunta = (num_pergunta + 1) % 8
                 else:
                     sons['wrong'].play()
                     pygame.time.delay(1000)
                     errou = True
                     break
-                resposta = None
+                num_resposta = 0
+                check_resposta = False
             if num_certas == 8:
                 break
             while perguntas_da_final[num_pergunta][2]:
@@ -951,7 +995,7 @@ def iniciar_jogo():
             window.fill('black')
             time = (60000 - (pygame.time.get_ticks() - start)) / 1000
             seg = Texto(str(int(ceil(time))), 'ArialBlack', 120, 428, 924)
-            qtd_certas = Texto(str(int(num_certas))+'/8', 'FreeSansBold', 90, 150, 960)
+            qtd_certas = Texto(str(int(num_certas)) + '/8', 'FreeSansBold', 90, 150, 960)
 
             if time < 0:  # Se não responde...
                 roleta.update_image('img/roleta_final_0.png')
@@ -973,14 +1017,14 @@ def iniciar_jogo():
             bpm.show_texto(window, 'center')
             pulso = (pulso + 1) % 60
 
-            input_resposta.draw(window)
+            blit_resposta_final(perguntas_da_final[num_pergunta][3], num_resposta)
             seg.show_texto(window, 'center')
             qtd_certas.show_texto(window, 'center')
             botao_passar.show_texto(window)
             blit_varios_buracos(buracos_abertos_final[1:qtd_buracos_abertos + 1])
 
             if int(ceil(time)) % 10 == 0 and time % 1 > 0.9:
-                roleta.update_image('img/roleta_final_'+str(int(ceil(time)))+'.png')
+                roleta.update_image('img/roleta_final_' + str(int(ceil(time))) + '.png')
 
             if time % 1 > 0.9:
                 if time > 10:
@@ -995,12 +1039,22 @@ def iniciar_jogo():
                 if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                     if sair_do_jogo.check_click():
                         pygame.mixer.stop()
-                        return
+                        menu_principal()
                     if botao_passar.check_click():
                         num_pergunta = (num_pergunta + 1) % 8
-                # if ev.type == pygame.KEYDOWN:
-                #     input_resposta.handle_event(ev)
-                resposta = input_resposta.handle_event(ev)
+                if ev.type == pygame.KEYDOWN:
+                    if ev.key == pygame.K_RETURN:
+                        check_resposta = True
+                    if ev.key == pygame.K_p:
+                        num_pergunta = (num_pergunta + 1) % 8
+                        num_resposta = 0
+                    if ev.key == pygame.K_a or ev.key == pygame.K_1 or ev.key == pygame.K_KP1:
+                        num_resposta = 1
+                    if ev.key == pygame.K_b or ev.key == pygame.K_2 or ev.key == pygame.K_KP2:
+                        num_resposta = 2
+                    if (ev.key == pygame.K_c or ev.key == pygame.K_3 or ev.key == pygame.K_KP3) and \
+                            (len(perguntas_da_final[num_pergunta][3]) == 3):  # Perguntas de V ou F
+                        num_resposta = 3
             # pygame.display.update()
         pygame.mixer.stop()
         if errou:
@@ -1009,14 +1063,15 @@ def iniciar_jogo():
             finalista.dinheiro = finalista.dinheiro + 5000 * num_certas
             blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos + 1])
             pygame.display.update()
-            wait_until_enter(int(sons['queda'].get_length()))
+            wait_until_enter(int(sons['queda'].get_length() + 1))
         else:
             sons['escapou'].play()
+            sons['aplausos2'].play()
             finalista.dinheiro = finalista.dinheiro + 5000 * num_certas + 10000
             blit_all(sair_do_jogo, essentials, jogadores)
             blit_varios_buracos(buracos_abertos_final[1:qtd_buracos_abertos + 1])
             pygame.display.update()
-            wait_until_enter(int(sons['escapou'].get_length()))
+            wait_until_enter(int(sons['escapou'].get_length() + 1))
 
             frase_dist = ['Hora de jogar a roleta com ' + str(qtd_buracos_abertos) + ' chances de cair!',
                           'Se escapar, ganha R$ 500.000!']
@@ -1038,18 +1093,19 @@ def iniciar_jogo():
                             loop_500000 = False
             if not caiu_ou_nao:
                 sons['escapou'].play()
+                sons['aplausos2'].play()
                 finalista.dinheiro = 500000
-                wait_until_enter(int(sons['escapou'].get_length()))
+                wait_until_enter(int(sons['escapou'].get_length()) + 1)
             else:
                 sons['queda'].play()
-                wait_until_enter(int(sons['queda'].get_length()))
+                wait_until_enter(int(sons['queda'].get_length()) + 1)
         pygame.mixer.stop()
         sons['tema'].play()
         if errou:
             vermelhos_restantes = [v for v in range(6) if v not in buracos_abertos_final[:qtd_buracos_abertos + 1]]
             blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos_restantes)
-            blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos+1])
-        elif caiu_ou_nao:
+            blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos + 1])
+        elif not caiu_ou_nao:
             blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
         img_pergunta.update_image("img/grana.png")
         finalista.mostra_dinheiro(window, img_pergunta)
@@ -1063,12 +1119,15 @@ def iniciar_jogo():
 def configuracoes():
     global window
     global volta_menu
+    global sons
     limpa_tela(window)
     y_ib = [170, 220, 270, 320, 370]
 
     df_jogadores = pd.read_json("players.json")
     df_jogadores = df_jogadores.copy()
     input_boxes = []
+    config_salva = False
+    tudo_salvo = Texto('Configurações salvas com sucesso!','FreeSansBold', tam=36, x=1880, y=985)
 
     for n, y in zip(df_jogadores['nome'], y_ib):
         input_box = InputBox(60, y, 700, 45, text=n)
@@ -1095,6 +1154,9 @@ def configuracoes():
                         df_jogadores.loc[i, 'nome'] = novos_jogadores[i]
                     df_jogadores.to_json("players.json", orient="records")
                     pygame.mixer.music.set_volume(vol)
+                    for som in sons.keys():
+                        sons[som].set_volume(vol)
+                    config_salva = True
 
             if ev.type == pygame.QUIT:
                 pygame.quit()
@@ -1115,6 +1177,8 @@ def configuracoes():
         for box in input_boxes:
             box.draw(window)
         volta_menu.show_texto(window)
+        if config_salva:
+            tudo_salvo.show_texto(window, align='topright')
 
         titulo = Texto('CONFIGURAÇÕES', 'FreeSansBold', 48, 960, 40)
         titulo.show_texto(window, 'center')
@@ -1139,6 +1203,10 @@ def configuracoes():
         txt_controles_2 = Texto('Para responder a pergunta - Digitar a letra da alternativa (A a D) ou o número (1 a '
                                 '4)',
                                 'FreeSans', 30, 60, 675)
+        txt_controles_2.show_texto(window, 'topleft')
+
+        txt_controles_2 = Texto('P - Pausar o jogo (menos na rodada final)',
+                                'FreeSans', 30, 60, 725)
         txt_controles_2.show_texto(window, 'topleft')
 
         txt_volume = Texto('Volume: ' + str(int(vol * 100)) + '%', 'FreeSansBold', 48, 45, 800)
@@ -1350,12 +1418,14 @@ creditos = Botao('Créditos', 1850, 850)
 sair = Botao('Sair', 1850, 950)
 sair_do_jogo = Botao('Sair do jogo', 10, 10, tam=30, align='topleft')
 volta_menu = Botao('Voltar para o menu', 10, 10, tam=30, align='topleft')
+versao_do_jogo = Texto('Versão 1.3', 'FreeSansBold', 48, 40, 1020)
 
 img_pergunta = Image('img/pergunta_espera.png', 310, 680)
 
-df_perguntas = pd.read_csv('base/main.csv',encoding='utf-8')
+df_perguntas = pd.read_csv('base/main.csv', encoding='utf-8')
 df_perguntas['used'] = False
 
+sons = load_sounds()
 main_loop = True
 while main_loop:
 
@@ -1367,6 +1437,7 @@ while main_loop:
     regras.show_texto(window)
     creditos.show_texto(window)
     sair.show_texto(window)
+    versao_do_jogo.show_texto(window, align='topleft')
 
     pygame.display.update()
 
