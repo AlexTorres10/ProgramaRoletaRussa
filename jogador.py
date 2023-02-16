@@ -1,6 +1,7 @@
 import pygame
 from display import Image, get_ratio, mostra_essentials
 from textos_menu import Texto
+from copy import copy
 
 pos_players = [(910, 492), (743, 398), (743, 208), (910, 107), (1090, 208)]
 pos_nome = [(1722, 80), (1722, 195), (1722, 315), (1722, 435), (1722, 555)]
@@ -114,6 +115,13 @@ def mostra_jogadores(window, jogadores):
             pl.image.draw(window)
             pl.display_nome(window)
             pl.display_dinheiro(window)
+
+
+def copy_jogadores(jogadores):
+    jogadores_copy = []
+    for pl in jogadores:
+        jogadores_copy.append(copy(pl))
+    return jogadores_copy
 
 
 def get_leader(jogadores):
