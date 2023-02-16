@@ -1635,9 +1635,8 @@ df_perguntas['used'] = False
 
 sons = load_sounds()
 main_loop = True
-quedas = []
 while main_loop:
-
+    quedas = []
     window.fill('black')
     roleta_logo.draw(window)
 
