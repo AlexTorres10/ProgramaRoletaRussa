@@ -2,6 +2,7 @@ import pygame
 from display import Image, get_ratio, mostra_essentials
 from textos_menu import Texto
 from copy import copy
+from random import randint, choice
 
 pos_players = [(910, 492), (743, 398), (743, 208), (910, 107), (1090, 208)]
 pos_nome = [(1722, 80), (1722, 195), (1722, 315), (1722, 435), (1722, 555)]
@@ -13,13 +14,17 @@ for list_of_pos in [pos_dinheiro, pos_nome]:
 
 
 class Jogador:
-    def __init__(self, nome, pos):
+    def __init__(self, nome, pos, tipo):
         self.nome = nome
         self.dinheiro = 0
         self.eliminado = False
         self.pos = pos
         self.image = Image("img/number" + str(pos) + ".png", pos_players[pos - 1][0], pos_players[pos - 1][1])
         self.tam_fonte = int(30 * get_ratio())
+        self.tipo = tipo
+
+    def set_tipo(self, tipo):
+        self.tipo = tipo
 
     def pega_dinheiro_do_outro(self, outro_jogador, w, s, ess, jog):
         fatias = int(outro_jogador.dinheiro / 20)
@@ -107,6 +112,62 @@ class Jogador:
                                                                                        True, (255, 255, 255))
         text_rect = texto_dinheiro.get_rect(center=pos_dinheiro[self.pos - 1])
         window.blit(texto_dinheiro, text_rect)
+
+    def bot_responde(self, rodada, pergunta_final='', alternativas='', resposta_certa='', tempo_final=0):
+        # Nível 1 - Bot Carla Perez na final
+        # 10% para acertar - 90% para chutar
+        # Nível 2 - Bot Leigo
+        # 30% para acertar - 70% para chutar
+        # Nível 3 - Bot Normal
+        # 50% para acertar - 50% para chutar
+        # Nível 4 - Bot Inteligente
+        # 70% para acertar - 30% para chutar
+        # Nível 5 - Bot Cacá Rosset na final
+        # 90% para acertar - 10% para chutar
+        limiar = 11-2*self.tipo
+
+        # Será gerado um número entre 1 e 10. Se for maior que o limiar, o bot acerta. Se não for, ele chuta.
+        decisao = randint(1, 10)
+        respostas = ['A', 'B', 'C', 'D']
+        if decisao > limiar:  # Ou seja, se ele for acertar
+            if rodada < 5:
+                num_resposta = 0
+                for alt in alternativas:
+                    num_resposta += 1
+                    if alt == resposta_certa:  # No momento em que tivermos a certa, ele para
+                        break
+                # Retorna a resposta certa (1, 2, 3, 4) e o tempo para responder
+                print(alternativas[num_resposta-1])
+                return num_resposta, randint(1, 15)
+            else:
+                print(pergunta_final['certa'])
+                print(pergunta_final)
+                return respostas.index(pergunta_final['certa'])+1, tempo_final - randint(3, 6)
+        else:  # SE ERRAR...
+            if rodada < 5:
+                chute = choice(alternativas)
+                print(chute)
+                # Retorna o chute (A, B, C, D) e o tempo para responder
+                return alternativas.index(chute)+1, randint(1, 15)
+            else:
+                limiar_chute = randint(20, 45)  # Pode ser que o chute seja mais cedo ou mais tarde. Decidi fazer um
+                # limiar variável.
+                if tempo_final < limiar_chute:  # Se o tempo for menor que o limiar, o bot chuta.
+                    chute = choice(respostas[:len(pergunta_final['alternativas'])])
+                    return respostas.index(chute)+1, tempo_final - randint(3, 6)
+                else:
+                    return 0, tempo_final - randint(2, 6)
+
+    def bot_escolhe(self, escolhas, lider, nao_respondeu):
+        for nr in nao_respondeu:  # Quem não respondeu tem mais chances de ser escolhido.
+            if nr in escolhas:
+                escolhas.append(nr)
+        if lider is not None and lider != self:  # Se temos um líder e não é o bot
+            escolhas.append(lider)  # Ele terá um peso a mais para ser escolhido. É o líder.
+        if self.dinheiro == 0 and lider is not None:  # Se tá sem grana, tem mais tendência a perguntar ao líder!
+            escolhas.append(lider)
+        print([esc.nome for esc in escolhas])
+        return choice(escolhas)
 
 
 def mostra_jogadores(window, jogadores):
