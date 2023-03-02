@@ -1093,7 +1093,7 @@ def iniciar_jogo():
                                     outro_jogador = pl
                         outro_jogador.pega_dinheiro_do_outro(escolhido, window, sair_do_jogo, essentials, jogadores)
                     loop = True
-                    wait_until_enter(4)
+                    wait_until_enter(3)
                     sons['zonas_de_risco'].play(0)  # VOU DESTRAVAR AS ZONAS DE RISCO
                     start = pygame.time.get_ticks()
                     joga_roleta = False
@@ -1596,6 +1596,7 @@ def configuracoes():
     global window
     global volta_menu
     global sons
+    global vol
     limpa_tela(window)
     y_ib = [170, 220, 270, 320, 370]
 
@@ -1618,7 +1619,6 @@ def configuracoes():
         tipos.append(t)
 
     loop_config = True
-    vol = pygame.mixer.music.get_volume()
 
     salvar = Botao('Salvar configurações', 1880, 880, align='topright')
     while loop_config:
@@ -1868,8 +1868,6 @@ def mostra_recordes():
     df_recordes = pd.read_json("records.json")
     df_recordes = df_recordes.sort_values(by=['dinheiro', 'final_certas', 'dinheiro_antes_final'], ascending=False)
     df_recordes = df_recordes.head(10)
-
-    sons['final_inicio'].set_volume(0.1)
     sons['final_inicio'].play()
 
     titulo = 'RECORDES'
@@ -1934,6 +1932,7 @@ def menu_principal():
         iniciar.show_texto(window)
         config.show_texto(window)
         regras.show_texto(window)
+        recordes.show_texto(window)
         creditos.show_texto(window)
         sair.show_texto(window)
 
@@ -1949,6 +1948,8 @@ def menu_principal():
                     configuracoes()
                 if regras.check_click():
                     mostra_regras()
+                if recordes.check_click():
+                    mostra_recordes()
                 if creditos.check_click():
                     mostra_creditos()
                 if sair.check_click():
@@ -1988,6 +1989,10 @@ df_perguntas = pd.read_csv('base/main.csv', encoding='utf-8')
 df_perguntas['used'] = False
 
 sons = load_sounds()
+vol = round(0.25, 2)
+for som in sons.keys():
+    sons[som].set_volume(vol)
+pygame.mixer.music.set_volume(vol)
 main_loop = True
 while main_loop:
     quedas = []
