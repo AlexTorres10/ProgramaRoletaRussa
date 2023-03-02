@@ -115,16 +115,16 @@ class Jogador:
 
     def bot_responde(self, rodada, pergunta_final='', alternativas='', resposta_certa='', tempo_final=0):
         # Nível 1 - Bot Carla Perez na final
-        # 10% para acertar - 90% para chutar
+        # 0% para acertar - 100% para chutar
         # Nível 2 - Bot Leigo
-        # 30% para acertar - 70% para chutar
+        # 20% para acertar - 80% para chutar
         # Nível 3 - Bot Normal
-        # 50% para acertar - 50% para chutar
+        # 40% para acertar - 60% para chutar
         # Nível 4 - Bot Inteligente
-        # 70% para acertar - 30% para chutar
+        # 60% para acertar - 40% para chutar
         # Nível 5 - Bot Cacá Rosset na final
-        # 90% para acertar - 10% para chutar
-        limiar = 11-2*self.tipo
+        # 80% para acertar - 20% para chutar
+        limiar = 10-2*(self.tipo-1)
 
         # Será gerado um número entre 1 e 10. Se for maior que o limiar, o bot acerta. Se não for, ele chuta.
         decisao = randint(1, 10)
