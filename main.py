@@ -1064,7 +1064,7 @@ def iniciar_jogo():
                                 if ev.key == pygame.K_RETURN:
                                     loop_jogo = False
                         time = pygame.time.get_ticks() - start
-                        if time > 5000:  # Botando 35 segundos até revelar
+                        if time > 30000:  # Botando 30 segundos até revelar
                             loop_jogo = False
                 pygame.mixer.stop()
                 for som in sons.keys():
