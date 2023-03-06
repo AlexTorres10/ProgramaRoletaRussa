@@ -1285,6 +1285,7 @@ def iniciar_jogo():
 
             botao_passar.show_texto(window)
             pygame.display.update()
+            time = pygame.time.get_ticks() - start
             if finalista.tipo == 0:
                 for ev in pygame.event.get():
                     if ev.type == pygame.MOUSEBUTTONDOWN:
@@ -1313,7 +1314,6 @@ def iniciar_jogo():
                     if num_resposta == 0:
                         num_pergunta = (num_pergunta + 1) % 8
                     loop_1pergunta = False
-            time = pygame.time.get_ticks() - start
 
         # 60 SEGUNDOS PARA A GLÓRIA
 
@@ -1520,6 +1520,12 @@ def iniciar_jogo():
             finalista.dinheiro = finalista.dinheiro + 5000 * num_certas
             blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos + 1])
             pygame.display.update()
+            sob = open("Final-Sobrou.txt", "w")
+
+            for p in perguntas_da_final:
+                if not p['status']:
+                    sob.write(p['pergunta'] + ' - ' + p['certa']+'\n')
+            sob.close()
             wait_until_enter(int(sons['queda'].get_length() + 1))
         else:
             sons['escapou'].play()
@@ -1528,7 +1534,7 @@ def iniciar_jogo():
             blit_all(sair_do_jogo, essentials, jogadores)
             blit_varios_buracos(buracos_abertos_final[1:qtd_buracos_abertos + 1])
             pygame.display.update()
-            wait_until_enter(int(sons['escapou'].get_length() + 1))
+            wait_until_enter(int(sons['escapou'].get_length()))
 
             frase_dist = ['Hora de jogar a roleta com ' + str(qtd_buracos_abertos) + ' chances de cair!',
                           'Se escapar, ganha R$ 500.000!']
@@ -1562,7 +1568,7 @@ def iniciar_jogo():
                 sons['escapou'].play()
                 sons['aplausos2'].play()
                 finalista.dinheiro = 500000
-                wait_until_enter(int(sons['escapou'].get_length()) + 1)
+                wait_until_enter(int(sons['escapou'].get_length()))
             else:
                 sons['queda'].play()
                 wait_until_enter(int(sons['queda'].get_length()) + 1)
@@ -1989,7 +1995,7 @@ df_perguntas = pd.read_csv('base/main.csv', encoding='utf-8')
 df_perguntas['used'] = False
 
 sons = load_sounds()
-vol = round(0.25, 2)
+vol = round(0.10, 2)
 for som in sons.keys():
     sons[som].set_volume(vol)
 pygame.mixer.music.set_volume(vol)
