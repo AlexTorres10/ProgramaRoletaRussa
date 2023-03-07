@@ -915,7 +915,7 @@ def iniciar_jogo():
                             if ev.key == pygame.K_RETURN:
                                 loop_jogo = False
                     time = pygame.time.get_ticks() - start
-                    if time > 10000:  # Espera 10 segundos para contar o tempo
+                    if time > 15000:  # Espera 15 segundos para contar o tempo
                         loop_jogo = False
                 img_pergunta.update_image('img/pergunta.png')
                 img_pulso.draw(window)
@@ -960,26 +960,26 @@ def iniciar_jogo():
                                 if ev.key == pygame.K_a or ev.key == pygame.K_1 or ev.key == pygame.K_KP1:
                                     blit_resposta_escolhida(pergunta, alternativas, 0)
                                     resposta_escolhida = alternativas[0]
-                                    pos_resp_escolh = 0
+                                    pos_resp_escolh = 1
                                     respondeu = True
                                     loop_jogo = False
                                 if ev.key == pygame.K_b or ev.key == pygame.K_2 or ev.key == pygame.K_KP2:
                                     blit_resposta_escolhida(pergunta, alternativas, 1)
                                     resposta_escolhida = alternativas[1]
-                                    pos_resp_escolh = 1
+                                    pos_resp_escolh = 2
                                     respondeu = True
                                     loop_jogo = False
                                 if ev.key == pygame.K_c or ev.key == pygame.K_3 or ev.key == pygame.K_KP3:
                                     blit_resposta_escolhida(pergunta, alternativas, 2)
                                     resposta_escolhida = alternativas[2]
-                                    pos_resp_escolh = 2
+                                    pos_resp_escolh = 3
                                     respondeu = True
                                     loop_jogo = False
                                 if rodada >= 3:
                                     if ev.key == pygame.K_d or ev.key == pygame.K_4 or ev.key == pygame.K_KP4:
                                         blit_resposta_escolhida(pergunta, alternativas, 3)
                                         resposta_escolhida = alternativas[3]
-                                        pos_resp_escolh = 3
+                                        pos_resp_escolh = 4
                                         respondeu = True
                                         loop_jogo = False
                         if time < -3000:  # Se não responde...
@@ -1588,9 +1588,9 @@ def iniciar_jogo():
             df_recordes = df_recordes.append({'nome': finalista.nome, 'dinheiro': finalista.dinheiro,
                                               'dinheiro_antes_final': dinheiro_antes_final,
                                               'final_certas': num_certas}, ignore_index=True, sort=False)
-            df_recordes = df_recordes.head(10)
             df_recordes = df_recordes.sort_values(by=['dinheiro', 'final_certas', 'dinheiro_antes_final'],
                                                   ascending=False)
+            df_recordes = df_recordes.head(10)
             df_recordes.to_json("records.json", orient="records")
         wait_until_enter(120)
         for som in sons.keys():
