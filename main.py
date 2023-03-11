@@ -246,12 +246,13 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 pygame.time.delay(75)
         sons['jogando_roleta'].stop()
         pygame.mixer.stop()
-        for i in range(0, 10):
+        giros_para_parar = randint(7, 12)
+        for i in range(0, giros_para_parar):
             vermelhos = [(v + 1) % 6 for v in vermelhos]
             blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
             sons['zonas_de_risco'].play(0)
-            pygame.time.delay(100 * (i + 1))
-        giros_a_mais = randrange(3)
+            pygame.time.delay(int((1000/giros_para_parar) * (i + 1)))
+        giros_a_mais = randrange(4)
         for i in range(giros_a_mais):
             sons['zonas_de_risco'].play(0)
             vermelhos = [(v + 1) % 6 for v in vermelhos]
@@ -286,7 +287,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             alav.update_image('img/alavanca2-' + str(i) + '.png')
             pygame.display.update()
         loc_vermelho = vermelhos[0]
-        giros_dramaticos = randrange(4)
+        giros_dramaticos = randrange(10)
         for giro in range(giros_dramaticos):  # Não afetam porque fazem uma volta completa
             for i in range(0, 6):
                 loc_vermelho = (loc_vermelho + 1) % 6
@@ -294,11 +295,12 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 pygame.time.delay(75)
         pygame.mixer.stop()
         sons['jogando_roleta'].stop()
-        for i in range(10):
+        giros_para_parar = randint(7, 12)
+        for i in range(0, giros_para_parar):
             loc_vermelho = (loc_vermelho + 1) % 6
             blit_vermelho(sair_do_jogo, essentials, jogadores, [loc_vermelho])
             sons['zonas_de_risco'].play(0)
-            pygame.time.delay(100 * (i + 1))
+            pygame.time.delay(int((1000 / giros_para_parar) * (i + 1)))
         while loc_vermelho != eliminado.pos:
             loc_vermelho = (loc_vermelho + 1) % 6
             blit_vermelho(sair_do_jogo, essentials, jogadores, [loc_vermelho])
@@ -567,13 +569,16 @@ def blit_alternativas(perg, alternativas):
         alternativa.show_texto(window, 'topleft')
 
 
-def blit_resposta_final(alternativas, num_alternativa):
+def blit_resposta_final(alternativas, num_alternativa, cor=(255, 255, 255)):
     global window
     global img_pergunta
     # img_pergunta.draw(window)
     if num_alternativa > 0 & num_alternativa <= len(alternativas):
         alternativa = Texto(alternativas[num_alternativa - 1], 'FreeSansBold', 48, 560, 920)
-        alternativa.show_texto(window, 'topleft')
+        if cor == (255, 255, 255):
+            alternativa.show_texto(window, 'topleft')
+        else:
+            alternativa.show_texto_cor(window, 'topleft', cor)
 
 
 def blit_resposta_escolhida(perg, alternativas, escolhida):
@@ -1339,6 +1344,9 @@ def iniciar_jogo():
                     opcoes = ['A', 'B', 'C']
                     num_resp_certa = opcoes.index(perguntas_da_final[num_pergunta]['certa']) + 1
                     if num_resposta == num_resp_certa:
+                        blit_resposta_final(perguntas_da_final[num_pergunta]['alternativas'], num_resposta,
+                                            cor=(0, 175, 0))
+                        pygame.display.update()
                         perguntas_da_final[num_pergunta]['status'] = True
                         num_pergunta = (num_pergunta + 1) % 8
                         num_certas += 1
@@ -1346,6 +1354,8 @@ def iniciar_jogo():
                         sons['wrong'].play()
                         bota_vermelho(window, [2])
                         mostra_jogadores(window, jogadores)
+                        blit_resposta_final(perguntas_da_final[num_pergunta]['alternativas'], num_resposta,
+                                            cor=(220, 0, 0))
                         pygame.display.update()
                         pygame.time.delay(1000)
                         errou = True
@@ -1431,10 +1441,15 @@ def iniciar_jogo():
                         perguntas_da_final[num_pergunta]['status'] = True
                         num_pergunta = (num_pergunta + 1) % 8
                         num_certas += 1
+                        blit_resposta_final(perguntas_da_final[num_pergunta]['alternativas'], num_resposta,
+                                            cor=(0, 175, 0))
+                        pygame.display.update()
                     else:
                         sons['wrong'].play()
                         bota_vermelho(window, [2])
                         mostra_jogadores(window, jogadores)
+                        blit_resposta_final(perguntas_da_final[num_pergunta]['alternativas'], num_resposta,
+                                            cor=(220, 0, 0))
                         pygame.display.update()
                         pygame.time.delay(1000)
                         errou = True
@@ -1520,12 +1535,12 @@ def iniciar_jogo():
             finalista.dinheiro = finalista.dinheiro + 5000 * num_certas
             blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos + 1])
             pygame.display.update()
-            sob = open("Final-Sobrou.txt", "w")
-
-            for p in perguntas_da_final:
-                if not p['status']:
-                    sob.write(p['pergunta'] + ' - ' + p['certa']+'\n')
-            sob.close()
+            # sob = open("Final-Sobrou.txt", "w")
+            #
+            # for p in perguntas_da_final:
+            #     if not p['status']:
+            #         sob.write(p['pergunta'] + ' - ' + p['certa']+'\n')
+            # sob.close()
             wait_until_enter(int(sons['queda'].get_length() + 1))
         else:
             sons['escapou'].play()
