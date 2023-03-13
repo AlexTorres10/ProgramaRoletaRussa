@@ -1,19 +1,29 @@
 import pygame
 import pyautogui
 
-DISPLAYS = [(1920, 1080), (1024, 576), (1152, 648), (1280, 720), (1600, 900), (2560, 1440)]
+DISPLAYS = [(1920, 1080), (1024, 576), (1152, 648), (1280, 720),
+            (1600, 900), (2560, 1440), (800, 450), (1366, 768)]
 displayIndex = 0
 res_usuario = pyautogui.size()
 
 
 def get_display_index():
     global displayIndex
+    global DISPLAYS
+    displayIndex = None
     if res_usuario in DISPLAYS:
         displayIndex = DISPLAYS.index(res_usuario)
     else:
         for d in DISPLAYS:
             if d[0] == res_usuario[0]:
                 displayIndex = DISPLAYS.index(d)
+    if displayIndex is None:
+        new_display = (int(1920*get_ratio()), int(1080*get_ratio()))
+        DISPLAYS.append(new_display)
+    else:
+        return displayIndex
+    displayIndex = DISPLAYS.index(new_display)
+
     return displayIndex
 
 

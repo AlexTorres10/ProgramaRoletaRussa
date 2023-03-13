@@ -797,6 +797,7 @@ def iniciar_jogo():
     loop_jogo = True
     while loop_jogo:
         # RODADAS ELIMINATÓRIAS
+
         for rodada in range(1, 5):
             if rodada == 3:
                 prompt_rever_quedas(window)
@@ -863,7 +864,7 @@ def iniciar_jogo():
                 blit_vermelho(sair_do_jogo, essentials, jogadores, zonas_de_risco[num_pergunta])
                 sons['question'].play(0)
                 pergunta, alternativas, resposta_certa = seleciona_pergunta(rodada)
-                wait_until_enter(5)  # Um tempinho de ‘suspense’
+                wait_until_enter(3)  # Um tempinho de ‘suspense’
                 roleta.update_image('img/roleta.png')
                 img_pergunta.update_image('img/pergunta_espera.png')
                 blit_all(sair_do_jogo, essentials, jogadores)
@@ -1214,8 +1215,9 @@ def iniciar_jogo():
                 sons[som].stop()
         pygame.mixer.stop()
         # RODADA FINAL
-        rodada = 5
         prompt_rever_quedas(window)
+        rodada = 5
+        pygame.mixer.stop()
         finalista = get_leader(jogadores)  # O líder é logicamente o finalista!
         alavanca.update_image('img/alavanca1-0.png')
         sons['final_inicio'].play()
@@ -1535,12 +1537,12 @@ def iniciar_jogo():
             finalista.dinheiro = finalista.dinheiro + 5000 * num_certas
             blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos + 1])
             pygame.display.update()
-            # sob = open("Final-Sobrou.txt", "w")
-            #
-            # for p in perguntas_da_final:
-            #     if not p['status']:
-            #         sob.write(p['pergunta'] + ' - ' + p['certa']+'\n')
-            # sob.close()
+            sob = open("Final-Sobrou.txt", "w")
+
+            for p in perguntas_da_final:
+                if not p['status']:
+                    sob.write(p['pergunta'] + ' - ' + p['certa']+'\n')
+            sob.close()
             wait_until_enter(int(sons['queda'].get_length() + 1))
         else:
             sons['escapou'].play()
@@ -2002,7 +2004,7 @@ creditos = Botao('Créditos', 1850, 850)
 sair = Botao('Sair', 1850, 950)
 sair_do_jogo = Botao('Sair do jogo', 10, 10, tam=30, align='topleft')
 volta_menu = Botao('Voltar para o menu', 10, 10, tam=30, align='topleft')
-versao_do_jogo = Texto('Versão 2.0', 'FreeSansBold', 48, 40, 1000)
+versao_do_jogo = Texto('Versão 2.1', 'FreeSansBold', 48, 40, 1000)
 
 img_pergunta = Image('img/pergunta_espera.png', 310, 680)
 
