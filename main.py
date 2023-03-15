@@ -625,6 +625,12 @@ def seleciona_pergunta(rodada):
     global df_perguntas
     df = df_perguntas.copy()
     df = df[~df['used']]  # Pegando somente as perguntas que não foram feitas
+
+    if df[df['alternativas'] == 3].shape[0] == 0 or \
+            df[df['alternativas'] == 4].shape[0] == 0 or \
+            df[df['alternativas'] == 5].shape[0] < 8:
+        df['used'] = False  # Se não houver mais perguntas a serem selecionadas, reinicia a base.
+
     if rodada <= 2:
         df = df[df['alternativas'] == 3]
         list_index = df.index.to_list()
@@ -1537,12 +1543,12 @@ def iniciar_jogo():
             finalista.dinheiro = finalista.dinheiro + 5000 * num_certas
             blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos + 1])
             pygame.display.update()
-            sob = open("Final-Sobrou.txt", "w")
-
-            for p in perguntas_da_final:
-                if not p['status']:
-                    sob.write(p['pergunta'] + ' - ' + p['certa']+'\n')
-            sob.close()
+            # sob = open("Final-Sobrou.txt", "w")
+            #
+            # for p in perguntas_da_final:
+            #     if not p['status']:
+            #         sob.write(p['pergunta'] + ' - ' + p['certa']+'\n')
+            # sob.close()
             wait_until_enter(int(sons['queda'].get_length() + 1))
         else:
             sons['escapou'].play()
