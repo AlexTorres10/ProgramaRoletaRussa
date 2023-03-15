@@ -629,7 +629,9 @@ def seleciona_pergunta(rodada):
     if df[df['alternativas'] == 3].shape[0] == 0 or \
             df[df['alternativas'] == 4].shape[0] == 0 or \
             df[df['alternativas'] == 5].shape[0] < 8:
-        df['used'] = False  # Se não houver mais perguntas a serem selecionadas, reinicia a base.
+        df_perguntas['used'] = False  # Se não houver mais perguntas a serem selecionadas, reinicia a base.
+        df = df_perguntas.copy()
+        df = df[~df['used']]
 
     if rodada <= 2:
         df = df[df['alternativas'] == 3]
