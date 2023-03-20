@@ -9,6 +9,8 @@ from math import ceil
 from random import randrange, shuffle, uniform
 import random
 import sys
+import locale
+locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
 
 pygame.init()
 
@@ -322,7 +324,8 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
         sons['jogando_roleta'].play(0)
         comeca = randrange(6)
         blit_azul(sair_do_jogo, essentials, jogadores, comeca)
-        for i in range(50):
+        giros = randint(25, 75)
+        for i in range(giros):
             comeca = (comeca + 1) % 6  # São 6 buracos
             blit_azul(sair_do_jogo, essentials, jogadores, comeca)
             pygame.time.delay(50)
@@ -352,10 +355,13 @@ def mostra_quedas():
     #                                            'jogadores': jogadores_aux})
     sons['tema'].play()
     blit_all(sair_do_jogo, essentials, quedas[0]['jogadores'])
-    essentials[0].update_image('img/roleta_' + str(quedas[0]['jog_eliminado'].pos) + '.png')
+    if quedas[0]['modo'] == 'normal':
+        essentials[0].update_image('img/roleta_' + str(quedas[0]['jog_eliminado'].pos) + '.png')
+    else:
+        essentials[0].update_image('img/roleta.png')
     pygame.display.update()
 
-    wait_until_enter(3)
+    wait_until_enter(1)
     num_quedas = 0
     for q in quedas:
         b = copy_jogadores(q['jogadores'])
@@ -363,7 +369,7 @@ def mostra_quedas():
                   'jog_eliminado': b[q['jog_eliminado'].pos - 1], 'jogadores': b}
         alav = essentials[2]
         if q['modo'] == 'normal':
-            comeca = (q['vermelhos'][0] - randrange(2, 4)) % 6
+            comeca = (q['vermelhos'][0] - randint(3, 4)) % 6
             essentials[0].update_image('img/roleta_' + str(q['jog_eliminado'].pos) + '.png')
             blit_all(sair_do_jogo, essentials, q['jogadores'])
             pygame.display.update()
@@ -426,7 +432,7 @@ def mostra_quedas():
                 pygame.display.update()
 
             if len(em_risco) > 1:
-                comeca = (q['vermelhos'][0] - randrange(2, 4)) % 6
+                comeca = (q['vermelhos'][0] - randint(3, 4)) % 6
                 sons['jogando_roleta'].play(0)
                 start = pygame.time.get_ticks()
                 time = pygame.time.get_ticks() - start
@@ -703,6 +709,7 @@ def wait_until_enter(segundos):
 
 
 def prompt_rever_quedas(w):
+    global essentials
     frase_dist = ['Gostaria de rever a queda dos adversários? S/N']
     for i in range(len(frase_dist)):
         frase = Texto(frase_dist[i], 'FreeSansBold', 72, 960, 820 + 80 * i)
@@ -719,6 +726,7 @@ def prompt_rever_quedas(w):
                     return
             if ev.type == pygame.KEYDOWN:
                 if ev.key == pygame.K_s:
+                    essentials[0].update_image('img/roleta.png')
                     rr_quedas = Image('img/rr_quedas.png', 0, 0)
                     rr_quedas.draw(w)
 
@@ -781,7 +789,7 @@ def iniciar_jogo():
 
     sons['start_game'].play(0)
     blit_all(sair_do_jogo, essentials, jogadores)
-    frase_dist = ['Vamos distribuir R$ 1000 para', ' cada um no começo deste jogo e', 'decidir quem começa jogando!']
+    frase_dist = ['Vamos distribuir R$ 1.000,00 para', ' cada um no começo deste jogo e', 'decidir quem começa jogando!']
     for i in range(len(frase_dist)):
         frase = Texto(frase_dist[i], 'FreeSans', 72, 960, 820 + 80 * i)
         frase.show_texto(window, align='center')
@@ -850,8 +858,11 @@ def iniciar_jogo():
             sons['round'].play(0)
             wait_until_enter(2)
             blit_all(sair_do_jogo, essentials, jogadores)
-            frase_dist = ['Cada resposta certa valerá R$ ' + str(dinheiro_rodada[rodada - 1]) + ', e',
+
+            frase_dist = ['Cada resposta certa valerá ' + str(locale.currency(dinheiro_rodada[rodada - 1],
+                                                                              grouping=True)) + ', e',
                           'teremos ' + str(qtd_alternativas[rodada - 1]) + ' alternativas para cada pergunta!']
+
             for i in range(len(frase_dist)):
                 frase = Texto(frase_dist[i], 'FreeSans', 72, 960, 820 + 80 * i)
                 frase.show_texto(window, align='center')
@@ -2012,7 +2023,7 @@ creditos = Botao('Créditos', 1850, 850)
 sair = Botao('Sair', 1850, 950)
 sair_do_jogo = Botao('Sair do jogo', 10, 10, tam=30, align='topleft')
 volta_menu = Botao('Voltar para o menu', 10, 10, tam=30, align='topleft')
-versao_do_jogo = Texto('Versão 2.1', 'FreeSansBold', 48, 40, 1000)
+versao_do_jogo = Texto('Versão 2.1.2', 'FreeSansBold', 48, 40, 1000)
 
 img_pergunta = Image('img/pergunta_espera.png', 310, 680)
 
