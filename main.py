@@ -344,7 +344,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             sons['zonas_de_risco'].play(0)
             blit_azul(sair_do_jogo, essentials, jogadores, comeca)
             pygame.time.delay(1000)
-        sons['escolhido'].play(0)
+        sons['quem_comeca'].play(0)
         return eliminado
 
 
@@ -1579,12 +1579,13 @@ def iniciar_jogo():
             finalista.dinheiro = finalista.dinheiro + 5000 * num_certas
             blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos + 1])
             pygame.display.update()
-            sob = open("Final-Sobrou.txt", "w")
 
-            for p in perguntas_da_final:
-                if not p['status']:
-                    sob.write(p['pergunta'] + ' - ' + p['certa']+'\n')
-            sob.close()
+            # sob = open("Final-Sobrou.txt", "w")
+            # for p in perguntas_da_final:
+            #     if not p['status']:
+            #         sob.write(p['pergunta'] + ' - ' + p['certa']+'\n')
+            # sob.close()
+
             wait_until_enter(int(sons['queda'].get_length() + 1))
         else:
             sons['escapou'].play()
