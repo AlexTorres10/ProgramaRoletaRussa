@@ -80,6 +80,7 @@ def pergunta_selecionada(event):
                 data = [perg + texto_restante, alts[2], alts[0], alts[1]]
 
             textos = [alts[0] + ", " + alts[1] + " ou " + alts[2] + ". " + perg, texto_restante, '-', '-', '-', '-']
+
             for col, entry in zip(data, entries):
                 entry.insert(0, col)
 
@@ -87,6 +88,7 @@ def pergunta_selecionada(event):
 
         for item, z, t in zip(all_canvas, zip_alternativas, textos):
             if t != '-' and t != '':
+                t = t.replace('<br>', '')
                 canvas.itemconfig(item, text=z + t)
             else:
                 canvas.itemconfig(item, text='')
