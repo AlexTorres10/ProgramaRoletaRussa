@@ -250,7 +250,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 pygame.time.delay(75)
         sons['jogando_roleta'].stop()
         pygame.mixer.stop()
-        giros_para_parar = randint(6, 12)
+        giros_para_parar = randint(5, 12)
         for i in range(0, giros_para_parar):
             vermelhos = [(v + 1) % 6 for v in vermelhos]
             blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
@@ -299,7 +299,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 pygame.time.delay(75)
         pygame.mixer.stop()
         sons['jogando_roleta'].stop()
-        giros_para_parar = randint(6, 12)
+        giros_para_parar = randint(5, 12)
         for i in range(0, giros_para_parar):
             loc_vermelho = (loc_vermelho + 1) % 6
             blit_vermelho(sair_do_jogo, essentials, jogadores, [loc_vermelho])
@@ -333,7 +333,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             pygame.time.delay(50)
         pygame.mixer.stop()
         sons['jogando_roleta'].stop()
-        giros_para_parar = randint(6, 12)
+        giros_para_parar = randint(5, 12)
         for i in range(giros_para_parar):
             comeca = (comeca + 1) % 6
             sons['zonas_de_risco'].play(0)
@@ -697,13 +697,7 @@ def wait_until_enter(segundos):
                 if ev.key == pygame.K_RETURN:
                     loop_jogo = False
                 if ev.key == pygame.K_F1:
-                    loop_pause = True
-                    while loop_pause:
-                        pygame.time.delay(300)
-                        for ev in pygame.event.get():
-                            if ev.type == pygame.KEYDOWN:
-                                if ev.key == pygame.K_RETURN:
-                                    loop_pause = False
+                    segundos = segundos*10
                 if ev.key == pygame.K_p:
                     loop_pause = True
                     while loop_pause:
@@ -715,7 +709,7 @@ def wait_until_enter(segundos):
                                 if ev.key == pygame.K_p:
                                     loop_pause = False
         time = pygame.time.get_ticks() - start
-        if time > (segundos * 1000):  # Espera 10 segundos para contar o tempo
+        if time > (segundos * 1000):
             loop_jogo = False
 
 
@@ -906,7 +900,8 @@ def iniciar_jogo():
                 else:
                     wait_until_enter(5)
                     escolhido = desafiante.bot_escolhe(get_escolhas(jogadores, desafiante), get_leader(jogadores),
-                                                       nao_respondeu)
+                                                       nao_respondeu, rodada, num_pergunta+1)
+                    # num_pergunta vai de 0 a 4
                 if escolhido is None:
                     return
                 if escolhido in nao_respondeu:
@@ -930,6 +925,7 @@ def iniciar_jogo():
                 start = pygame.time.get_ticks()
                 # PASSOU PARA ALGUÉM — Mostra alternativas
                 loop_jogo = True
+                time_limit = 15000
                 while loop_jogo:
                     blit_all(sair_do_jogo, essentials, jogadores)
                     blit_alternativas(pergunta, alternativas)
@@ -952,16 +948,9 @@ def iniciar_jogo():
                             if ev.key == pygame.K_RETURN:
                                 loop_jogo = False
                             if ev.key == pygame.K_F1:
-                                print("Entrou!")
-                                while loop_jogo:
-                                    for ev in pygame.event.get():
-                                        try:
-                                            if ev.key == pygame.K_RETURN:
-                                                loop_jogo = False
-                                        except:
-                                            pass
+                                time_limit = time_limit*10
                     time = pygame.time.get_ticks() - start
-                    if time > 15000:  # Espera 15 segundos para contar o tempo
+                    if time > time_limit:  # Espera 15 segundos para contar o tempo
                         loop_jogo = False
                 img_pergunta.update_image('img/pergunta.png')
                 img_pulso.draw(window)

@@ -12,31 +12,31 @@ df = pd.read_csv("base/main.csv")
 
 def update(event):
     search_query = search_entry.get()
-    search_results = df[df['pergunta'].str.contains(search_query) | df['resposta_certa'].str.contains(search_query) |
-                        df['alternativa_1'].str.contains(search_query) | df['alternativa_2'].str.contains(search_query)
-                        | df['alternativa_3'].str.contains(search_query)]
+    search_query = search_query.lower()
+    search_results = df[df['pergunta'].str.lower().str.contains(search_query) |
+                        df['resposta_certa'].str.lower().str.contains(search_query) |
+                        df['alternativa_1'].str.lower().str.contains(search_query) |
+                        df['alternativa_2'].str.lower().str.contains(search_query) |
+                        df['alternativa_3'].str.lower().str.contains(search_query)]
     listbox.delete(0, tk.END)
     for row in search_results.itertuples(index=False):
         listbox.insert(tk.END, row.pergunta)
-    print("Ele vem aqui em segredo 1")
-    if not search_results.empty:
-        pergunta_entry.delete(0, tk.END)
-        pergunta_entry.insert(0, row['pergunta'])
-        resposta_certa_entry.delete(0, tk.END)
-        resposta_certa_entry.insert(0, row['resposta_certa'])
-        alternativa_1_entry.delete(0, tk.END)
-        alternativa_1_entry.insert(0, row['alternativa_1'])
-        alternativa_2_entry.delete(0, tk.END)
-        alternativa_2_entry.insert(0, row['alternativa_2'])
-        alternativa_3_entry.delete(0, tk.END)
-        alternativa_3_entry.insert(0, row['alternativa_3'])
+    # if not search_results.empty:
+    #     pergunta_entry.delete(0, tk.END)
+    #     pergunta_entry.insert(0, row['pergunta'])
+    #     resposta_certa_entry.delete(0, tk.END)
+    #     resposta_certa_entry.insert(0, row['resposta_certa'])
+    #     alternativa_1_entry.delete(0, tk.END)
+    #     alternativa_1_entry.insert(0, row['alternativa_1'])
+    #     alternativa_2_entry.delete(0, tk.END)
+    #     alternativa_2_entry.insert(0, row['alternativa_2'])
+    #     alternativa_3_entry.delete(0, tk.END)
+    #     alternativa_3_entry.insert(0, row['alternativa_3'])
 
 
 def pergunta_selecionada(event):
     # get the selected question from the listbox
     selected_index = listbox.curselection()
-
-    # print("Ele vem aqui em segredo 5")
 
     if len(selected_index) == 1:
         pergunta = listbox.get(selected_index[0])
@@ -69,12 +69,12 @@ def pergunta_selecionada(event):
             perg_split = row['pergunta'].split('. ')[1].split('<br>')
             perg = perg_split[0]
             if len(perg_split) > 1:
-                texto_restante = perg_split[1]
+                texto_restante = '<br>' + perg_split[1]
 
             alts = row['pergunta'].split('. ')[0].replace(' ou ', ', ').split(', ')
-            if row['alternativas'] == 'A':
+            if row['resposta_certa'] == 'A':
                 data = [perg + texto_restante, alts[0], alts[1], alts[2]]
-            elif row['alternativas'] == 'B':
+            elif row['resposta_certa'] == 'B':
                 data = [perg + texto_restante, alts[1], alts[0], alts[2]]
             else:
                 data = [perg + texto_restante, alts[2], alts[0], alts[1]]
@@ -178,6 +178,7 @@ def replace_question():
     # get the selected question
     pergunta = canvas.itemcget(perg_img, 'text')
     pergunta_2 = canvas.itemcget(perg_img_2, 'text')
+    print(pergunta_2)
     if pergunta_2 != '':
         pergunta = pergunta + '<br>' + pergunta_2
 
@@ -230,8 +231,6 @@ def replace_question():
 
 def save_database():
     # show a message box to confirm the user wants to save the database
-    messagebox.YES = 'Sim'
-    messagebox.NO = 'Não'
     confirm = messagebox.askyesno("Salvar Base", "Tem certeza de que quer salvar a base de perguntas?")
 
     if confirm:
@@ -242,22 +241,9 @@ def save_database():
         messagebox.showinfo("Base salva", "A base de perguntas foi salva.")
 
 
-def simnao(title, message, yes_text, no_text):
-    top = tk.Toplevel()
-    top.title(title)
-    label = tk.Label(top, text=message)
-    label.pack(padx=10, pady=10)
-
-    yes_button = tk.Button(top, text=yes_text, command=lambda: top.destroy(), width=10)
-    yes_button.pack(side=tk.LEFT, padx=5, pady=5)
-
-    no_button = tk.Button(top, text=no_text, command=lambda: top.destroy(), width=10)
-    no_button.pack(side=tk.RIGHT, padx=5, pady=5)
-
-    top.grab_set()
-    top.wait_window()
 # Create main window
 root = tk.Tk()
+root.iconbitmap("rr_editor.ico")
 root.geometry("960x600")
 
 # Create search entry
