@@ -152,20 +152,40 @@ class Jogador:
             else:
                 limiar_chute = randint(20, 45)  # Pode ser que o chute seja mais cedo ou mais tarde. Decidi fazer um
                 # limiar variável.
+                print(pergunta_final)
                 if tempo_final < limiar_chute:  # Se o tempo for menor que o limiar, o bot chuta.
-                    chute = choice(respostas[:len(pergunta_final['alternativas'])])
+                    chute = choice(respostas[:-1])
                     return respostas.index(chute)+1, tempo_final - randint(3, 6)
                 else:
                     return 0, tempo_final - randint(2, 6)
 
-    def bot_escolhe(self, escolhas, lider, nao_respondeu):
-        for nr in nao_respondeu:  # Quem não respondeu tem mais chances de ser escolhido.
-            if nr in escolhas:
-                escolhas.append(nr)
-        if lider is not None and lider != self:  # Se temos um líder e não é o bot
-            escolhas.append(lider)  # Ele terá um peso a mais para ser escolhido. É o líder.
-        if self.dinheiro == 0 and lider is not None:  # Se tá sem grana, tem mais tendência a perguntar ao líder!
-            escolhas.append(lider)
+    def bot_escolhe(self, escolhas, lider, nao_respondeu, rodada, pergunta):
+        if rodada == 4 and pergunta == 5:  # Se estiver na última pergunta
+            outro = [esc for esc in escolhas if esc != self][0]
+            if abs(self.dinheiro - outro.dinheiro) > 2500:
+                # Se não alcança o outro se acertar...
+                escolhas = [esc for esc in escolhas if esc != self]
+                # Desafie o outro obrigatoriamente.
+        else:
+            for nr in nao_respondeu:  # Quem não respondeu tem mais chances de ser escolhido.
+                if nr in escolhas:
+                    escolhas.append(nr)
+                if rodada == 1:
+                    # Se estivermos na primeira rodada, teremos uma tendência bem maior
+                    # a perguntar de quem não respondeu.
+                    escolhas.append(nr)
+                    escolhas.append(nr)
+                    escolhas.append(nr)
+                    escolhas.append(nr)
+            if lider is not None and lider != self:  # Se temos um líder e não é o bot
+                escolhas.append(lider)  # Ele terá um peso a mais para ser escolhido. É o líder.
+            if self.dinheiro == 0 and lider is not None:  # Se tá sem grana, tem mais tendência a perguntar ao líder!
+                escolhas.append(lider)
+                if rodada == 1:  # E também de perguntar ao líder se acabou de perder a grana.
+                    escolhas.append(nr)
+                    escolhas.append(nr)
+                    escolhas.append(nr)
+                    escolhas.append(nr)
         print([esc.nome for esc in escolhas])
         return choice(escolhas)
 
