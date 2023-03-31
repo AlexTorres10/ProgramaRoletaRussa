@@ -170,22 +170,22 @@ class Jogador:
             for nr in nao_respondeu:  # Quem não respondeu tem mais chances de ser escolhido.
                 if nr in escolhas:
                     escolhas.append(nr)
-                if rodada == 1:
-                    # Se estivermos na primeira rodada, teremos uma tendência bem maior
-                    # a perguntar de quem não respondeu.
-                    escolhas.append(nr)
-                    escolhas.append(nr)
-                    escolhas.append(nr)
-                    escolhas.append(nr)
+                    if rodada == 1:
+                        # Se estivermos na primeira rodada, teremos uma tendência bem maior
+                        # a perguntar de quem não respondeu.
+                        escolhas.append(nr)
+                        escolhas.append(nr)
+                        escolhas.append(nr)
+                        escolhas.append(nr)
             if lider is not None and lider != self:  # Se temos um líder e não é o bot
                 escolhas.append(lider)  # Ele terá um peso a mais para ser escolhido. É o líder.
             if self.dinheiro == 0 and lider is not None:  # Se tá sem grana, tem mais tendência a perguntar ao líder!
                 escolhas.append(lider)
                 if rodada == 1:  # E também de perguntar ao líder se acabou de perder a grana.
-                    escolhas.append(nr)
-                    escolhas.append(nr)
-                    escolhas.append(nr)
-                    escolhas.append(nr)
+                    escolhas.append(lider)
+                    escolhas.append(lider)
+                    escolhas.append(lider)
+                    escolhas.append(lider)
         print([esc.nome for esc in escolhas])
         return choice(escolhas)
 
