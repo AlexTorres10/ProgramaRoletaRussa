@@ -759,13 +759,14 @@ def prompt_rever_quedas(w):
                     pygame.display.update()
                     wait_until_enter(int(sons['rever_quedas'].get_length()))
                     mostra_quedas()
+                    sons['aplausos2'].play(0)
                     loop = False
                 if ev.key == pygame.K_n:
                     loop = False
 
 
 def get_pulso(pulso_anterior):
-    dif_anterior = randrange(-2, 3)
+    dif_anterior = randint(-3, 3)
     return pulso_anterior + dif_anterior
 
 
@@ -870,7 +871,7 @@ def iniciar_jogo():
                                 loop = False
             else:
                 desafiante = lider
-
+            sons['tema'].stop()
             frase_dist = ['Vamos começar a ' + str(rodada) + 'ª rodada',
                           'da Roleta Russa!']
             for i in range(len(frase_dist)):
@@ -879,6 +880,8 @@ def iniciar_jogo():
             pygame.display.update()
             wait_until_enter(6)
             pygame.mixer.stop()
+            for som in sons.keys():
+                sons[som].stop()
             sons['round'].play(0)
             wait_until_enter(2)
             blit_all(sair_do_jogo, essentials, jogadores)
@@ -1262,14 +1265,10 @@ def iniciar_jogo():
             blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
             pygame.display.update()
             wait_until_enter(5)
-            pygame.mixer.stop()
-            for som in sons.keys():
-                sons[som].stop()
         pygame.mixer.stop()
         # RODADA FINAL
         prompt_rever_quedas(window)
         rodada = 5
-        pygame.mixer.stop()
         finalista = get_leader(jogadores)  # O líder é logicamente o finalista!
         alavanca.update_image('img/alavanca1-0.png')
         sons['final_inicio'].play()
@@ -1533,7 +1532,7 @@ def iniciar_jogo():
                     num_pergunta_aux = num_pergunta
                     num_resposta, limiar = finalista.bot_responde(rodada,
                                                                   pergunta_final=perguntas_da_final[num_pergunta],
-                                                                  tempo_final=time)
+                                                                  tempo_final=time, certas=num_certas)
                     print("Limiar", limiar)
 
                 if time < limiar:

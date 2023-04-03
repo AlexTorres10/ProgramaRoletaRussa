@@ -113,7 +113,7 @@ class Jogador:
         text_rect = texto_dinheiro.get_rect(center=pos_dinheiro[self.pos - 1])
         window.blit(texto_dinheiro, text_rect)
 
-    def bot_responde(self, rodada, pergunta_final='', alternativas='', resposta_certa='', tempo_final=0):
+    def bot_responde(self, rodada, pergunta_final='', alternativas='', resposta_certa='', tempo_final=0, certas=0):
         # Nível 1 - Bot Carla Perez na final
         # 0% para acertar - 100% para chutar
         # Nível 2 - Bot Leigo
@@ -153,7 +153,8 @@ class Jogador:
                 limiar_chute = randint(20, 45)  # Pode ser que o chute seja mais cedo ou mais tarde. Decidi fazer um
                 # limiar variável.
                 print(pergunta_final)
-                if tempo_final < limiar_chute:  # Se o tempo for menor que o limiar, o bot chuta.
+                if tempo_final < limiar_chute or certas == 7:
+                    # Se o tempo for menor que o limiar ou estivermos em 7 certas, o bot chuta.
                     chute = choice(respostas[:-1])
                     return respostas.index(chute)+1, tempo_final - randint(3, 6)
                 else:
