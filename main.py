@@ -281,7 +281,8 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             if 2 in vermelhos:
                 jogador_em_risco.eliminar(jogadores)
                 blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco, final=final)
-                return True
+                blit_varios_buracos(vermelhos)
+                return [True, vermelhos]
             else:
                 return False
 
@@ -849,6 +850,7 @@ def iniciar_jogo():
                 alavanca.update_image('img/alavanca2-0.png')
                 roleta.update_image('img/roleta_inicio.png')
                 blit_all(sair_do_jogo, essentials, jogadores)
+                sons['tema'].stop()
                 if rodada > 1:
                     frase_dist = ['Temos um empate na liderança! ', 'Portanto a roleta deve ser jogada para',
                                   'decidir quem começa jogando!']
@@ -1649,6 +1651,9 @@ def iniciar_jogo():
             blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos + 1])
         elif not caiu_ou_nao:
             blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
+        else:
+            blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
+            blit_varios_buracos(caiu_ou_nao[1])
         img_pergunta.update_image("img/grana.png")
         finalista.mostra_dinheiro(window, img_pergunta)
         pygame.display.update()
