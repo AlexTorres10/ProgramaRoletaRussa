@@ -1636,10 +1636,10 @@ def iniciar_jogo():
                 else:
                     caiu_ou_nao = False
             if not caiu_ou_nao:
-                sons['escapou'].play()
+                sons['vitoria'].play()
                 sons['aplausos2'].play()
                 finalista.dinheiro = 500000
-                wait_until_enter(int(sons['escapou'].get_length()-3))
+                wait_until_enter(int(sons['vitoria'].get_length()))
             else:
                 sons['queda'].play()
                 wait_until_enter(int(sons['queda'].get_length()) + 1)
