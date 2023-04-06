@@ -1613,29 +1613,28 @@ def iniciar_jogo():
                 frase = Texto(frase_dist[i], 'FreeSansBold', 72, 960, 800 + 80 * i)
                 frase.show_texto(window, align='center')
             pygame.display.update()
-            if finalista.tipo == 0:
-                loop_500000 = True
-                while loop_500000:
-                    for ev in pygame.event.get():
-                        if ev.type == pygame.KEYDOWN:
-                            if ev.key == pygame.K_SPACE:
-                                if qtd_buracos_abertos > 0:
+
+            if qtd_buracos_abertos > 0:
+                if finalista.tipo == 0:
+                    loop_500000 = True
+                    while loop_500000:
+                        for ev in pygame.event.get():
+                            if ev.type == pygame.KEYDOWN:
+                                if ev.key == pygame.K_SPACE:
                                     caiu_ou_nao = jogar_roleta('normal', alavanca, chances_de_cair=qtd_buracos_abertos,
                                                                jogador_em_risco=finalista, sons=sons,
                                                                jogadores=jogadores,
                                                                final=True)
-                                else:
-                                    caiu_ou_nao = False
-                                loop_500000 = False
-            else:
-                wait_until_enter(5)
-                if qtd_buracos_abertos > 0:
+                                    loop_500000 = False
+                else:
+                    wait_until_enter(5)
                     caiu_ou_nao = jogar_roleta('normal', alavanca, chances_de_cair=qtd_buracos_abertos,
                                                jogador_em_risco=finalista, sons=sons, jogadores=jogadores,
                                                final=True)
-                else:
-                    caiu_ou_nao = False
+            else:
+                caiu_ou_nao = False
             if not caiu_ou_nao:
+                sons['vitoria'].set_volume(vol+0.1)
                 sons['vitoria'].play()
                 sons['aplausos2'].play()
                 finalista.dinheiro = 500000

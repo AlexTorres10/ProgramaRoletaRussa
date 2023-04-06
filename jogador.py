@@ -138,27 +138,29 @@ class Jogador:
                         break
                 # Retorna a resposta certa (1, 2, 3, 4) e o tempo para responder
                 print(alternativas[num_resposta-1])
-                return num_resposta, randint(1, 15)
+                return num_resposta, randint(2*(self.tipo-1), 15)
             else:
                 print(pergunta_final['certa'])
                 print(pergunta_final)
                 return respostas.index(pergunta_final['certa'])+1, tempo_final - randint(3, 6)
-        else:  # SE ERRAR...
+        else:  # SE CHUTAR...
             if rodada < 5:
                 chute = choice(alternativas)
                 print(chute)
                 # Retorna o chute (A, B, C, D) e o tempo para responder
-                return alternativas.index(chute)+1, randint(1, 15)
+                return alternativas.index(chute)+1, randint(1, 12)
             else:
-                limiar_chute = randint(20, 45)  # Pode ser que o chute seja mais cedo ou mais tarde. Decidi fazer um
+                limiar_chute = randint(20, 45)
+
+                # Pode ser que o chute seja mais cedo ou mais tarde. Decidi fazer um
                 # limiar variável.
                 print(pergunta_final)
                 if tempo_final < limiar_chute or certas == 7:
                     # Se o tempo for menor que o limiar ou estivermos em 7 certas, o bot chuta.
                     chute = choice(respostas[:-1])
-                    return respostas.index(chute)+1, tempo_final - randint(3, 6)
+                    return respostas.index(chute)+1, tempo_final - randint(4, 6)
                 else:
-                    return 0, tempo_final - randint(2, 6)
+                    return 0, tempo_final - randint(4, 6)
 
     def bot_escolhe(self, escolhas, lider, nao_respondeu, rodada, pergunta):
         if rodada == 4 and pergunta == 5:  # Se estiver na última pergunta
