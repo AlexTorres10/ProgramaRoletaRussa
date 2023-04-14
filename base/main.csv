@@ -1,25 +1,61 @@
-pergunta,alternativas,resposta_certa,alternativa_1,alternativa_2,alternativa_3
-Jair Bolsonaro ganhou as eleições presidenciais de 2018 <br>disputando por qual partido?,3,PSL,PL,Progressistas,-
-Em que país está localizada a antiga cidade de Troia?,3,Turquia,Grécia,Itália,-
-"""Sonata ao Luar"" é uma sinfonia feita por qual compositor?",3,Beethoven,Bach,Strauss,-
-Qual destas pessoas criou a empresa de automóveis Ford <br>Motors?,3,Henry Ford,John Ford,Peter Ford,-
-Kurt Cobain foi vocalista de qual banda de rock?,3,Nirvana,Red Hot Chili Peppers,Avenged Sevenfold,-
-"O nome de qual ciência é literalmente traduzido como <br>""descrição da terra""?",3,Geografia,Geometria,Geodésia,-
-Qual destes é um antibiótico?,3,Penicilina,Paracetamol,Ibuprofeno,-
-Qual piloto brasileiro foi campeão da Fórmula 2 em 2022?,3,Felipe Drugovich,Enzo Fittipaldi,Sérgio Sette Câmara,-
-"No Texas Hold'em, qual destas mãos vale mais do <br>que o full house?",4,Quadra,Dois pares,Straight,Flush
-"Em que cidade o arquiduque da Áustria-Hungria Francisco <br>Ferdinando foi morto, iniciando a 1ª Guerra Mundial?",4,Sarajevo,Belgrado,Zagreb,Tirana
-"Qual é o primeiro nome do presidente da França, Macron?",4,Emmanuel,Nicolas,Jacques,Pierre
-Qual princesa da mitologia grega se acorrentou numa rocha <br>para evitar a destruição de sua cidade?,4,Andrômeda,Cassiopeia,Ariadne,Medeia
-Qual equipamento foi aperfeiçoado por Galileu Galilei?,4,Periscópio,Binóculo,Microscópio,Telescópio
-Em que país nasceu Saddam Hussein?,4,Iraque,Afeganistão,Irã,Arábia Saudita
-"Quantos gols o Rei Pelé marcou com a camisa da <br>Seleção Brasileira, incluindo jogos oficiais e amistosos?",4,95 gols,150 gols,49 gols,1000 gols
-Em que casa começa o rei negro no tabuleiro de xadrez?,4,e8,d8,e1,d1
-"Between, Under, Above. Qual preposição inglesa signfica <br>""acima""?",5,C,Above,Above,Above
-"Texas, Califórnia, Flórida. Onde fica o Cabo Canaveral, <br>famoso pelos programas espaciais?",5,C,Flórida,Flórida,Flórida
-"185, 215, 235. Quantos milhões de habitantes tem o Brasil?",5,B,215,215,215
-"3, 4, 5. Quantos átomos de carbono tem o propano?",5,A,3,A,A
-"Incomum, Antipático, Inverídico. Qual é o antônimo de <br>cordial?",5,B,Antipático,B,B
-"Sal, Cloro, Enxofre. Qual substância é adicionada <br>nas piscinas?",5,B,Cloro,Cloro,Cloro
-"Prado, Ermitage, Louvre. Em que museu está a Mona Lisa?",5,C,Louvre,-,-
-"Jamaica, Cuba, Bahamas. Qual destes países caribenhos <br>é um arquipélago?",5,C,Bahamas,Bahamas,Bahamas
+pergunta,alternativas,resposta_certa,alternativa_1,alternativa_2,alternativa_3,embaralhar,used
+Qual atriz possui o recorde de mais estatuetas do <br>Oscar de Melhor Atriz?,3,Katharine Hepburn,Audrey Hepburn,Elizabeth Taylor,-,N,False
+"Como é chamado um ""cafezinho"" em Portugal?",3,Bica,Amarguinho,Curto,-,N,False
+Qual desses escritores pertenceu à classe literária chamada <br>realismo?,3,Machado de Assis,Luís de Camões,Gonçalves Dias,-,N,False
+Qual é o nome do dublador do Goku em Dragon Ball Z?,3,Wendell Bezerra,Alfredo Rollo,Hermes Baroli,-,N,False
+O que significa procrastinar?,3,Adiar,Procurar com afinco,Prevenir,-,N,False
+Que humorista já falecido dublou a voz de Shrek em seus dois <br>primeiros filmes?,3,Bussunda,Orlando Drummond,Chico Anysio,-,N,False
+Quantos fusos horários possui a Rússia?,3,11,9,13,-,N,False
+Onde nasceu Kareem Abdul-Jabbar?,3,Nova Iorque,Nova Jersey,Novo México,-,N,False
+Quantos pontos tem um set de tênis de mesa profissional?,3,11,5,7,-,N,False
+Qual foi a última equipe de Felipe Massa na Fórmula 1?,3,Williams,Ferrari,Sauber,-,N,False
+Em que país Ayrton Senna venceu seu primeiro Grande <br>Prêmio de Fórmula 1?,3,Portugal,Itália,Espanha,-,N,False
+Quantas arestas tem um cubo?,3,12,6,8,-,N,False
+Qual é a religião predominante na Tailândia?,3,Budismo,Cristianismo,Hinduísmo,-,N,False
+"A frase ""América para os americanos"" está relacionada ao quê?",3,Doutrina Monroe,Revolução Russa,Independência dos EUA,-,N,False
+Qual destes nomes não podemos associar à Intentona <br>Comunista?,3,Plínio Salgado,Luís Carlos Prestes,Olga Benário,-,N,False
+Quem é o deus das portas na mitologia romana?,3,Jano,Asclépio,Saturno,-,N,False
+"Qual estilista criou o famoso estilo ""New Look"", lançado após <br>a Segunda Guerra Mundial?",3,Christian Dior,Ives Saint-Laurent,Coco Chanel,-,N,False
+"A expressão ""labareda de fogo"" é classificada como o quê?",3,Pleonasmo,Eufemismo,Prosopopeia,-,N,False
+Em que ano nasceu Galileu Galilei?,3,1564,1475,1689,-,N,False
+"Como se chama a medida inglesa equivalente a 30,48cm, <br>usada principalmente na aeronáutica?",3,Pé,Polegada,Jarda,-,N,False
+"Quantos filhos teve Jó no total, contando antes e depois <br>da provação?",4,20 filhos,10 filhos,15 filhos,5 filhos,N,False
+De quantos graus na escala Richter foi o maior terremoto já <br>registrado na história?,4,9.5 graus,8.3 graus,9.2 graus,7.8 graus,N,False
+"Qual foi o primeiro presidente da Ditadura Militar no Brasil, <br>iniciada em 1964?",4,Castelo Branco,Costa e Silva,Geisel,Garrastazu Médici,N,False
+Que naipe do baralho tem o desenho de um diamante?,4,Ouros,Copas,Paus,Espadas,N,False
+Quantos torneios de Roland Garros venceu Gustavo Kuerten?,4,3,5,7,1,N,False
+Em que jornal as tirinhas da Turma da Mônica foram publicadas <br>pela primeira vez?,4,Folha de São Paulo,O Estado de São Paulo,Jornal do Brasil,O Globo,N,False
+"Baby do Brasil, Pepeu Gomes, Moraes Moreira, Paulinho Boca <br>de Cantor e Luiz Galvão formaram qual grupo nos anos 70?",4,Novos Baianos,A Cor do Som,Tropicália,Mutantes,N,False
+Qual neto da Rainha Elizabeth II abdicou da família real?,4,Harry,William,George,Charles,N,False
+"Qual destes livros de Harry Potter, cronologicamente, <br>é o mais recente?",4,O Enigma do Príncipe,O Prisioneiro de Azkaban,A Pedra Filosofal,O Cálice de Fogo,N,False
+Quem foi a primeira pessoa programadora da história?,4,Ada Lovelace,Blaise Pascal,Dennis Ritchie,Linus Torvalds,N,False
+"Em que ano foi lançado o último filme de Harry Potter, <br>""As Relíquias da Morte: Parte 2""?",4,2011,2014,2008,2009,N,False
+Qual é a residência oficial do Presidente da República?,4,Palácio da Alvorada,Palácio do Jaburu,Palácio do Catete,Palácio Itamaraty,N,False
+Qual das seguintes mãos de poker vale mais?,4,Royal flush,Straight,Quadra,Straight flush,N,False
+De que tipo é uma onda de rádio?,4,Eletromagnética,Eletroeletrônica,Radiofônica,Radiodifusora,N,False
+"O que significa a palavra ""salamaleque"", que os árabes usam <br>para se cumprimentar?",4,A paz esteja contigo,Que Alá te proteja,Deus te abençoe,Tudo bem com você?,N,False
+"Qual país tinha seu exército conhecido como ""Armada <br>Invencível?",4,Espanha,Inglaterra,França,Países Baixos,N,False
+Em que estado brasileiro nasceu o pintor Cândido Portinari?,4,São Paulo,Piauí,Goiás,Rio Grande do Sul,N,False
+"Quem é chamado de síndico na música ""W/Brasil"", do cantor <br>Jorge Ben Jor?",4,Tim Maia,Roberto Carlos,Gilberto Gil,Chico Buarque,N,False
+"Quem compôs ""As Quatro Estações""?",4,Antonio Vivaldi,Richard Wagner,Antonio Salieri,Johann Strauss,N,False
+A América do Sul tem quantos países considerados <br>estados soberanos?,4,12,14,10,16,N,False
+"Prado, Ermitage, Louvre. Em que museu está a Mona Lisa?",5,C,Louvre,-,-,N,False
+"Boca Juniors, River Plate, Independiente. Qual time <br>argentino tem mais títulos da liga (2022)?",5,B,River Plate,River Plate,River Plate,N,False
+"Caju, Abóbora, Chuchu. Qual fruto é chamado de ""jerimum"" no <br>Norte e Nordeste?",5,B,Abóbora,-,-,N,False
+"Irmãos Grimm, Hans Christian Andersen, Lewis Carroll. Quem <br>escreveu ""Alice No País das Maravilhas?",5,C,Lewis Carroll,C,C,N,False
+"Toleman, Alfa Romeo, Tyrrell. Por qual equipe da Fórmula 1 <br>estreou Ayrton Senna?",5,A,Toleman,Toleman,Toleman,N,False
+"Brasil, China, Holanda. Qual é o maior criador de frangos do <br>mundo?",5,B,-,-,-,N,False
+"Paulo, João, Desconhecido. Quem escreveu a carta aos <br>Hebreus?",5,C,-,-,-,N,False
+"Marechal Deodoro, Barão de Mauá, Duque de Caxias. Quem é <br>o patrono do Exército Brasileiro?",5,C,Duque de Caxias,-,-,N,False
+"K, P, F. Qual letra representa o elemento do fósforo?",5,B,P,P,P,N,False
+"Malvinas, Ilha de Páscoa, Santa Helena. Em que ilha <br>Napoleão foi exilado?",5,C,Santa Helena,C,C,N,False
+"Panda, coala, ornitorrinco. Qual destes animais não é <br>originário da Austrália?",5,A,Panda,Panda,Panda,N,False
+"Ceará, Pernambuco, Sergipe. Em que estado brasileiro fica <br>a cidade de Olinda?",5,B,Pernambuco,Pernambuco,Pernambuco,N,False
+"Popeye, Zé Carioca ou Zeca Urubu. Qual deles foi o primeiro <br>mascote do Flamengo?",5,A,-,-,-,N,False
+"Ferreira Gullar, Dias Gomes, Graciliano Ramos. Quem <br>escreveu ""Memórias do Cárcere""?",5,C,Graciliano Ramos,Graciliano Ramos,Graciliano Ramos,N,False
+"José, Benjamin, Issacar. Qual é o filho mais novo de Jacó?",5,B,Benjamin,Benjamin,Benjamin,N,False
+"Chaves, Quico, Seu Madruga. Qual personagem de ""Chaves"" <br>era interpretado por Carlos Villagrán?",5,B,Quico,Quico,Quico,N,False
+"Nova Iorque, Washington, Londres. Onde fica a sede do FMI?",5,B,-,-,-,N,False
+"El Cid, El Paso, El Dorado. Qual destes é uma cidade <br>lendária de ouro e riquezas?",5,C,El Dorado,El Dorado,El Dorado,N,False
+"Bruce Willis, Vin Diesel, Terry Crews. Qual destes atores <br>protagoniza ""Velozes e Furiosos""?",5,B,Vin Diesel,Vin Diesel,Vin Diesel,N,False
+"Seiya, Shiryu, Hyoga. Qual é o cavaleiro de Cisne com <br>poderes de gelo?",5,C,Hyoga,Hyoga,Hyoga,N,False
