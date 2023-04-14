@@ -21,17 +21,6 @@ def update(event):
     listbox.delete(0, tk.END)
     for row in search_results.itertuples(index=False):
         listbox.insert(tk.END, row.pergunta)
-    # if not search_results.empty:
-    #     pergunta_entry.delete(0, tk.END)
-    #     pergunta_entry.insert(0, row['pergunta'])
-    #     resposta_certa_entry.delete(0, tk.END)
-    #     resposta_certa_entry.insert(0, row['resposta_certa'])
-    #     alternativa_1_entry.delete(0, tk.END)
-    #     alternativa_1_entry.insert(0, row['alternativa_1'])
-    #     alternativa_2_entry.delete(0, tk.END)
-    #     alternativa_2_entry.insert(0, row['alternativa_2'])
-    #     alternativa_3_entry.delete(0, tk.END)
-    #     alternativa_3_entry.insert(0, row['alternativa_3'])
 
 
 def pergunta_selecionada(event):
@@ -48,8 +37,8 @@ def pergunta_selecionada(event):
         row = search_results.iloc[0]
         combobox.current(row['alternativas'] - 3)
         for entry in entries[:-1]:
-            entry.delete(0, tk.END)
             entry.configure(state='normal')
+            entry.delete(0, tk.END)
         if row['alternativas'] < 5:
             alternativa_3_entry.delete(0, tk.END)
             if row['alternativas'] == 3:
@@ -65,6 +54,7 @@ def pergunta_selecionada(event):
             textos = [perg, texto_restante, row['resposta_certa'], row['alternativa_1'], row['alternativa_2'],
                       row['alternativa_3']]
         else:
+            alternativa_3_entry.delete(0, tk.END)
             alternativa_3_entry.configure(state='disabled')
             perg_split = row['pergunta'].split('. ')[1].split('<br>')
             perg = perg_split[0]
@@ -111,7 +101,7 @@ def add_question():
     nova_pergunta_dados = []
 
     dict_nova_pergunta = {'pergunta': '', 'resposta_certa': '', 'alternativa_1': '',
-                          'alternativa_2': '', 'alternativa_3': ''}
+                          'alternativa_2': '', 'alternativa_3': '', 'embaralhar': 'N'}
 
     for entry in entries:
         value = entry.get()
