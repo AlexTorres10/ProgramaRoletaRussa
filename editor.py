@@ -101,7 +101,7 @@ def add_question():
     nova_pergunta_dados = []
 
     dict_nova_pergunta = {'pergunta': '', 'resposta_certa': '', 'alternativa_1': '',
-                          'alternativa_2': '', 'alternativa_3': '', 'embaralhar': 'N'}
+                          'alternativa_2': '', 'alternativa_3': ''}
 
     for entry in entries:
         value = entry.get()
@@ -116,6 +116,7 @@ def add_question():
         if combobox.current() == 0:
             dict_nova_pergunta['alternativa_3'] = '-'
         dict_nova_pergunta['alternativas'] = combobox.current()+3
+        dict_nova_pergunta['embaralhar'] = 'N'
         df = pd.concat([df, pd.DataFrame(dict_nova_pergunta, index=[0])], ignore_index=True)
     else:
         pos_resp_certa = randint(1, 3)
@@ -155,6 +156,7 @@ def add_question():
         dict_nova_pergunta['alternativa_2'] = '-'
         dict_nova_pergunta['alternativa_3'] = '-'
         dict_nova_pergunta['alternativas'] = 5
+        dict_nova_pergunta['embaralhar'] = 'N'
         df = pd.concat([df, pd.DataFrame(dict_nova_pergunta, index=[0])], ignore_index=True)
     listbox.delete(0, tk.END)
     for row in df.itertuples(index=False):
