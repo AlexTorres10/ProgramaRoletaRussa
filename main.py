@@ -1,5 +1,4 @@
 import pygame
-
 from display import *
 from jogador import *
 from jogar_roleta import *
@@ -240,8 +239,10 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
     blit_all(sair_do_jogo, essentials, jogadores)
     if modo == 'normal':
         for i in range(12, -1, -1):
+            if i == 6:
+                vermelhos = [(v + 1) % 6 for v in vermelhos]
+                pygame.time.delay(50)
             blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
-            pygame.display.update()
             alav.update_image('img/alavanca1-' + str(i) + '.png')
             pygame.display.update()
         giros_dramaticos = randrange(4)
@@ -272,7 +273,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 quedas.append({'modo': 'normal', 'vermelhos': vermelhos,
                                'jog_eliminado': jogadores_aux[jogador_em_risco.pos - 1],
                                'jogadores': jogadores_aux, 'giros_dramaticos': giros_dramaticos,
-                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais})
+                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais+1})
                 jogador_em_risco.eliminar(jogadores)
                 blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco)
                 return True
@@ -286,7 +287,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 quedas.append({'modo': 'normal', 'vermelhos': vermelhos,
                                'jog_eliminado': jogadores_aux[jogador_em_risco.pos - 1],
                                'jogadores': jogadores_aux, 'giros_dramaticos': giros_dramaticos,
-                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais})
+                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais+1})
                 jogador_em_risco.eliminar(jogadores)
                 blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco)
                 return True
@@ -303,11 +304,15 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             else:
                 return False
     elif modo == 'carrasco':
+        loc_vermelho = vermelhos[0]
         for i in range(12, -1, -1):
-            blit_all(sair_do_jogo, essentials, jogadores)
+            # blit_all(sair_do_jogo, essentials, jogadores)
+            if i == 6:
+                loc_vermelho = (loc_vermelho + 1) % 6
+                pygame.time.delay(50)
+            blit_vermelho(sair_do_jogo, essentials, jogadores, [loc_vermelho])
             alav.update_image('img/alavanca2-' + str(i) + '.png')
             pygame.display.update()
-        loc_vermelho = vermelhos[0]
         giros_dramaticos = randrange(10)
         for giro in range(giros_dramaticos):  # Não afetam porque fazem uma volta completa
             for i in range(0, 6):
@@ -332,7 +337,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
         quedas.append({'modo': 'carrasco', 'vermelhos': [loc_vermelho],
                        'jog_eliminado': jogadores_aux[eliminado.pos - 1],
                        'jogadores': jogadores_aux, 'giros_dramaticos': giros_dramaticos,
-                       'giros_para_parar': giros_para_parar, 'giros_a_mais': 0})
+                       'giros_para_parar': giros_para_parar, 'giros_a_mais': 1})
         eliminado.eliminar(jogadores)
         blit_queda(sair_do_jogo, essentials, jogadores, [loc_vermelho], eliminado)
         return eliminado
@@ -358,7 +363,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             blit_azul(sair_do_jogo, essentials, jogadores, comeca)
             pygame.time.delay(int((1000 / giros_para_parar) * (i + 1)))
         print(eliminado.nome)
-        for i in range(4):
+        for i in range(3):
             if comeca == eliminado.pos:
                 break
             comeca = (comeca + 1) % 6
@@ -428,6 +433,9 @@ def mostra_quedas():
 
             # print("Vermelhos", vermelhos_aux)
             for i in range(12, -1, -1):
+                if i == 6:
+                    vermelhos_aux = [(v + 1) % 6 for v in vermelhos_aux]
+                    pygame.time.delay(50)
                 blit_vermelho(sair_do_jogo, essentials, q['jogadores'], vermelhos_aux)
                 alav.update_image('img/alavanca1-' + str(i) + '.png')
                 pygame.display.update()
@@ -476,8 +484,10 @@ def mostra_quedas():
                     pygame.time.delay(50)
 
                 for i in range(12, -1, -1):
+                    if i == 6:
+                        comeca = (comeca + 1) % 6
+                        pygame.time.delay(50)
                     blit_vermelho(sair_do_jogo, essentials, q['jogadores'], [comeca])
-                    pygame.display.update()
                     alav.update_image('img/alavanca2-' + str(i) + '.png')
                     pygame.display.update()
 
