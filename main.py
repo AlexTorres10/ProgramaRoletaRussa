@@ -1293,7 +1293,7 @@ def iniciar_jogo():
                 if lider is not None:
                     lider.change_pos(lider.pos)
                 sons['tema'].play()
-            wait_until_enter(30)
+            wait_until_enter(20)
             fadein()
             pygame.time.delay(3000)
             fadeout()
