@@ -313,7 +313,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             blit_vermelho(sair_do_jogo, essentials, jogadores, [loc_vermelho])
             alav.update_image('img/alavanca2-' + str(i) + '.png')
             pygame.display.update()
-        giros_dramaticos = randrange(10)
+        giros_dramaticos = randint(5, 15)
         for giro in range(giros_dramaticos):  # Não afetam porque fazem uma volta completa
             for i in range(0, 6):
                 loc_vermelho = (loc_vermelho + 1) % 6
@@ -356,7 +356,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             pygame.time.delay(50)
         pygame.mixer.stop()
         sons['jogando_roleta'].stop()
-        giros_para_parar = randint(6, 12)
+        giros_para_parar = randint(6, 10)
         for i in range(giros_para_parar):
             comeca = (comeca + 1) % 6
             sons['zonas_de_risco'].play(0)
@@ -517,8 +517,6 @@ def mostra_quedas():
                 wait_until_enter(int(sons['queda'].get_length() + 1))
             else:
                 wait_until_enter(1.5)
-                # quedas.append({'modo': 'carrasco', 'vermelhos': [], 'jog_eliminado': jogador_em_risco,
-                #                                            'jogadores': jogadores_aux})
                 for i in range(12, -1, -1):
                     blit_all(sair_do_jogo, essentials, q['jogadores'])
                     alav.update_image('img/alavanca2-' + str(i) + '.png')
