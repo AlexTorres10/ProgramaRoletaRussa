@@ -7,7 +7,7 @@ from tkinter.font import Font
 from random import randint
 
 # Load data from CSV file
-df = pd.read_csv("base/main.csv")
+df = pd.read_csv("base/main.csv", sep=';')
 
 
 def update(event):

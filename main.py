@@ -226,12 +226,12 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                         pygame.mixer.stop()
                         roleta_verdadeira = candidatos[pos_azul]
                         return para_roleta('comeco', alav,
-                                           eliminado=roleta_verdadeira, vermelhos=[comeca],
+                                           jog_comeca=roleta_verdadeira, vermelhos=[comeca],
                                            sons=sons, jogadores=jogadores)
 
 
 def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogador_em_risco=Jogador('Zé', 1, 0),
-                jog_comeca=0, sons={}, jogadores=[], final=False, rodada=0, pergunta=0):
+                jog_comeca=Jogador('Zé', 1, 0), sons={}, jogadores=[], final=False, rodada=0, pergunta=0):
     global window
     global essentials
     global sair_do_jogo
@@ -278,6 +278,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco)
                 return True
             elif rodada == 4 and pergunta == 5:
+                print("Foi o caso de forçar a queda!")
                 sons['zonas_de_risco'].play(0)
                 vermelhos = [(v + 1) % 6 for v in vermelhos]
                 blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
@@ -327,17 +328,19 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             blit_vermelho(sair_do_jogo, essentials, jogadores, [loc_vermelho])
             sons['zonas_de_risco'].play(0)
             pygame.time.delay(int((1000 / giros_para_parar) * (i + 1)))
+        giros_a_mais = 1
         while loc_vermelho != eliminado.pos:
             loc_vermelho = (loc_vermelho + 1) % 6
             blit_vermelho(sair_do_jogo, essentials, jogadores, [loc_vermelho])
             sons['zonas_de_risco'].play(0)
             pygame.time.delay(1000)
+            giros_a_mais += 1
         sons['queda'].play(0)
         jogadores_aux = copy_jogadores(jogadores)
         quedas.append({'modo': 'carrasco', 'vermelhos': [loc_vermelho],
                        'jog_eliminado': jogadores_aux[eliminado.pos - 1],
                        'jogadores': jogadores_aux, 'giros_dramaticos': giros_dramaticos,
-                       'giros_para_parar': giros_para_parar, 'giros_a_mais': 1})
+                       'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais})
         eliminado.eliminar(jogadores)
         blit_queda(sair_do_jogo, essentials, jogadores, [loc_vermelho], eliminado)
         return eliminado
@@ -362,9 +365,8 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             sons['zonas_de_risco'].play(0)
             blit_azul(sair_do_jogo, essentials, jogadores, comeca)
             pygame.time.delay(int((1000 / giros_para_parar) * (i + 1)))
-        print(eliminado.nome)
         for i in range(3):
-            if comeca == eliminado.pos:
+            if comeca == jog_comeca.pos:
                 break
             comeca = (comeca + 1) % 6
             sons['zonas_de_risco'].play(0)
@@ -377,12 +379,13 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             pygame.time.delay(1000)
 
         sons['quem_comeca'].play(0)
-        if comeca == eliminado.pos:
-            return eliminado
+        if comeca == jog_comeca.pos:
+            print("Escolhido desde o início:",jog_comeca.nome)
+            return jog_comeca
         else:
             for jog in jogadores:
                 if comeca == jog.pos:
-                    print("Era", eliminado.nome, "mas agora será", jog.nome)
+                    print("Era", jog_comeca.nome, "mas agora será", jog.nome)
                     return jog
 
 
@@ -491,8 +494,9 @@ def mostra_quedas():
                     alav.update_image('img/alavanca2-' + str(i) + '.png')
                     pygame.display.update()
 
+                print("Giros dramáticos", q['giros_dramaticos'])
                 for giro in range(q['giros_dramaticos']):  # Não afetam porque fazem uma volta completa
-                    for i in range(0, 6):
+                    for i in range(6):
                         comeca = (comeca + 1) % 6  # São 6 buracos
                         blit_vermelho(sair_do_jogo, essentials, q['jogadores'], [comeca])
                         pygame.time.delay(75)
@@ -917,7 +921,9 @@ def iniciar_jogo():
             for som in sons.keys():
                 sons[som].stop()
             sons['round'].play(0)
-            wait_until_enter(2)
+            wait_until_enter(1)
+            sons['aplausos1'].play()
+            wait_until_enter(1)
             blit_all(sair_do_jogo, essentials, jogadores)
 
             frase_dist = ['Cada resposta certa valerá ' + str(locale.currency(dinheiro_rodada[rodada - 1],
@@ -1127,7 +1133,7 @@ def iniciar_jogo():
                 pygame.display.update()
 
                 # Respondeu a pergunta!
-                time_limit = 30000 if escolhido.tipo == 0 else 6000
+                time_limit = 30000 if escolhido.tipo == 0 else 5500
                 if respondeu:
                     sons['respondeu'].play(0)
                     start = pygame.time.get_ticks()
@@ -1291,11 +1297,11 @@ def iniciar_jogo():
                 if lider is not None:
                     lider.change_pos(lider.pos)
                 sons['tema'].play()
-            wait_until_enter(20)
+            wait_until_enter(10)
             fadein()
             pygame.time.delay(3000)
             fadeout()
-            sons['aplausos1'].play()
+
             roleta.update_image('img/roleta_inicio.png')
             blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
             pygame.display.update()
@@ -2097,7 +2103,7 @@ versao_do_jogo = Texto('Versão 2.5', 'FreeSansBold', 48, 40, 1000)
 
 img_pergunta = Image('img/pergunta_espera.png', 310, 680)
 
-df_perguntas = pd.read_csv('base/main.csv', encoding='utf-8')
+df_perguntas = pd.read_csv('base/main.csv', encoding='utf-8', sep=';')
 df_perguntas['used'] = False
 
 sons = load_sounds()
