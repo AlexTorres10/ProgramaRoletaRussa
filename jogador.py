@@ -137,7 +137,7 @@ class Jogador:
                     if alt == resposta_certa:  # No momento em que tivermos a certa, ele para
                         break
                 # Retorna a resposta certa (1, 2, 3, 4) e o tempo para responder
-                return num_resposta, randint(2*(self.tipo+1), 15)
+                return num_resposta, randint(2 * self.tipo, 15)
             else:
                 print(pergunta_final)
                 return respostas.index(pergunta_final['certa'])+1, tempo_final - randint(3, 6)
