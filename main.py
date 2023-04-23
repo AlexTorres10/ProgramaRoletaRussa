@@ -1309,7 +1309,6 @@ def iniciar_jogo():
                 blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
                 pygame.display.update()
                 wait_until_enter(5)
-        # pygame.mixer.stop()
         # RODADA FINAL
         prompt_rever_quedas(window)
         rodada = 5

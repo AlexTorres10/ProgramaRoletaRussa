@@ -138,7 +138,7 @@ class Jogador:
                         break
                 # Retorna a resposta certa (1, 2, 3, 4) e o tempo para responder
                 print(alternativas[num_resposta-1])
-                return num_resposta, randint(2*(self.tipo-1), 15)
+                return num_resposta, randint(2*(self.tipo+1), 15)
             else:
                 print(pergunta_final['certa'])
                 print(pergunta_final)
