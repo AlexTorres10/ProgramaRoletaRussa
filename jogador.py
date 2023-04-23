@@ -137,10 +137,8 @@ class Jogador:
                     if alt == resposta_certa:  # No momento em que tivermos a certa, ele para
                         break
                 # Retorna a resposta certa (1, 2, 3, 4) e o tempo para responder
-                print(alternativas[num_resposta-1])
                 return num_resposta, randint(2*(self.tipo+1), 15)
             else:
-                print(pergunta_final['certa'])
                 print(pergunta_final)
                 return respostas.index(pergunta_final['certa'])+1, tempo_final - randint(3, 6)
         else:  # SE CHUTAR...
@@ -152,9 +150,7 @@ class Jogador:
             else:
                 limiar_chute = randint(20, 50)
 
-                # Pode ser que o chute seja mais cedo ou mais tarde. Decidi fazer um
-                # limiar variável.
-                print(pergunta_final)
+                # Pode ser que o chute seja mais cedo ou mais tarde. Decidi fazer um limiar variável.
                 if tempo_final < limiar_chute or certas == 7:
                     # Se o tempo for menor que o limiar ou estivermos em 7 certas, o bot chuta.
                     chute = choice(respostas[:-1])
@@ -188,8 +184,6 @@ class Jogador:
                     escolhas.append(lider)
                     escolhas.append(lider)
                     escolhas.append(lider)
-                    escolhas.append(lider)
-        print([esc.nome for esc in escolhas])
         return choice(escolhas)
 
 
