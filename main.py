@@ -108,8 +108,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                 pygame.time.delay(50)
                 if segundos > jogando_roleta:
                     return para_roleta('normal', alav, vermelhos=vermelhos, jogador_em_risco=jogador_em_risco,
-                                       sons=sons, jogadores=jogadores, final=final)
-
+                                       sons=sons, jogadores=jogadores, final=final, rodada=rodada, pergunta=pergunta)
     elif modo == 'carrasco':
         em_risco = get_em_risco(jogadores)
         pos_risco = randrange(len(em_risco))
@@ -267,13 +266,14 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             pygame.time.delay(1000)
         pygame.time.delay(250)
         if not final:
+            print("Roleta jogada na rodada", rodada, "na pergunta", pergunta)
             if jogador_em_risco.pos in vermelhos:
                 sons['queda'].play(0)
                 jogadores_aux = copy_jogadores(jogadores)
                 quedas.append({'modo': 'normal', 'vermelhos': vermelhos,
                                'jog_eliminado': jogadores_aux[jogador_em_risco.pos - 1],
                                'jogadores': jogadores_aux, 'giros_dramaticos': giros_dramaticos,
-                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais+1})
+                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais + 1})
                 jogador_em_risco.eliminar(jogadores)
                 blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco)
                 return True
@@ -288,7 +288,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 quedas.append({'modo': 'normal', 'vermelhos': vermelhos,
                                'jog_eliminado': jogadores_aux[jogador_em_risco.pos - 1],
                                'jogadores': jogadores_aux, 'giros_dramaticos': giros_dramaticos,
-                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais+1})
+                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais + 1})
                 jogador_em_risco.eliminar(jogadores)
                 blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco)
                 return True
@@ -380,7 +380,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
 
         sons['quem_comeca'].play(0)
         if comeca == jog_comeca.pos:
-            print("Escolhido desde o início:",jog_comeca.nome)
+            print("Escolhido desde o início:", jog_comeca.nome)
             return jog_comeca
         else:
             for jog in jogadores:
@@ -696,7 +696,7 @@ def seleciona_pergunta(rodada):
         else:
             for option, i in zip(df_aux['embaralhar'], range(len(alternativas))):
                 option = int(option)
-                alternativas[i] = alt_aux[option-1]
+                alternativas[i] = alt_aux[option - 1]
             print("Novas alternativas:", alternativas)
         df_perguntas.loc[pos_pergunta, 'used'] = True
         return pergunta, alternativas, df_aux['resposta_certa']
@@ -715,7 +715,7 @@ def seleciona_pergunta(rodada):
         else:
             for option, i in zip(df_aux['embaralhar'], range(len(alternativas))):
                 option = int(option)
-                alternativas[i] = alt_aux[option-1]
+                alternativas[i] = alt_aux[option - 1]
             print("Novas alternativas:", alternativas)
         df_perguntas.loc[pos_pergunta, 'used'] = True
         return pergunta, alternativas, df_aux['resposta_certa']
@@ -786,6 +786,7 @@ def prompt_rever_quedas(w):
                     pygame.mixer.stop()
                     return
             if ev.type == pygame.KEYDOWN:
+                pygame.mixer.stop()
                 if ev.key == pygame.K_s:
                     essentials[0].update_image('img/roleta.png')
                     rr_quedas = Image('img/rr_quedas.png', 0, 0)
@@ -1212,14 +1213,15 @@ def iniciar_jogo():
                                 if ev.key == pygame.K_SPACE:
                                     pygame.mixer.stop()
                                     caiu_ou_nao = jogar_roleta('normal', alavanca, num_pergunta + 1, escolhido,
-                                                               sons, jogadores, rodada=rodada, pergunta=num_pergunta+1)
+                                                               sons, jogadores, rodada=rodada,
+                                                               pergunta=num_pergunta + 1)
                                     loop = False
                                 if ev.key == pygame.K_RETURN and escolhido.tipo != 0:
                                     joga_roleta = True
                         if (segundos > 5 and escolhido.tipo != 0) or (joga_roleta and escolhido.tipo != 0):
                             pygame.mixer.stop()
                             caiu_ou_nao = jogar_roleta('normal', alavanca, num_pergunta + 1, escolhido,
-                                                       sons, jogadores, rodada=rodada, pergunta=num_pergunta+1)
+                                                       sons, jogadores, rodada=rodada, pergunta=num_pergunta + 1)
                             loop = False
 
                     if caiu_ou_nao:
@@ -1241,9 +1243,9 @@ def iniciar_jogo():
                     pygame.display.update()
                     desafiante = escolhido
                 wait_until_enter(3)
+            if not jog_eliminado:
                 blit_all(sair_do_jogo, essentials, jogadores)
                 wait_until_enter(1)
-            if not jog_eliminado:
                 alavanca.update_image('img/alavanca2-0.png')
                 sons['campainha'].play()
                 pygame.time.delay(1000)
@@ -1297,16 +1299,17 @@ def iniciar_jogo():
                 if lider is not None:
                     lider.change_pos(lider.pos)
                 sons['tema'].play()
-            wait_until_enter(10)
-            fadein()
-            pygame.time.delay(3000)
-            fadeout()
+            if rodada < 4:
+                wait_until_enter(10)
+                fadein()
+                pygame.time.delay(3000)
+                fadeout()
 
-            roleta.update_image('img/roleta_inicio.png')
-            blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
-            pygame.display.update()
-            wait_until_enter(5)
-        pygame.mixer.stop()
+                roleta.update_image('img/roleta_inicio.png')
+                blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
+                pygame.display.update()
+                wait_until_enter(5)
+        # pygame.mixer.stop()
         # RODADA FINAL
         prompt_rever_quedas(window)
         rodada = 5
