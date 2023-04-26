@@ -239,7 +239,10 @@ def save_database():
 
 # Create main window
 root = tk.Tk()
-root.iconbitmap("rr_editor.ico")
+try:
+    root.iconbitmap("rr_editor.ico")
+except:
+    pass
 root.geometry("960x600")
 
 # Create search entry
