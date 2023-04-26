@@ -172,7 +172,7 @@ def replace_question():
     # get the selected question
     pergunta = canvas.itemcget(perg_img, 'text')
     pergunta_2 = canvas.itemcget(perg_img_2, 'text')
-    print(pergunta_2)
+
     if pergunta_2 != '':
         pergunta = pergunta + '<br>' + pergunta_2
 
@@ -194,25 +194,27 @@ def replace_question():
         df.loc[df["pergunta"] == pergunta, "pergunta"] = nova_pergunta[0]
     else:
         pos_resp_certa = randint(1, 3)
-        df.loc[df["pergunta"] == pergunta, "alternativa_1"] = '-'
-        df.loc[df["pergunta"] == pergunta, "alternativa_2"] = '-'
-        df.loc[df["pergunta"] == pergunta, "alternativa_3"] = '-'
-        df.loc[df["pergunta"] == pergunta, "alternativas"] = 5
+        perg = pergunta.split('. ')[1]
+
+        df.loc[df["pergunta"].str.contains(perg), "alternativa_1"] = '-'
+        df.loc[df["pergunta"].str.contains(perg), "alternativa_2"] = '-'
+        df.loc[df["pergunta"].str.contains(perg), "alternativa_3"] = '-'
+        df.loc[df["pergunta"].str.contains(perg), "alternativas"] = 5
         if pos_resp_certa == 1:
             texto_pergunta = nova_pergunta[1] + ", " + nova_pergunta[2] + " ou " + nova_pergunta[3] + ". " + \
                              nova_pergunta[0]
-            df.loc[df["pergunta"] == pergunta, "resposta_certa"] = 'A'
-            df.loc[df["pergunta"] == pergunta, "pergunta"] = texto_pergunta
+            df.loc[df["pergunta"].str.contains(perg), "resposta_certa"] = 'A'
+            df.loc[df["pergunta"].str.contains(perg), "pergunta"] = texto_pergunta
         elif pos_resp_certa == 2:
             texto_pergunta = nova_pergunta[2] + ", " + nova_pergunta[1] + " ou " + nova_pergunta[3] + ". " + \
                              nova_pergunta[0]
-            df.loc[df["pergunta"] == pergunta, "resposta_certa"] = 'B'
-            df.loc[df["pergunta"] == pergunta, "pergunta"] = texto_pergunta
+            df.loc[df["pergunta"].str.contains(perg), "resposta_certa"] = 'B'
+            df.loc[df["pergunta"].str.contains(perg), "pergunta"] = texto_pergunta
         else:
             texto_pergunta = nova_pergunta[3] + ", " + nova_pergunta[2] + " ou " + nova_pergunta[1] + ". " + \
                              nova_pergunta[0]
-            df.loc[df["pergunta"] == pergunta, "resposta_certa"] = 'C'
-            df.loc[df["pergunta"] == pergunta, "pergunta"] = texto_pergunta
+            df.loc[df["pergunta"].str.contains(perg), "resposta_certa"] = 'C'
+            df.loc[df["pergunta"].str.contains(perg), "pergunta"] = texto_pergunta
 
     listbox.delete(0, tk.END)
     for row in df.itertuples(index=False):
@@ -229,7 +231,7 @@ def save_database():
 
     if confirm:
         # save the database to disk
-        df.to_csv("base/main.csv", index=False)
+        df.to_csv("base/main.csv", sep=';', index=False)
 
         # show a message box to confirm the database was saved
         messagebox.showinfo("Base salva", "A base de perguntas foi salva.")
