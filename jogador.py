@@ -139,12 +139,10 @@ class Jogador:
                 # Retorna a resposta certa (1, 2, 3, 4) e o tempo para responder
                 return num_resposta, randint(2 * self.tipo, 15)
             else:
-                print(pergunta_final)
                 return respostas.index(pergunta_final['certa'])+1, tempo_final - randint(3, 6)
         else:  # SE CHUTAR...
             if rodada < 5:
                 chute = choice(alternativas)
-                print(chute)
                 # Retorna o chute (A, B, C, D) e o tempo para responder
                 return alternativas.index(chute)+1, randint(1, 12)
             else:

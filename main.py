@@ -121,8 +121,8 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
         if len(em_risco) > 1:
             sons['jogando_roleta'].play(0)
             lider = get_leader(jogadores)
-            if (lider is not None and lider.tipo == 0) or (lider is None):
-                # Se temos um líder e ele é humano OU não temos líder, você joga a roleta.
+            if (lider is not None and lider.tipo == 0) or (lider is None and not todos_bots(jogadores)):
+                # Se temos um líder e ele é humano OU não temos líder, joga a roleta.
                 while not space:
                     comeca = (comeca + 1) % 6  # São 6 buracos
                     blit_vermelho(sair_do_jogo, essentials, jogadores, [comeca])
@@ -215,8 +215,11 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
             alav.update_image('img/alavanca2-' + str(i) + '.png')
             pygame.display.update()
 
+        jogando_roleta = uniform(1, 3)
+        start = pygame.time.get_ticks()
         while not space:
             pos_azul = (pos_azul + 1) % len(candidatos)
+            segundos = (pygame.time.get_ticks() - start)/1000
             for events in pygame.event.get():
                 if events.type == pygame.QUIT:
                     space = True
@@ -227,6 +230,11 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                         return para_roleta('comeco', alav,
                                            jog_comeca=roleta_verdadeira, vermelhos=[comeca],
                                            sons=sons, jogadores=jogadores)
+            if todos_bots(jogadores) and (segundos > jogando_roleta):
+                roleta_verdadeira = candidatos[pos_azul]
+                return para_roleta('comeco', alav,
+                                   jog_comeca=roleta_verdadeira, vermelhos=[comeca],
+                                   sons=sons, jogadores=jogadores)
 
 
 def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogador_em_risco=Jogador('Zé', 1, 0),
@@ -266,7 +274,6 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             pygame.time.delay(1000)
         pygame.time.delay(250)
         if not final:
-            print("Roleta jogada na rodada", rodada, "na pergunta", pergunta)
             if jogador_em_risco.pos in vermelhos:
                 sons['queda'].play(0)
                 jogadores_aux = copy_jogadores(jogadores)
@@ -380,12 +387,10 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
 
         sons['quem_comeca'].play(0)
         if comeca == jog_comeca.pos:
-            print("Escolhido desde o início:", jog_comeca.nome)
             return jog_comeca
         else:
             for jog in jogadores:
                 if comeca == jog.pos:
-                    print("Era", jog_comeca.nome, "mas agora será", jog.nome)
                     return jog
 
 
@@ -494,7 +499,6 @@ def mostra_quedas():
                     alav.update_image('img/alavanca2-' + str(i) + '.png')
                     pygame.display.update()
 
-                print("Giros dramáticos", q['giros_dramaticos'])
                 for giro in range(q['giros_dramaticos']):  # Não afetam porque fazem uma volta completa
                     for i in range(6):
                         comeca = (comeca + 1) % 6  # São 6 buracos
@@ -807,6 +811,13 @@ def get_pulso(pulso_anterior):
     return pulso_anterior + dif_anterior
 
 
+def todos_bots(jogadores):
+    for pl in jogadores:
+        if pl.tipo == 0 and not pl.eliminado:
+            return False
+    return True
+
+
 def iniciar_jogo():
     global window
     global essentials
@@ -895,19 +906,24 @@ def iniciar_jogo():
                         frase = Texto(frase_dist[i], 'FreeSans', 72, 960, 820 + 80 * i)
                         frase.show_texto(window, align='center')
                 pygame.display.update()
-                loop = True
-                while loop:
-                    for ev in pygame.event.get():
-                        if ev.type == pygame.QUIT:
-                            pygame.quit()
-                        if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
-                            if sair_do_jogo.check_click():
-                                pygame.mixer.stop()
-                                return
-                        if ev.type == pygame.KEYDOWN:
-                            if ev.key == pygame.K_SPACE:
-                                desafiante = jogar_roleta('comeco', alavanca, jogadores=jogadores, sons=sons)
-                                loop = False
+
+                if todos_bots(jogadores):
+                    wait_until_enter(5)
+                    desafiante = jogar_roleta('comeco', alavanca, jogadores=jogadores, sons=sons)
+                else:
+                    loop = True
+                    while loop:
+                        for ev in pygame.event.get():
+                            if ev.type == pygame.QUIT:
+                                pygame.quit()
+                            if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
+                                if sair_do_jogo.check_click():
+                                    pygame.mixer.stop()
+                                    return
+                            if ev.type == pygame.KEYDOWN:
+                                if ev.key == pygame.K_SPACE:
+                                    desafiante = jogar_roleta('comeco', alavanca, jogadores=jogadores, sons=sons)
+                                    loop = False
             else:
                 desafiante = lider
             sons['tema'].stop()
@@ -1282,19 +1298,24 @@ def iniciar_jogo():
                         pygame.mixer.stop()
                         jogar_roleta('carrasco', alavanca, sons=sons, jogadores=jogadores)
                 else:
-                    while loop:
-                        for ev in pygame.event.get():
-                            if ev.type == pygame.QUIT:
-                                pygame.quit()
-                            if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
-                                if sair_do_jogo.check_click():
-                                    pygame.mixer.stop()
-                                    return
-                            if ev.type == pygame.KEYDOWN:
-                                if ev.key == pygame.K_SPACE:
-                                    pygame.mixer.stop()
-                                    jogar_roleta('carrasco', alavanca, sons=sons, jogadores=jogadores)
-                                    loop = False
+                    if todos_bots(jogadores):
+                        wait_until_enter(5)
+                        pygame.mixer.stop()
+                        jogar_roleta('carrasco', alavanca, sons=sons, jogadores=jogadores)
+                    else:
+                        while loop:
+                            for ev in pygame.event.get():
+                                if ev.type == pygame.QUIT:
+                                    pygame.quit()
+                                if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
+                                    if sair_do_jogo.check_click():
+                                        pygame.mixer.stop()
+                                        return
+                                if ev.type == pygame.KEYDOWN:
+                                    if ev.key == pygame.K_SPACE:
+                                        pygame.mixer.stop()
+                                        jogar_roleta('carrasco', alavanca, sons=sons, jogadores=jogadores)
+                                        loop = False
                 wait_until_enter(int(sons['queda'].get_length()))
                 if lider is not None:
                     lider.change_pos(lider.pos)
@@ -1576,7 +1597,6 @@ def iniciar_jogo():
                     num_resposta, limiar = finalista.bot_responde(rodada,
                                                                   pergunta_final=perguntas_da_final[num_pergunta],
                                                                   tempo_final=time, certas=num_certas)
-                    print("Limiar", limiar)
 
                 if time < limiar:
                     if num_resposta == 0:
@@ -1632,11 +1652,11 @@ def iniciar_jogo():
             blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos + 1])
             pygame.display.update()
 
-            # sob = open("Final-Sobrou.txt", "w")
-            # for p in perguntas_da_final:
-            #     if not p['status']:
-            #         sob.write(p['pergunta'] + ' - ' + p['certa']+'\n')
-            # sob.close()
+            sob = open("Final-Sobrou.txt", "w")
+            for p in perguntas_da_final:
+                if not p['status']:
+                    sob.write(p['pergunta'] + ' - ' + p['certa']+'\n')
+            sob.close()
 
             wait_until_enter(int(sons['queda'].get_length() + 1))
         else:

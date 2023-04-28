@@ -115,7 +115,7 @@ def add_question():
         # df = pd.concat([df, pd.DataFrame(nova_pergunta)], ignore_index=True)
         if combobox.current() == 0:
             dict_nova_pergunta['alternativa_3'] = '-'
-        dict_nova_pergunta['alternativas'] = combobox.current()+3
+        dict_nova_pergunta['alternativas'] = combobox.current() + 3
         dict_nova_pergunta['embaralhar'] = 'N'
         df = pd.concat([df, pd.DataFrame(dict_nova_pergunta, index=[0])], ignore_index=True)
     else:
@@ -289,7 +289,6 @@ alternativa_3_label = tk.Label(entry_frame, text="Alternativa 3:", font=Font(siz
 alternativa_3_label.grid(row=5, column=0, sticky="w")
 alternativa_3_entry = tk.Entry(entry_frame, width=45, font=Font(size=12), state='disabled')
 alternativa_3_entry.grid(row=5, column=1)
-
 
 combobox_label = tk.Label(entry_frame, text="Rodada:", font=Font(size=12))
 combobox_label.grid(row=6, column=0, sticky="w")
