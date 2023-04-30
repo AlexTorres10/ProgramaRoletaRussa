@@ -352,6 +352,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
         blit_queda(sair_do_jogo, essentials, jogadores, [loc_vermelho], eliminado)
         return eliminado
     elif modo == 'comeco':
+        pygame.mixer.stop()
         for i in range(12, -1, -1):
             blit_all(sair_do_jogo, essentials, jogadores)
             alav.update_image('img/alavanca2-' + str(i) + '.png')
@@ -893,8 +894,11 @@ def iniciar_jogo():
         for rodada in range(1, 5):
             blit_all(sair_do_jogo, essentials, jogadores)
             pygame.display.update()
+
+            # Primeiro, veremos quem é líder
             lider = get_leader(jogadores)
             if lider is None:
+                # Se não há líder, jogamos a roleta para ver quem começa.
                 alavanca.update_image('img/alavanca2-0.png')
                 roleta.update_image('img/roleta_inicio.png')
                 blit_all(sair_do_jogo, essentials, jogadores)
@@ -1260,7 +1264,9 @@ def iniciar_jogo():
                     desafiante = escolhido
                 wait_until_enter(3)
             if not jog_eliminado:
+                roleta.update_image('img/roleta.png')
                 blit_all(sair_do_jogo, essentials, jogadores)
+                pygame.display.update()
                 wait_until_enter(1)
                 alavanca.update_image('img/alavanca2-0.png')
                 sons['campainha'].play()
