@@ -720,7 +720,6 @@ def seleciona_pergunta(rodada):
             for option, i in zip(df_aux['embaralhar'], range(len(alternativas))):
                 option = int(option)
                 alternativas[i] = alt_aux[option - 1]
-            print("Novas alternativas:", alternativas)
         df_perguntas.loc[pos_pergunta, 'used'] = True
         return pergunta, alternativas, df_aux['resposta_certa']
     else:
