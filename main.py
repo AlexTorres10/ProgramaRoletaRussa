@@ -696,13 +696,12 @@ def seleciona_pergunta(rodada):
         pergunta = df_aux['pergunta']
         alternativas = [df_aux['resposta_certa'], df_aux['alternativa_1'], df_aux['alternativa_2']]
         alt_aux = [df_aux['resposta_certa'], df_aux['alternativa_1'], df_aux['alternativa_2']]
-        if df_aux['embaralhar'] == 'N':
+        if len(df_aux['embaralhar']) < 3:
             shuffle(alternativas)
         else:
             for option, i in zip(df_aux['embaralhar'], range(len(alternativas))):
                 option = int(option)
                 alternativas[i] = alt_aux[option - 1]
-            print("Novas alternativas:", alternativas)
         df_perguntas.loc[pos_pergunta, 'used'] = True
         return pergunta, alternativas, df_aux['resposta_certa']
     elif rodada <= 4:
