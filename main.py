@@ -98,7 +98,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                                                sons=sons, jogadores=jogadores, final=final, rodada=rodada,
                                                pergunta=pergunta)
         else:
-            jogando_roleta = uniform(2, 7)
+            jogando_roleta = uniform(1, 5)
             start = pygame.time.get_ticks()
             while not space:
                 segundos = (pygame.time.get_ticks() - start) / 1000
@@ -138,7 +138,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                                 return para_roleta('carrasco', alav, eliminado=roleta_verdadeira, vermelhos=[comeca],
                                                    sons=sons, jogadores=jogadores)
             else:
-                jogando_roleta = uniform(2, 7)
+                jogando_roleta = uniform(1, 5)
                 start = pygame.time.get_ticks()
                 while not space:
                     segundos = (pygame.time.get_ticks() - start) / 1000
@@ -252,7 +252,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
             alav.update_image('img/alavanca1-' + str(i) + '.png')
             pygame.display.update()
-        giros_dramaticos = randrange(4)
+        giros_dramaticos = randrange(3)
         for giro in range(giros_dramaticos):  # Não afetam porque fazem uma volta completa
             for i in range(0, 6):
                 vermelhos = [(v + 1) % 6 for v in vermelhos]
@@ -321,7 +321,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             blit_vermelho(sair_do_jogo, essentials, jogadores, [loc_vermelho])
             alav.update_image('img/alavanca2-' + str(i) + '.png')
             pygame.display.update()
-        giros_dramaticos = randint(5, 15)
+        giros_dramaticos = randint(3, 10)
         for giro in range(giros_dramaticos):  # Não afetam porque fazem uma volta completa
             for i in range(0, 6):
                 loc_vermelho = (loc_vermelho + 1) % 6
@@ -824,6 +824,7 @@ def iniciar_jogo():
     global df_perguntas
     global img_pergunta
     global sons
+    global quedas
     for som in sons.keys():
         sons[som].stop()
     sons['tema'].play(0)
@@ -1006,7 +1007,7 @@ def iniciar_jogo():
                 start = pygame.time.get_ticks()
                 # PASSOU PARA ALGUÉM — Mostra alternativas
                 loop_jogo = True
-                time_limit = 15000 if escolhido.tipo == 0 else 5000
+                time_limit = 10000 if escolhido.tipo == 0 else 5000
                 while loop_jogo:
                     blit_all(sair_do_jogo, essentials, jogadores)
                     blit_alternativas(pergunta, alternativas)
@@ -1038,6 +1039,8 @@ def iniciar_jogo():
                 pygame.display.update()
                 start = pygame.time.get_ticks()
                 loop_jogo = True
+
+                resposta_escolhida = ''
                 # TEMPO!
                 if escolhido.tipo == 0:
                     while loop_jogo:
@@ -1098,7 +1101,7 @@ def iniciar_jogo():
                                         pos_resp_escolh = 4
                                         respondeu = True
                                         loop_jogo = False
-                        if time < -3000:  # Se não responde...
+                        if time < -3:  # Se não responde...
                             pos_resp_escolh = None
                             loop_jogo = False
                 else:
@@ -1144,7 +1147,9 @@ def iniciar_jogo():
                                     pygame.mixer.stop()
                                     return
                 tempo_restante = int(ceil(time))
-                if tempo_restante <= 0:
+                if tempo_restante == -3:
+                    tempo_restante = 0
+                elif tempo_restante < 0:
                     tempo_restante = 1
                 seg = Texto(str(tempo_restante), 'ArialBlack', 120, 428, 924)
                 seg.show_texto(window, 'center')
@@ -1152,7 +1157,7 @@ def iniciar_jogo():
                 pygame.display.update()
 
                 # Respondeu a pergunta!
-                time_limit = 30000 if escolhido.tipo == 0 else 5500
+                time_limit = 20000 if escolhido.tipo == 0 else 5500
                 if respondeu:
                     sons['respondeu'].play(0)
                     start = pygame.time.get_ticks()
@@ -1183,7 +1188,7 @@ def iniciar_jogo():
                                 if ev.key == pygame.K_F1:
                                     time_limit = time_limit * 3
                         time = pygame.time.get_ticks() - start
-                        if time > time_limit:  # Botando 30 segundos até revelar
+                        if time > time_limit:  # Botando 20 segundos até revelar
                             loop_jogo = False
                 pygame.mixer.stop()
                 for som in sons.keys():
@@ -1256,8 +1261,8 @@ def iniciar_jogo():
                     pygame.display.update()
                     wait_until_enter(3)
                     sons['dinheiro'].play(0)
-                    escolhido.ganha_dinheiro(dinheiro_rodada[rodada - 1], window, sair_do_jogo, essentials, jogadores,
-                                             img_pergunta)
+                    escolhido.ganha_dinheiro(dinheiro_rodada[rodada - 1], window, sair_do_jogo, essentials,
+                                             jogadores, img_pergunta)
                     pygame.display.update()
                     desafiante = escolhido
                 wait_until_enter(3)
@@ -1601,7 +1606,6 @@ def iniciar_jogo():
                     num_resposta, limiar = finalista.bot_responde(rodada,
                                                                   pergunta_final=perguntas_da_final[num_pergunta],
                                                                   tempo_final=time, certas=num_certas)
-
                 if time < limiar:
                     if num_resposta == 0:
                         num_pergunta = (num_pergunta + 1) % 8
@@ -1872,14 +1876,15 @@ def mostra_regras():
             'jogo, cada jogador recebe R$ 1.000. Ao \nfinal de ' \
             'cada uma das rodadas, um jogador é eliminado. Cada rodada tem até 5 perguntas, que serão repassadas de ' \
             'jogador para jogador, com exceção \nda 4ª rodada, onde é possível repassar para si mesmo.\n           ' \
-            'O jogador terá 15 segundos para responder a pergunta. Se acertar a ' \
-            'pergunta, ele ganha dinheiro. Mas se errar, ele perde seu dinheiro para seu \n' \
-            'desafiante e deverá jogar a roleta com uma determinada chance de cair, ' \
-            'representada pela quantidade de buracos vermelhos. ' \
-            'Se o vermelho não parar \nno jogador, a rodada continua e ele será o próximo desafiante, ' \
-            'caso não seja a última pergunta da rodada. Caso pare, o jogador cai no buraco,' \
-            ' está eli-\nminado e a rodada está ' \
-            'encerrada.\n           A cada pergunta, o risco de cair aumenta. Na ' \
+            'O jogador terá 15 segundos para responder a pergunta. Se não responder, é eliminado e cai no buraco ' \
+            'automaticamente, perdendo seu dinheiro \npara o desafiante e encerrando a rodada. Se acertar a ' \
+            'pergunta, ele ganha dinheiro. Mas se errar, ele perde seu dinheiro para o ' \
+            'desafiante e deverá jogar \na roleta com uma determinada chance de cair, ' \
+            'representada pela quantidade de buracos vermelhos apresentados antes da pergunta. ' \
+            'Se o vermelho não \nparar no jogador, a rodada continua e ele será ' \
+            'o próximo desafiante, ' \
+            'caso não seja a última pergunta da rodada. Caso pare, o jogador cai no buraco, está \neliminado ' \
+            'e a rodada está encerrada.\n           A cada pergunta, o risco de cair aumenta. Na ' \
             '1ª pergunta, um erro dá 1 chance ' \
             'em 6 de cair, na 2ª pergunta, serão 2 chances de cair e ' \
             'assim por\ndiante até a 5ª pergunta. Se após as 5 perguntas, ninguém for eliminado, o jogador que ' \
