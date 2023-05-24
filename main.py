@@ -330,6 +330,8 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
         pygame.mixer.stop()
         sons['jogando_roleta'].stop()
         giros_para_parar = randint(5, 12)
+        if (eliminado.pos-(loc_vermelho+giros_para_parar) % 6) == eliminado.pos:
+            giros_para_parar = 10 if giros_para_parar == 5 else giros_para_parar - 1
         for i in range(0, giros_para_parar):
             loc_vermelho = (loc_vermelho + 1) % 6
             blit_vermelho(sair_do_jogo, essentials, jogadores, [loc_vermelho])
