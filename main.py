@@ -13,7 +13,6 @@ import sys
 import locale
 
 locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
-
 pygame.init()
 
 
@@ -866,8 +865,8 @@ def iniciar_jogo():
 
     sons['start_game'].play(0)
     blit_all(sair_do_jogo, essentials, jogadores)
-    frase_dist = ['Vamos distribuir R$ 1.000,00 para', ' cada um no começo deste jogo e',
-                  'decidir quem começa jogando!']
+    frase_dist = ['Vamos distribuir R$ 1.000,00 para cada ', 'um no começo deste jogo e jogar a ',
+                  'roleta para decidir quem começa jogando!']
     for i in range(len(frase_dist)):
         frase = Texto(frase_dist[i], 'FreeSans', 72, 960, 820 + 80 * i)
         frase.show_texto(window, align='center')
@@ -906,7 +905,7 @@ def iniciar_jogo():
                 sons['tema'].stop()
                 if rodada > 1:
                     frase_dist = ['Temos um empate na liderança! ', 'Portanto a roleta deve ser jogada para',
-                                  'decidir quem começa jogando!']
+                                  'decidir quem começa a rodada!']
                     for i in range(len(frase_dist)):
                         frase = Texto(frase_dist[i], 'FreeSans', 72, 960, 820 + 80 * i)
                         frase.show_texto(window, align='center')
@@ -951,9 +950,14 @@ def iniciar_jogo():
             frase_dist = ['Cada resposta certa valerá ' + str(locale.currency(dinheiro_rodada[rodada - 1],
                                                                               grouping=True)) + ', e',
                           'teremos ' + str(qtd_alternativas[rodada - 1]) + ' alternativas para cada pergunta!']
+            x = 820
+            if rodada == 4:
+                frase_dist.append('Agora é possível responder para si mesmo ou ')
+                frase_dist.append('passar para seu adversário se for o desafiante!')
+                x = 740
 
             for i in range(len(frase_dist)):
-                frase = Texto(frase_dist[i], 'FreeSans', 72, 960, 820 + 80 * i)
+                frase = Texto(frase_dist[i], 'FreeSans', 72, 960, x + 80 * i)
                 frase.show_texto(window, align='center')
             pygame.display.update()
             wait_until_enter(15)
@@ -1225,6 +1229,7 @@ def iniciar_jogo():
                     sons['zonas_de_risco'].play(0)  # VOU DESTRAVAR AS ZONAS DE RISCO
                     start = pygame.time.get_ticks()
                     joga_roleta = False
+                    time_limit = 5
                     while loop:
                         segundos = (pygame.time.get_ticks() - start) / 1000
                         for ev in pygame.event.get():
@@ -1243,7 +1248,9 @@ def iniciar_jogo():
                                     loop = False
                                 if ev.key == pygame.K_RETURN and escolhido.tipo != 0:
                                     joga_roleta = True
-                        if (segundos > 5 and escolhido.tipo != 0) or (joga_roleta and escolhido.tipo != 0):
+                                if ev.key == pygame.K_F1 and escolhido.tipo != 0:
+                                    time_limit *= 10
+                        if (segundos > time_limit and escolhido.tipo != 0) or (joga_roleta and escolhido.tipo != 0):
                             pygame.mixer.stop()
                             caiu_ou_nao = jogar_roleta('normal', alavanca, num_pergunta + 1, escolhido,
                                                        sons, jogadores, rodada=rodada, pergunta=num_pergunta + 1)
