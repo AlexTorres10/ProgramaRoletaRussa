@@ -11,8 +11,9 @@ caiu = pygame.image.load("img/caiu.png")
 caiu = pygame.transform.smoothscale(caiu, (int(caiu.get_width() * get_ratio()),
                                            int(caiu.get_height() * get_ratio())))
 
-                  #0           #1           #2          #3         #4           #5
-pos_buracos = [(1068, 377), (890, 468), (723, 377), (723, 187), (890, 87), (1068, 187)]
+
+                    #0          #1          #2            #3         #4        #5
+pos_buracos = [(1062, 370), (884, 466), (717, 370), (717, 180), (884, 80), (1062, 180)]
 for i in range(len(pos_buracos)):
     pos_buracos[i] = (int(pos_buracos[i][0] * get_ratio()), int(pos_buracos[i][1] * get_ratio()))
 
