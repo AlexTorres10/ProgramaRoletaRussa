@@ -938,7 +938,7 @@ def iniciar_jogo():
                           'teremos ' + str(qtd_alternativas[rodada - 1]) + ' alternativas para cada pergunta!']
             x = 820
             if rodada == 4:
-                frase_dist.append('Agora é possível responder para si mesmo ou ')
+                frase_dist.append('Agora é possível responder você mesmo ou ')
                 frase_dist.append('passar para seu adversário se for o desafiante!')
                 x = 740
 
