@@ -71,6 +71,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
     blit_all(sair_do_jogo, essentials, jogadores)
     pygame.display.update()
     comeca = randrange(6)
+    giros = 0
     if modo == 'normal':
         vermelhos = []
         for i in range(chances_de_cair):
@@ -78,6 +79,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
             comeca -= 1
         space = False
         sons['jogando_roleta'].play(0)
+
         for i in range(13):
             blit_all(sair_do_jogo, essentials, jogadores)
             alav.update_image('img/alavanca1-' + str(i) + '.png')
@@ -88,6 +90,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                 blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
                 pygame.display.update()
                 pygame.time.delay(50)
+                giros += 1
                 for events in pygame.event.get():
                     if events.type == pygame.QUIT:
                         space = True
@@ -95,7 +98,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                         if events.key == pygame.K_SPACE:
                             return para_roleta('normal', alav, vermelhos=vermelhos, jogador_em_risco=jogador_em_risco,
                                                sons=sons, jogadores=jogadores, final=final, rodada=rodada,
-                                               pergunta=pergunta)
+                                               pergunta=pergunta, giros=giros)
         else:
             jogando_roleta = uniform(1, 5)
             start = pygame.time.get_ticks()
@@ -105,9 +108,11 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                 blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
                 pygame.display.update()
                 pygame.time.delay(50)
+                giros += 1
                 if segundos > jogando_roleta:
                     return para_roleta('normal', alav, vermelhos=vermelhos, jogador_em_risco=jogador_em_risco,
-                                       sons=sons, jogadores=jogadores, final=final, rodada=rodada, pergunta=pergunta)
+                                       sons=sons, jogadores=jogadores, final=final, rodada=rodada,
+                                       pergunta=pergunta, giros=giros)
     elif modo == 'carrasco':
         em_risco = get_em_risco(jogadores)
         pos_risco = randrange(len(em_risco))
@@ -128,6 +133,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                     pygame.display.update()
                     pos_risco = (pos_risco + 1) % len(em_risco)  # Enquanto a roleta joga normal, internamente escolhe 1
                     pygame.time.delay(50)
+                    giros += 1
                     for events in pygame.event.get():
                         if events.type == pygame.QUIT:
                             space = True
@@ -135,7 +141,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                             if events.key == pygame.K_SPACE:
                                 roleta_verdadeira = em_risco[pos_risco]
                                 return para_roleta('carrasco', alav, eliminado=roleta_verdadeira, vermelhos=[comeca],
-                                                   sons=sons, jogadores=jogadores)
+                                                   sons=sons, jogadores=jogadores, giros=giros)
             else:
                 jogando_roleta = uniform(1, 5)
                 start = pygame.time.get_ticks()
@@ -146,18 +152,18 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                     pygame.display.update()
                     pos_risco = (pos_risco + 1) % len(em_risco)  # Enquanto a roleta joga normal, internamente escolhe 1
                     pygame.time.delay(50)
+                    giros += 1
                     if segundos > jogando_roleta:
                         roleta_verdadeira = em_risco[pos_risco]
                         return para_roleta('carrasco', alav, eliminado=roleta_verdadeira, vermelhos=[comeca],
-                                           sons=sons, jogadores=jogadores)
-
+                                           sons=sons, jogadores=jogadores, giros=giros)
         else:
             start = pygame.time.get_ticks()
             lider = get_leader(jogadores)
             if (lider is not None and lider.tipo == 0) or (lider is None):
                 while not space:
                     segundos = (pygame.time.get_ticks() - start) / 1000
-                    if segundos > 3:
+                    if segundos > 1.5:
                         for i in range(12, -1, -1):
                             blit_all(sair_do_jogo, essentials, jogadores)
                             alav.update_image('img/alavanca2-' + str(i) + '.png')
@@ -218,7 +224,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
         start = pygame.time.get_ticks()
         while not space:
             pos_azul = (pos_azul + 1) % len(candidatos)
-            segundos = (pygame.time.get_ticks() - start)/1000
+            segundos = (pygame.time.get_ticks() - start) / 1000
             for events in pygame.event.get():
                 if events.type == pygame.QUIT:
                     space = True
@@ -237,7 +243,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
 
 
 def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogador_em_risco=Jogador('Zé', 1, 0),
-                jog_comeca=Jogador('Zé', 1, 0), sons={}, jogadores=[], final=False, rodada=0, pergunta=0):
+                jog_comeca=Jogador('Zé', 1, 0), sons={}, jogadores=[], final=False, rodada=0, pergunta=0, giros=0):
     global window
     global essentials
     global sair_do_jogo
@@ -245,27 +251,24 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
     blit_all(sair_do_jogo, essentials, jogadores)
     if modo == 'normal':
         for i in range(12, -1, -1):
-            if i == 6:
-                vermelhos = [(v + 1) % 6 for v in vermelhos]
-                pygame.time.delay(50)
             blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
             alav.update_image('img/alavanca1-' + str(i) + '.png')
             pygame.display.update()
         giros_dramaticos = randrange(3)
         for giro in range(giros_dramaticos):  # Não afetam porque fazem uma volta completa
-            for i in range(0, 6):
+            for i in range(6):
                 vermelhos = [(v + 1) % 6 for v in vermelhos]
                 blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
                 pygame.time.delay(75)
         sons['jogando_roleta'].stop()
         pygame.mixer.stop()
         giros_para_parar = randint(5, 12)
-        for i in range(0, giros_para_parar):
+        for i in range(giros_para_parar):
             vermelhos = [(v + 1) % 6 for v in vermelhos]
             blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
             sons['zonas_de_risco'].play(0)
             pygame.time.delay(int((1000 / giros_para_parar) * (i + 1)))
-        giros_a_mais = randrange(3)
+        giros_a_mais = randint(0, 2)
         for i in range(giros_a_mais):
             sons['zonas_de_risco'].play(0)
             vermelhos = [(v + 1) % 6 for v in vermelhos]
@@ -279,7 +282,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 quedas.append({'modo': 'normal', 'vermelhos': vermelhos,
                                'jog_eliminado': jogadores_aux[jogador_em_risco.pos - 1],
                                'jogadores': jogadores_aux, 'giros_dramaticos': giros_dramaticos,
-                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais + 1})
+                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais, 'giros': giros})
                 jogador_em_risco.eliminar(jogadores)
                 blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco)
                 return True
@@ -294,7 +297,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 quedas.append({'modo': 'normal', 'vermelhos': vermelhos,
                                'jog_eliminado': jogadores_aux[jogador_em_risco.pos - 1],
                                'jogadores': jogadores_aux, 'giros_dramaticos': giros_dramaticos,
-                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais + 1})
+                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais+1, 'giros': giros})
                 jogador_em_risco.eliminar(jogadores)
                 blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco)
                 return True
@@ -313,10 +316,6 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
     elif modo == 'carrasco':
         loc_vermelho = vermelhos[0]
         for i in range(12, -1, -1):
-            # blit_all(sair_do_jogo, essentials, jogadores)
-            if i == 6:
-                loc_vermelho = (loc_vermelho + 1) % 6
-                pygame.time.delay(50)
             blit_vermelho(sair_do_jogo, essentials, jogadores, [loc_vermelho])
             alav.update_image('img/alavanca2-' + str(i) + '.png')
             pygame.display.update()
@@ -328,27 +327,27 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 pygame.time.delay(75)
         pygame.mixer.stop()
         sons['jogando_roleta'].stop()
-        giros_para_parar = randint(5, 12)
-        if (eliminado.pos-(loc_vermelho+giros_para_parar) % 6) == eliminado.pos:
-            giros_para_parar = 10 if giros_para_parar == 5 else giros_para_parar - 1
+        giros_para_parar = (eliminado.pos - loc_vermelho) % 6
+        giros_para_parar = giros_para_parar + 6 if giros_para_parar < 5 else giros_para_parar
+
         for i in range(0, giros_para_parar):
             loc_vermelho = (loc_vermelho + 1) % 6
             blit_vermelho(sair_do_jogo, essentials, jogadores, [loc_vermelho])
             sons['zonas_de_risco'].play(0)
             pygame.time.delay(int((1000 / giros_para_parar) * (i + 1)))
-        giros_a_mais = 1
-        while loc_vermelho != eliminado.pos:
-            loc_vermelho = (loc_vermelho + 1) % 6
-            blit_vermelho(sair_do_jogo, essentials, jogadores, [loc_vermelho])
-            sons['zonas_de_risco'].play(0)
-            pygame.time.delay(1000)
-            giros_a_mais += 1
+
+        # while loc_vermelho != eliminado.pos:
+        #     loc_vermelho = (loc_vermelho + 1) % 6
+        #     blit_vermelho(sair_do_jogo, essentials, jogadores, [loc_vermelho])
+        #     sons['zonas_de_risco'].play(0)
+        #     pygame.time.delay(1000)
+        #     giros_a_mais += 1
         sons['queda'].play(0)
         jogadores_aux = copy_jogadores(jogadores)
         quedas.append({'modo': 'carrasco', 'vermelhos': [loc_vermelho],
                        'jog_eliminado': jogadores_aux[eliminado.pos - 1],
                        'jogadores': jogadores_aux, 'giros_dramaticos': giros_dramaticos,
-                       'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais})
+                       'giros_para_parar': giros_para_parar, 'giros_a_mais': 0, 'giros': giros})
         eliminado.eliminar(jogadores)
         blit_queda(sair_do_jogo, essentials, jogadores, [loc_vermelho], eliminado)
         return eliminado
@@ -368,32 +367,23 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             pygame.time.delay(50)
         pygame.mixer.stop()
         sons['jogando_roleta'].stop()
-        giros_para_parar = randint(6, 10)
+
+        giros_para_parar = (jog_comeca.pos - comeca) % 6
+        giros_para_parar = giros_para_parar + 6 if giros_para_parar < 5 else giros_para_parar
         for i in range(giros_para_parar):
             comeca = (comeca + 1) % 6
             sons['zonas_de_risco'].play(0)
             blit_azul(sair_do_jogo, essentials, jogadores, comeca)
             pygame.time.delay(int((1000 / giros_para_parar) * (i + 1)))
-        for i in range(3):
-            if comeca == jog_comeca.pos:
-                break
-            comeca = (comeca + 1) % 6
-            sons['zonas_de_risco'].play(0)
-            blit_azul(sair_do_jogo, essentials, jogadores, comeca)
-            pygame.time.delay(1000)
-        if jogadores[comeca - 1].eliminado or comeca == 0:
-            comeca = (comeca + 1) % 6
-            sons['zonas_de_risco'].play(0)
-            blit_azul(sair_do_jogo, essentials, jogadores, comeca)
-            pygame.time.delay(1000)
+
+        # if jogadores[comeca - 1].eliminado or comeca == 0:
+        #     comeca = (comeca + 1) % 6
+        #     sons['zonas_de_risco'].play(0)
+        #     blit_azul(sair_do_jogo, essentials, jogadores, comeca)
+        #     pygame.time.delay(1000)
 
         sons['quem_comeca'].play(0)
-        if comeca == jog_comeca.pos:
-            return jog_comeca
-        else:
-            for jog in jogadores:
-                if comeca == jog.pos:
-                    return jog
+        return jog_comeca
 
 
 def mostra_quedas():
@@ -410,12 +400,7 @@ def mostra_quedas():
         essentials[0].update_image('img/roleta.png')
     pygame.display.update()
 
-    wait_until_enter(1)
-    num_quedas = 0
     for q in quedas:
-        b = copy_jogadores(q['jogadores'])
-        backup = {'modo': q['modo'], 'vermelhos': q['vermelhos'],
-                  'jog_eliminado': b[q['jog_eliminado'].pos - 1], 'jogadores': b}
         alav = essentials[2]
         if q['modo'] == 'normal':
             essentials[0].update_image('img/roleta_' + str(q['jog_eliminado'].pos) + '.png')
@@ -428,14 +413,14 @@ def mostra_quedas():
                 alav.update_image('img/alavanca1-' + str(i) + '.png')
                 pygame.display.update()
 
-            giros = 78 - (q['giros_para_parar'] % 6) - q['giros_a_mais']
+            start = (q['giros']+q['giros_dramaticos']*6+q['giros_para_parar']) % 6
 
             vermelhos_aux = []
-            comeca = (q['vermelhos'][0]) % 6
+            comeca = (q['vermelhos'][0] - start) % 6
             for i in range(len(q['vermelhos'])):
                 vermelhos_aux.append(comeca % 6)
                 comeca -= 1
-            for i in range(giros):
+            for i in range(q['giros']):
                 vermelhos_aux = [(v + 1) % 6 for v in vermelhos_aux]
                 blit_vermelho(sair_do_jogo, essentials, q['jogadores'], vermelhos_aux)
                 pygame.display.update()
@@ -443,21 +428,18 @@ def mostra_quedas():
 
             # print("Vermelhos", vermelhos_aux)
             for i in range(12, -1, -1):
-                if i == 6:
-                    vermelhos_aux = [(v + 1) % 6 for v in vermelhos_aux]
-                    pygame.time.delay(50)
                 blit_vermelho(sair_do_jogo, essentials, q['jogadores'], vermelhos_aux)
                 alav.update_image('img/alavanca1-' + str(i) + '.png')
                 pygame.display.update()
 
             for giro in range(q['giros_dramaticos']):  # Não afetam porque fazem uma volta completa
-                for i in range(0, 6):
+                for i in range(6):
                     vermelhos_aux = [(v + 1) % 6 for v in vermelhos_aux]
                     blit_vermelho(sair_do_jogo, essentials, q['jogadores'], vermelhos_aux)
                     pygame.time.delay(75)
             sons['jogando_roleta'].stop()
 
-            for i in range(0, q['giros_para_parar']):
+            for i in range(q['giros_para_parar']):
                 vermelhos_aux = [(v + 1) % 6 for v in vermelhos_aux]
                 blit_vermelho(sair_do_jogo, essentials, q['jogadores'], vermelhos_aux)
                 sons['zonas_de_risco'].play(0)
@@ -468,6 +450,7 @@ def mostra_quedas():
                 blit_vermelho(sair_do_jogo, essentials, q['jogadores'], vermelhos_aux)
                 sons['zonas_de_risco'].play(0)
                 pygame.time.delay(1000)
+            pygame.time.delay(250)
             pygame.mixer.stop()
             sons['queda'].play(0)
 
@@ -477,26 +460,31 @@ def mostra_quedas():
             wait_until_enter(int(sons['queda'].get_length() + 1))
         else:
             essentials[0].update_image('img/roleta.png')
+            alav.update_image('img/alavanca2-0.png')
+            blit_all(sair_do_jogo, essentials, q['jogadores'])
             em_risco = get_em_risco(q['jogadores'])
+            pygame.display.update()
+
+            wait_until_enter(2)
             for i in range(13):
                 blit_all(sair_do_jogo, essentials, q['jogadores'])
                 alav.update_image('img/alavanca2-' + str(i) + '.png')
                 pygame.display.update()
 
             if len(em_risco) > 1:
-                comeca = (q['vermelhos'][0]) % 6
+                start = (q['giros'] + q['giros_dramaticos']*6 + q['giros_para_parar']) % 6
+                comeca = (q['vermelhos'][0] - start) % 6
                 sons['jogando_roleta'].play(0)
-                giros = 78 - (q['giros_para_parar'] % 6) - q['giros_a_mais']
-                for i in range(giros):
+
+                # giros = 78 - (q['giros_para_parar'] % 6)
+
+                for i in range(q['giros']):
                     comeca = (comeca + 1) % 6  # São 6 buracos
                     blit_vermelho(sair_do_jogo, essentials, q['jogadores'], [comeca])
                     pygame.display.update()
                     pygame.time.delay(50)
 
                 for i in range(12, -1, -1):
-                    if i == 6:
-                        comeca = (comeca + 1) % 6
-                        pygame.time.delay(50)
                     blit_vermelho(sair_do_jogo, essentials, q['jogadores'], [comeca])
                     alav.update_image('img/alavanca2-' + str(i) + '.png')
                     pygame.display.update()
@@ -537,8 +525,6 @@ def mostra_quedas():
                 pygame.mixer.stop()
                 sons['queda'].play(0)
                 wait_until_enter(int(sons['queda'].get_length() + 1))
-        quedas[num_quedas] = backup
-        num_quedas += 1
         sons['tema'].play()
     pygame.mixer.stop()
     sons['rever_quedas'].play()
@@ -1672,7 +1658,7 @@ def iniciar_jogo():
             sob = open("Final-Sobrou.txt", "w")
             for p in perguntas_da_final:
                 if not p['status']:
-                    sob.write(p['pergunta'] + ' - ' + p['certa']+'\n')
+                    sob.write(p['pergunta'] + ' - ' + p['certa'] + '\n')
             sob.close()
 
             wait_until_enter(int(sons['queda'].get_length() + 1))
