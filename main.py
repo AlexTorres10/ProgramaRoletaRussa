@@ -689,7 +689,7 @@ def seleciona_pergunta(rodada):
             for option, i in zip(df_aux['embaralhar'], range(len(alternativas))):
                 option = int(option)
                 alternativas[i] = alt_aux[option - 1]
-        df_perguntas.loc[pos_pergunta, 'used'] = True
+        df_perguntas.loc[df_perguntas['pergunta'] == pergunta, 'used'] = True
         return pergunta, alternativas, df_aux['resposta_certa']
     elif rodada <= 4:
         df = df[df['alternativas'] == 4]
@@ -707,7 +707,7 @@ def seleciona_pergunta(rodada):
             for option, i in zip(df_aux['embaralhar'], range(len(alternativas))):
                 option = int(option)
                 alternativas[i] = alt_aux[option - 1]
-        df_perguntas.loc[pos_pergunta, 'used'] = True
+        df_perguntas.loc[df_perguntas['pergunta'] == pergunta, 'used'] = True
         return pergunta, alternativas, df_aux['resposta_certa']
     else:
         df = df[df['alternativas'] == 5]
