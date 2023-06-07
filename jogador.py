@@ -114,7 +114,8 @@ class Jogador:
         text_rect = texto_dinheiro.get_rect(center=pos_dinheiro[self.pos - 1])
         window.blit(texto_dinheiro, text_rect)
 
-    def bot_responde(self, rodada, pergunta_final='', alternativas='', resposta_certa='', tempo_final=0, certas=0):
+    def bot_responde(self, rodada, pergunta_final='', alternativas='', resposta_certa='', tempo_final=0, certas=0,
+                     desafiante='', escolhido=''):
         # Nível 1 - Bot Carla Perez na final
         # 0% para acertar - 100% para chutar
         # Nível 2 - Bot Leigo
@@ -126,6 +127,9 @@ class Jogador:
         # Nível 5 - Bot Cacá Rosset na final
         # 80% para acertar - 20% para chutar
         limiar = 10-2*(self.tipo-1)
+        if desafiante == escolhido:
+            # Não faria sentido um bot repassar a si mesmo, se não soubesse, certo?
+            limiar += 1
 
         # Será gerado um número entre 1 e 10. Se for maior que o limiar, o bot acerta. Se não for, ele chuta.
         decisao = randint(1, 10)
@@ -140,7 +144,7 @@ class Jogador:
                 # Retorna a resposta certa (1, 2, 3, 4) e o tempo para responder
                 return num_resposta, randint(2 * self.tipo, 15)
             else:
-                return respostas.index(pergunta_final['certa'])+1, tempo_final - randint(3, 6)
+                return respostas.index(pergunta_final['certa'])+1, tempo_final - randint(4, 6)
         else:  # SE CHUTAR...
             if rodada < 5:
                 chute = choice(alternativas)

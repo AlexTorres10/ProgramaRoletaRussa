@@ -276,6 +276,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             pygame.time.delay(1000)
         if not final:
             if jogador_em_risco.pos in vermelhos:
+                pygame.time.delay(200)
                 sons['queda'].play(0)
                 jogadores_aux = copy_jogadores(jogadores)
                 quedas.append({'modo': 'normal', 'vermelhos': vermelhos,
@@ -290,7 +291,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 sons['zonas_de_risco'].play(0)
                 vermelhos = [(v + 1) % 6 for v in vermelhos]
                 blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
-                pygame.time.delay(1000)
+                pygame.time.delay(1200)
                 sons['queda'].play(0)
                 jogadores_aux = copy_jogadores(jogadores)
                 quedas.append({'modo': 'normal', 'vermelhos': vermelhos,
@@ -301,6 +302,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco)
                 return True
             else:
+                pygame.time.delay(200)
                 sons['escapou'].play(0)
                 sons['aplausos2'].play()
                 return False
@@ -937,13 +939,17 @@ def iniciar_jogo():
                                                                               grouping=True)) + ', e',
                           'teremos ' + str(qtd_alternativas[rodada - 1]) + ' alternativas para cada pergunta!']
             x = 820
+            tam = 72
+            enter = 80
             if rodada == 4:
                 frase_dist.append('Agora é possível responder você mesmo ou ')
                 frase_dist.append('passar para seu adversário se for o desafiante!')
                 x = 740
+                tam = 64
+                enter = 72
 
             for i in range(len(frase_dist)):
-                frase = Texto(frase_dist[i], 'FreeSans', 72, 960, x + 80 * i)
+                frase = Texto(frase_dist[i], 'FreeSans', tam, 960, x + enter * i)
                 frase.show_texto(window, align='center')
             pygame.display.update()
             wait_until_enter(15)
@@ -1099,7 +1105,9 @@ def iniciar_jogo():
                 else:
                     # Bot respondendo!
                     pos_resp_escolh, tempo_restante = escolhido.bot_responde(rodada, alternativas=alternativas,
-                                                                             resposta_certa=resposta_certa)
+                                                                             resposta_certa=resposta_certa,
+                                                                             desafiante=desafiante,
+                                                                             escolhido=escolhido)
                     while loop_jogo:
                         respondeu = False
                         time = (15000 - (pygame.time.get_ticks() - start)) / 1000
@@ -1139,7 +1147,7 @@ def iniciar_jogo():
                                     pygame.mixer.stop()
                                     return
                 tempo_restante = int(ceil(time))
-                if tempo_restante == -3:
+                if tempo_restante < -3:
                     tempo_restante = 0
                 elif tempo_restante < 0:
                     tempo_restante = 1
@@ -1178,7 +1186,7 @@ def iniciar_jogo():
                                 if ev.key == pygame.K_RETURN:
                                     loop_jogo = False
                                 if ev.key == pygame.K_F1:
-                                    time_limit = time_limit * 3
+                                    time_limit = 40000
                         time = pygame.time.get_ticks() - start
                         if time > time_limit:  # Botando 20 segundos até revelar
                             loop_jogo = False
@@ -1867,7 +1875,7 @@ def mostra_regras():
     global window
     global volta_menu
     limpa_tela(window)
-    sons['regras'].play()
+    sons['question'].play()
     titulo = 'REGRAS: ROLETA RUSSA'
     texto = '           O jogo possui exatamente 6 buracos, 5 jogadores, 4 rodadas de eliminação e a rodada final. ' \
             'No início do ' \
@@ -1945,7 +1953,7 @@ def mostra_creditos():
     global volta_menu
     limpa_tela(window)
     volta_menu.show_texto(window)
-    sons['creditos'].play()
+    sons['round'].play()
 
     titulo = 'CRÉDITOS'
     cred = ['Códigos e imagens - Alex Torres',
@@ -2023,8 +2031,6 @@ def mostra_recordes():
 
     for n, d, daf, f, i in zip(df_recordes['nome'], df_recordes['dinheiro'],
                                df_recordes['dinheiro_antes_final'], df_recordes['final_certas'], range(10)):
-
-        print(n, d, daf, f, i)
         if n != '--':
             if d == 500000:
                 dinheiro_final = 'R$ ' + str(d) + ' (R$ ' + str(daf) + ')'

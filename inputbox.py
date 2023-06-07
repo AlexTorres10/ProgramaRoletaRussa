@@ -25,6 +25,7 @@ class InputBox:
                 self.active = False
             # Change the current color of the input box.
             self.color = COLOR_ACTIVE if self.active else COLOR_INACTIVE
+            self.txt_surface = self.font.render(self.text, True, self.color)
         if event.type == pygame.KEYDOWN:
             if self.active:
                 if event.key == pygame.K_BACKSPACE:
