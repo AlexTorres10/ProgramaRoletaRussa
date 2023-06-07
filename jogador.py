@@ -129,7 +129,7 @@ class Jogador:
         limiar = 10-2*(self.tipo-1)
         if desafiante == escolhido:
             # Não faria sentido um bot repassar a si mesmo, se não soubesse, certo?
-            limiar += 1
+            limiar -= 1
 
         # Será gerado um número entre 1 e 10. Se for maior que o limiar, o bot acerta. Se não for, ele chuta.
         decisao = randint(1, 10)
