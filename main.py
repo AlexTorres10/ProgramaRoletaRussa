@@ -1753,12 +1753,14 @@ def configuracoes():
     global vol
     limpa_tela(window)
     sons['start_game'].play()
-    y_ib = [170, 220, 270, 320, 370]
+    x = 60
+    y = 170
 
     df_jogadores = pd.read_json("players.json")
     df_jogadores = df_jogadores.copy()
     input_boxes = []
     botoes_tipo = []
+    opcoes_bot = []
     niveis = ['Humano', 'Bot Carla Perez na final', 'Bot Leigo', 'Bot Normal', 'Bot Inteligente',
               'Bot Cacá Rosset na final']
     cores = [(255, 255, 255), (0, 255, 0), (0, 125, 0), (255, 255, 0), (255, 125, 0), (255, 0, 0)]
@@ -1766,19 +1768,24 @@ def configuracoes():
     tudo_salvo = Texto('Configurações salvas com sucesso!', 'FreeSansBold', tam=36, x=1880, y=985)
     tipos = []
 
-    for n, y, t in zip(df_jogadores['nome'], y_ib, df_jogadores['tipo']):
-        input_box = InputBox(60, y, 355, 45, text=n)
+    for n, t in zip(df_jogadores['nome'], df_jogadores['tipo']):
+        input_box = InputBox(x, y, 355, 45, text=n)
         input_boxes.append(input_box)
-        botao_tipo = Botao(niveis[t], 450, y, tam=30, align='topleft', cor=cores[t])
-        botoes_tipo.append(botao_tipo)
+
+        option_box_tipo = OptionBox(x+360, y, 375, 45, (25, 25, 25), (120, 120, 120), selected=t)
+        opcoes_bot.append(option_box_tipo)
         tipos.append(t)
+        # x += 360
+        y += 50
 
     loop_config = True
+    selecionada = None
 
     salvar = Botao('Salvar configurações', 1880, 880, align='topright')
     while loop_config:
 
         limpa_tela(window)
+
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
                 pygame.quit()
@@ -1792,17 +1799,14 @@ def configuracoes():
                         novos_jogadores.append(box.text)
                     for i in range(len(novos_jogadores)):
                         df_jogadores.loc[i, 'nome'] = novos_jogadores[i]
-                        df_jogadores.loc[i, 'tipo'] = tipos[i]
+                        df_jogadores.loc[i, 'tipo'] = opcoes_bot[i].selected
                     df_jogadores.to_json("players.json", orient="records")
                     pygame.mixer.music.set_volume(vol)
                     for som in sons.keys():
                         sons[som].set_volume(vol)
                     config_salva = True
                 for i in range(len(tipos)):
-                    if botoes_tipo[i].check_click():
-                        tipos[i] = (tipos[i] + 1) % 6
-                        botoes_tipo[i].texto = niveis[tipos[i]]
-                        botoes_tipo[i].cor = cores[tipos[i]]
+                    opcoes_bot[i].update(ev)
 
             if ev.type == pygame.QUIT:
                 pygame.quit()
@@ -1823,8 +1827,7 @@ def configuracoes():
         for box in input_boxes:
             box.draw(window)
 
-        for tipo in botoes_tipo:
-            tipo.show_texto(window)
+
 
         volta_menu.show_texto(window)
         if config_salva:
@@ -1867,6 +1870,13 @@ def configuracoes():
         txt_volume.show_texto(window, 'topleft')
 
         salvar.show_texto(window)
+
+        for op in opcoes_bot:
+            if not op.draw_menu:
+                op.draw(window)
+        for op in opcoes_bot:
+            if op.draw_menu:
+                op.draw(window)
 
         pygame.display.update()
 
@@ -2134,7 +2144,7 @@ creditos = Botao('Créditos', 1850, 850)
 sair = Botao('Sair', 1850, 950)
 sair_do_jogo = Botao('Sair do jogo', 10, 10, tam=30, align='topleft')
 volta_menu = Botao('Voltar para o menu', 10, 10, tam=30, align='topleft')
-versao_do_jogo = Texto('Versão 2.6', 'FreeSansBold', 48, 40, 1000)
+versao_do_jogo = Texto('Versão 2.7', 'FreeSansBold', 48, 40, 1000)
 
 img_pergunta = Image('img/pergunta_espera.png', 310, 680)
 
