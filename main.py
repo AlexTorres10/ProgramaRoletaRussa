@@ -1963,7 +1963,7 @@ def mostra_creditos():
     global volta_menu
     limpa_tela(window)
     volta_menu.show_texto(window)
-    sons['round'].play()
+    sons['creditos'].play()
 
     titulo = 'CRÉDITOS'
     cred = ['Códigos e imagens - Alex Torres',
