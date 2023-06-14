@@ -1268,7 +1268,8 @@ def iniciar_jogo():
                                              jogadores, img_pergunta)
                     pygame.display.update()
                     desafiante = escolhido
-                wait_until_enter(3)
+                if not jog_eliminado:
+                    wait_until_enter(3)  # Tempo de espera para próxima pergunta
             if not jog_eliminado:
                 roleta.update_image('img/roleta.png')
                 blit_all(sair_do_jogo, essentials, jogadores)

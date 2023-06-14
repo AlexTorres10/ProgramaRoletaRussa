@@ -2,7 +2,7 @@ import pygame
 from display import Image, get_ratio, mostra_essentials
 from textos_menu import Texto
 from copy import copy
-from random import randint, choice
+from random import randint, choice, uniform
 
 pos_buracos = [(884, 466), (717, 370), (717, 180), (884, 80), (1062, 180)]
 pos_players = [(910, 495), (742, 398), (742, 208), (910, 107), (1090, 208)]
@@ -144,7 +144,7 @@ class Jogador:
                 # Retorna a resposta certa (1, 2, 3, 4) e o tempo para responder
                 return num_resposta, randint(2 * self.tipo, 15)
             else:
-                return respostas.index(pergunta_final['certa'])+1, tempo_final - randint(4, 6)
+                return respostas.index(pergunta_final['certa'])+1, tempo_final - uniform(3.5, 6.5)
         else:  # SE CHUTAR...
             if rodada < 5:
                 chute = choice(alternativas)
@@ -157,9 +157,9 @@ class Jogador:
                 if tempo_final < limiar_chute or certas == 7:
                     # Se o tempo for menor que o limiar ou estivermos em 7 certas, o bot chuta.
                     chute = choice(respostas[:-1])
-                    return respostas.index(chute)+1, tempo_final - randint(4, 6)
+                    return respostas.index(chute)+1, tempo_final - uniform(3.5, 6.5)
                 else:
-                    return 0, tempo_final - randint(4, 6)
+                    return 0, tempo_final - uniform(3.5, 6.5)
 
     def bot_escolhe(self, escolhas, lider, nao_respondeu, rodada, pergunta):
         if rodada == 4 and pergunta == 5:  # Se estiver na última pergunta
