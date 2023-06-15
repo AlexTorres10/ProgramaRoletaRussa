@@ -35,8 +35,8 @@ class InputBox:
                     else:
                         self.text = ''
                         self.espacos = 0
-                elif event.key == pygame.K_EQUALS or event.key == pygame.K_MINUS:
-                    pass
+                # elif event.key == pygame.K_EQUALS or event.key == pygame.K_MINUS:
+                #     pass
                 else:
                     if event.unicode != '~':
                         self.text += event.unicode

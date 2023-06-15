@@ -1760,11 +1760,7 @@ def configuracoes():
     df_jogadores = pd.read_json("players.json")
     df_jogadores = df_jogadores.copy()
     input_boxes = []
-    botoes_tipo = []
     opcoes_bot = []
-    niveis = ['Humano', 'Bot Carla Perez na final', 'Bot Leigo', 'Bot Normal', 'Bot Inteligente',
-              'Bot Cacá Rosset na final']
-    cores = [(255, 255, 255), (0, 255, 0), (0, 125, 0), (255, 255, 0), (255, 125, 0), (255, 0, 0)]
     config_salva = False
     tudo_salvo = Texto('Configurações salvas com sucesso!', 'FreeSansBold', tam=36, x=1880, y=985)
     tipos = []
@@ -1815,7 +1811,13 @@ def configuracoes():
                 box.handle_event(ev)
             if ev.type == pygame.KEYDOWN:
                 if ev.key == pygame.K_MINUS:
-                    vol -= 0.1
+                    input_box_active = False
+                    for ib in input_boxes:
+                        if ib.active:
+                            input_box_active = True
+                            break
+                    if not input_box_active:
+                        vol -= 0.1
                     # pygame.mixer.music.set_volume(vol)
                 if ev.key == pygame.K_EQUALS or ev.key == pygame.K_PLUS:
                     vol += 0.1
