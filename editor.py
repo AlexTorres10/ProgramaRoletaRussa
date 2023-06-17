@@ -7,8 +7,18 @@ from tkinter.font import Font
 from random import randint
 
 # Load data from CSV file
-df = pd.read_csv("base/main.csv", sep=';')
-
+try:
+    df = pd.read_csv("base/main.csv", sep=';')
+except:
+    df = pd.DataFrame({
+        'pergunta': ['Lorem Ipsum'],
+        'alternativas': [3],
+        'resposta_certa': ['Dolor cit amet'],
+        'alternativa_1': ['Consectetur'],
+        'alternativa_2': ['Adpiscing elit'],
+        'alternativa_3': ['Duis efficitur'],
+        'embaralhar': ['N']
+    })
 
 def update(event):
     search_query = search_entry.get()
