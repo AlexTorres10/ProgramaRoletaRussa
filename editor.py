@@ -5,11 +5,10 @@ from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
 from tkinter.font import Font
 from random import randint
-
-# Load data from CSV file
+from tkinter import filedialog
 try:
-    df = pd.read_csv("base/main.csv", sep=';')
-except:
+    df = pd.read_csv("base/main.csv", sep=';', encoding='utf-8')
+except FileNotFoundError:
     df = pd.DataFrame({
         'pergunta': ['Lorem Ipsum'],
         'alternativas': [3],
@@ -19,6 +18,39 @@ except:
         'alternativa_3': ['Duis efficitur'],
         'embaralhar': ['N']
     })
+
+
+def criar_nova_base():
+    global df
+    df = pd.DataFrame({
+        'pergunta': ['Lorem Ipsum'],
+        'alternativas': [3],
+        'resposta_certa': ['Dolor cit amet'],
+        'alternativa_1': ['Consectetur'],
+        'alternativa_2': ['Adpiscing elit'],
+        'alternativa_3': ['Duis efficitur'],
+        'embaralhar': ['N']
+    })
+    listbox.delete(0, tk.END)
+    for row in df.itertuples(index=False):
+        listbox.insert(tk.END, row.pergunta)
+
+
+def abrir_base():
+    global df
+    file_path = filedialog.askopenfilename(
+        filetypes=[('Arquivo CSV', '*.csv')],
+        title='Abra um arquivo CSV'
+    )
+
+    if file_path:
+        df = pd.read_csv(file_path, sep=';', encoding='utf-8')
+    else:
+        print("Sem arquivo")
+    listbox.delete(0, tk.END)
+    for row in df.itertuples(index=False):
+        listbox.insert(tk.END, row.pergunta)
+
 
 def update(event):
     search_query = search_entry.get()
@@ -237,13 +269,14 @@ def replace_question():
 
 def save_database():
     # show a message box to confirm the user wants to save the database
-    confirm = messagebox.askyesno("Salvar Base", "Tem certeza de que quer salvar a base de perguntas?")
+    file_path = filedialog.asksaveasfilename(
+        defaultextension='.csv',
+        filetypes=[('Arquivo CSV', '*.csv')],
+        title='Salvar base de dados'
+    )
 
-    if confirm:
-        # save the database to disk
+    if file_path:
         df.to_csv("base/main.csv", sep=';', index=False)
-
-        # show a message box to confirm the database was saved
         messagebox.showinfo("Base salva", "A base de perguntas foi salva.")
 
 
@@ -255,6 +288,14 @@ except:
     pass
 root.geometry("960x600")
 
+menu_bar = tk.Menu(root)
+# Create the "File" menu
+menu_bar.add_command(label="Criar nova base", command=criar_nova_base)
+
+# Add "Abrir base" option to the menu bar
+menu_bar.add_command(label="Abrir base", command=abrir_base)
+
+root.config(menu=menu_bar)
 # Create search entry
 search_label = tk.Label(root, text="Search:")
 search_label.pack(anchor=W)

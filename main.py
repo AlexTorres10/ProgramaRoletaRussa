@@ -1,4 +1,3 @@
-import pygame
 from display import *
 from jogador import *
 from jogar_roleta import *
@@ -72,6 +71,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
     pygame.display.update()
     comeca = randrange(6)
     giros = 0
+
     if modo == 'normal':
         vermelhos = []
         for i in range(chances_de_cair):
@@ -79,15 +79,23 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
             comeca -= 1
         space = False
         sons['jogando_roleta'].play(0)
+        buracos_abertos_final = [2, 3, 4, 5, 0, 1][1:chances_de_cair + 1]
 
         for i in range(13):
             blit_all(sair_do_jogo, essentials, jogadores)
+            if final:
+                blit_varios_buracos(list_buracos=buracos_abertos_final, c='final')
             alav.update_image('img/alavanca1-' + str(i) + '.png')
             pygame.display.update()
         if jogador_em_risco.tipo == 0:
             while not space:
                 vermelhos = [(v + 1) % 6 for v in vermelhos]
                 blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
+                if final:
+                    blit_varios_buracos(list_buracos=buracos_abertos_final, c='final')
+                    aberto_e_vermelho = [v for v in vermelhos if v in buracos_abertos_final]
+                    blit_varios_buracos(list_buracos=aberto_e_vermelho)
+
                 pygame.display.update()
                 pygame.time.delay(50)
                 giros += 1
@@ -106,6 +114,10 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                 segundos = (pygame.time.get_ticks() - start) / 1000
                 vermelhos = [(v + 1) % 6 for v in vermelhos]
                 blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
+                if final:
+                    blit_varios_buracos(list_buracos=buracos_abertos_final, c='final')
+                    aberto_e_vermelho = [v for v in vermelhos if v in buracos_abertos_final]
+                    blit_varios_buracos(list_buracos=aberto_e_vermelho)
                 pygame.display.update()
                 pygame.time.delay(50)
                 giros += 1
@@ -173,7 +185,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                                        'jog_eliminado': jogadores_aux[em_risco[0].pos - 1],
                                        'jogadores': jogadores_aux})
                         em_risco[0].eliminar(jogadores)
-                        blit_queda(sair_do_jogo, essentials, jogadores, [em_risco[0].pos], em_risco[0])
+                        blit_queda(sair_do_jogo, essentials, jogadores, [], em_risco[0], rodada4=True)
                         sons['queda'].play(0)
                         return em_risco[0]
                     for events in pygame.event.get():
@@ -190,7 +202,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                                                'jog_eliminado': jogadores_aux[em_risco[0].pos - 1],
                                                'jogadores': jogadores_aux})
                                 em_risco[0].eliminar(jogadores)
-                                blit_queda(sair_do_jogo, essentials, jogadores, [em_risco[0].pos], em_risco[0])
+                                blit_queda(sair_do_jogo, essentials, jogadores, [], em_risco[0], rodada4=True)
                                 sons['queda'].play(0)
                                 return em_risco[0]
             else:
@@ -207,7 +219,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                                        'jog_eliminado': jogadores_aux[em_risco[0].pos - 1],
                                        'jogadores': jogadores_aux})
                         em_risco[0].eliminar(jogadores)
-                        blit_queda(sair_do_jogo, essentials, jogadores, [em_risco[0].pos], em_risco[0])
+                        blit_queda(sair_do_jogo, essentials, jogadores, [], em_risco[0], rodada4=True)
                         sons['queda'].play(0)
                         return em_risco[0]
     elif modo == 'comeco':
@@ -249,9 +261,15 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
     global sair_do_jogo
     global quedas
     blit_all(sair_do_jogo, essentials, jogadores)
+    chances_de_cair = len(vermelhos)
+    buracos_abertos_final = [2, 3, 4, 5, 0, 1][1:chances_de_cair + 1]
     if modo == 'normal':
         for i in range(12, -1, -1):
             blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
+            if final:
+                blit_varios_buracos(list_buracos=buracos_abertos_final, c='final')
+                aberto_e_vermelho = [v for v in vermelhos if v in buracos_abertos_final]
+                blit_varios_buracos(list_buracos=aberto_e_vermelho)
             alav.update_image('img/alavanca1-' + str(i) + '.png')
             pygame.display.update()
         giros_dramaticos = randrange(3)
@@ -259,6 +277,10 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             for i in range(6):
                 vermelhos = [(v + 1) % 6 for v in vermelhos]
                 blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
+                if final:
+                    blit_varios_buracos(list_buracos=buracos_abertos_final, c='final')
+                    aberto_e_vermelho = [v for v in vermelhos if v in buracos_abertos_final]
+                    blit_varios_buracos(list_buracos=aberto_e_vermelho)
                 pygame.time.delay(75)
         sons['jogando_roleta'].stop()
         pygame.mixer.stop()
@@ -266,6 +288,10 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
         for i in range(giros_para_parar):
             vermelhos = [(v + 1) % 6 for v in vermelhos]
             blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
+            if final:
+                blit_varios_buracos(list_buracos=buracos_abertos_final, c='final')
+                aberto_e_vermelho = [v for v in vermelhos if v in buracos_abertos_final]
+                blit_varios_buracos(list_buracos=aberto_e_vermelho)
             sons['zonas_de_risco'].play(0)
             pygame.time.delay(int((1000 / giros_para_parar) * (i + 1)))
         giros_a_mais = randint(0, 2)
@@ -273,6 +299,10 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             sons['zonas_de_risco'].play(0)
             vermelhos = [(v + 1) % 6 for v in vermelhos]
             blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
+            if final:
+                blit_varios_buracos(list_buracos=buracos_abertos_final, c='final')
+                aberto_e_vermelho = [v for v in vermelhos if v in buracos_abertos_final]
+                blit_varios_buracos(list_buracos=aberto_e_vermelho)
             pygame.time.delay(1000)
         if not final:
             if jogador_em_risco.pos in vermelhos:
@@ -297,7 +327,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 quedas.append({'modo': 'normal', 'vermelhos': vermelhos,
                                'jog_eliminado': jogadores_aux[jogador_em_risco.pos - 1],
                                'jogadores': jogadores_aux, 'giros_dramaticos': giros_dramaticos,
-                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais+1, 'giros': giros})
+                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais + 1, 'giros': giros})
                 jogador_em_risco.eliminar(jogadores)
                 blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco)
                 return True
@@ -310,10 +340,12 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             if 2 in vermelhos:
                 jogador_em_risco.eliminar(jogadores)
                 blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco, final=final)
-                blit_varios_buracos(vermelhos)
+                blit_varios_buracos(buracos_abertos_final, c='final')
+                aberto_e_vermelho = [v for v in vermelhos if v in buracos_abertos_final]
+                blit_varios_buracos(list_buracos=aberto_e_vermelho)
                 return [True, vermelhos]
             else:
-                return False
+                return [False, vermelhos]
     elif modo == 'carrasco':
         loc_vermelho = vermelhos[0]
         for i in range(12, -1, -1):
@@ -416,7 +448,7 @@ def mostra_quedas():
                 alav.update_image('img/alavanca1-' + str(i) + '.png')
                 pygame.display.update()
 
-            start = (q['giros']+q['giros_dramaticos']*6+q['giros_para_parar']) % 6
+            start = (q['giros'] + q['giros_dramaticos'] * 6 + q['giros_para_parar']) % 6
 
             vermelhos_aux = []
             comeca = (q['vermelhos'][0] - start) % 6
@@ -474,7 +506,7 @@ def mostra_quedas():
                 pygame.display.update()
 
             if len(em_risco) > 1:
-                start = (q['giros'] + q['giros_dramaticos']*6 + q['giros_para_parar']) % 6
+                start = (q['giros'] + q['giros_dramaticos'] * 6 + q['giros_para_parar']) % 6
                 comeca = (q['vermelhos'][0] - start) % 6
                 sons['jogando_roleta'].play(0)
 
@@ -523,7 +555,8 @@ def mostra_quedas():
                     pygame.display.update()
 
                 q['jog_eliminado'].eliminar(q['jogadores'])
-                blit_queda(sair_do_jogo, essentials, q['jogadores'], [q['jog_eliminado'].pos], q['jog_eliminado'])
+                blit_queda(sair_do_jogo, essentials, q['jogadores'], [], q['jog_eliminado'])
+                blit_varios_buracos([q['jog_eliminado'].pos], c='rodada4')
                 pygame.mixer.stop()
                 sons['queda'].play(0)
                 wait_until_enter(int(sons['queda'].get_length() + 1))
@@ -565,23 +598,28 @@ def blit_azul(s, ess, jogadores, a):
     pygame.display.update()
 
 
-def blit_queda(s, ess, jogadores, vermelhos, jogador, final=False):
+def blit_queda(s, ess, jogadores, vermelhos, jogador, final=False, rodada4=False):
     global window
     window.fill('black')
     s.show_texto(window)
     mostra_essentials(window, ess)
-    if not final:
+    if not final and not rodada4:
         queda(window, vermelhos, jogador.pos)
+    elif not final and rodada4:
+        queda(window, vermelhos, jogador.pos, c='rodada4')
     else:
         queda(window, vermelhos, 2)
     mostra_jogadores(window, jogadores)
     pygame.display.update()
 
 
-def blit_varios_buracos(list_buracos):
+def blit_varios_buracos(list_buracos, c='caiu'):
     global window
-    for buraco in list_buracos:
-        window.blit(caiu, pos_buracos[buraco])
+    for b in list_buracos:
+        if c == 'caiu':
+            window.blit(caiu, pos_buracos[b])
+        else:
+            window.blit(buraco, pos_buracos[b])
     pygame.display.update()
 
 
@@ -1344,9 +1382,12 @@ def iniciar_jogo():
                 blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
                 pygame.display.update()
                 wait_until_enter(5)
+
         # RODADA FINAL
         prompt_rever_quedas(window)
-        rodada = 5
+
+        rodada=5
+
         finalista = get_leader(jogadores)  # O líder é logicamente o finalista!
         alavanca.update_image('img/alavanca1-0.png')
         sons['final_inicio'].play()
@@ -1677,7 +1718,7 @@ def iniciar_jogo():
             sons['aplausos2'].play()
             finalista.dinheiro = finalista.dinheiro + 5000 * num_certas + 10000
             blit_all(sair_do_jogo, essentials, jogadores)
-            blit_varios_buracos(buracos_abertos_final[1:qtd_buracos_abertos + 1])
+            blit_varios_buracos(buracos_abertos_final[1:qtd_buracos_abertos + 1], c='final')
             pygame.display.update()
             wait_until_enter(int(sons['escapou'].get_length() - 3))
 
@@ -1701,15 +1742,19 @@ def iniciar_jogo():
                                                                jogadores=jogadores,
                                                                final=True)
                                     loop_500000 = False
+                                    venceu = not caiu_ou_nao[0]
+                                    vermelhos_finais = caiu_ou_nao[1]
                 else:
                     wait_until_enter(5)
                     pygame.mixer.stop()
                     caiu_ou_nao = jogar_roleta('normal', alavanca, chances_de_cair=qtd_buracos_abertos,
                                                jogador_em_risco=finalista, sons=sons, jogadores=jogadores,
                                                final=True)
+                    vermelhos_finais = caiu_ou_nao[1]
+                    venceu = not caiu_ou_nao[0]
             else:
-                caiu_ou_nao = False
-            if not caiu_ou_nao:
+                venceu = True
+            if venceu:
                 sons['vitoria'].set_volume(vol + 0.1)
                 sons['vitoria'].play()
                 sons['aplausos2'].play()
@@ -1724,11 +1769,17 @@ def iniciar_jogo():
             vermelhos_restantes = [v for v in range(6) if v not in buracos_abertos_final[:qtd_buracos_abertos + 1]]
             blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos_restantes)
             blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos + 1])
-        elif not caiu_ou_nao:
-            blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
+        elif venceu:
+            # Se ganhou os R$ 500.000
+            blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos_finais)
+            blit_varios_buracos(list_buracos=buracos_abertos_final[1:qtd_buracos_abertos + 1], c='final')
+            aberto_e_vermelho = [v for v in vermelhos_finais if v in buracos_abertos_final[1:qtd_buracos_abertos + 1]]
+            blit_varios_buracos(list_buracos=aberto_e_vermelho)
         else:
-            blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
-            blit_varios_buracos(caiu_ou_nao[1])
+            blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos_finais)
+            blit_varios_buracos(list_buracos=buracos_abertos_final[:qtd_buracos_abertos + 1], c='final')
+            aberto_e_vermelho = [v for v in vermelhos_finais if v in buracos_abertos_final[:qtd_buracos_abertos + 1]]
+            blit_varios_buracos(list_buracos=aberto_e_vermelho)
         img_pergunta.update_image("img/grana.png")
         finalista.mostra_dinheiro(window, img_pergunta)
         pygame.display.update()
@@ -1752,6 +1803,7 @@ def configuracoes():
     global volta_menu
     global sons
     global vol
+    global df_perguntas
     limpa_tela(window)
     sons['start_game'].play()
     x = 60
@@ -1769,12 +1821,16 @@ def configuracoes():
         input_box = InputBox(x, y, 355, 45, text=n)
         input_boxes.append(input_box)
 
-        option_box_tipo = OptionBox(x+360, y, 375, 45, (25, 25, 25), (120, 120, 120), selected=t)
+        option_box_tipo = OptionBox(x + 360, y, 375, 45, (25, 25, 25), (120, 120, 120), selected=t)
         opcoes_bot.append(option_box_tipo)
         tipos.append(t)
         # x += 360
         y += 50
 
+    txt_base = Texto('Base de perguntas', 'FreeSansBold', tam=48, x=1100, y=170)
+    bases = [b for b in listdir('base') if '.csv' in b]
+    main_loc = bases.index('main.csv')
+    base = OptionBox(900, 220, 400, 45, (25, 25, 25), (120, 120, 120), option_list=bases, selected=main_loc)
     loop_config = True
     selecionada = None
 
@@ -1801,9 +1857,13 @@ def configuracoes():
                     pygame.mixer.music.set_volume(vol)
                     for som in sons.keys():
                         sons[som].set_volume(vol)
+                    nome_da_base = base.option_list[base.selected]
+                    df_perguntas = pd.read_csv('base/'+nome_da_base, encoding='utf-8', sep=';')
+                    df_perguntas['used'] = False
                     config_salva = True
                 for i in range(len(tipos)):
                     opcoes_bot[i].update(ev)
+                base.update(ev)
 
             if ev.type == pygame.QUIT:
                 pygame.quit()
@@ -1829,8 +1889,6 @@ def configuracoes():
 
         for box in input_boxes:
             box.draw(window)
-
-
 
         volta_menu.show_texto(window)
         if config_salva:
@@ -1872,6 +1930,8 @@ def configuracoes():
         txt_volume = Texto('+ - aumenta o volume; - diminui o volume', 'FreeSansBold', 36, 45, 860)
         txt_volume.show_texto(window, 'topleft')
 
+        txt_base.show_texto(window, 'center')
+
         salvar.show_texto(window)
 
         for op in opcoes_bot:
@@ -1880,6 +1940,7 @@ def configuracoes():
         for op in opcoes_bot:
             if op.draw_menu:
                 op.draw(window)
+        base.draw(window)
 
         pygame.display.update()
 
@@ -2147,7 +2208,7 @@ creditos = Botao('Créditos', 1850, 850)
 sair = Botao('Sair', 1850, 950)
 sair_do_jogo = Botao('Sair do jogo', 10, 10, tam=30, align='topleft')
 volta_menu = Botao('Voltar para o menu', 10, 10, tam=30, align='topleft')
-versao_do_jogo = Texto('Versão 2.7', 'FreeSansBold', 48, 40, 1000)
+versao_do_jogo = Texto('Versão 3.0', 'FreeSansBold', 48, 40, 1000)
 
 img_pergunta = Image('img/pergunta_espera.png', 310, 680)
 
