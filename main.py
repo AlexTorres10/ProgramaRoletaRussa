@@ -1804,6 +1804,8 @@ def configuracoes():
     global sons
     global vol
     global df_perguntas
+    global nome_da_base
+
     limpa_tela(window)
     sons['start_game'].play()
     x = 60
@@ -1829,7 +1831,8 @@ def configuracoes():
 
     txt_base = Texto('Base de perguntas', 'FreeSansBold', tam=48, x=1100, y=170)
     bases = [b for b in listdir('base') if '.csv' in b]
-    main_loc = bases.index('main.csv')
+
+    main_loc = bases.index(nome_da_base)
     base = OptionBox(900, 220, 400, 45, (25, 25, 25), (120, 120, 120), option_list=bases, selected=main_loc)
     loop_config = True
     selecionada = None
@@ -2212,6 +2215,7 @@ versao_do_jogo = Texto('Versão 3.0', 'FreeSansBold', 48, 40, 1000)
 
 img_pergunta = Image('img/pergunta_espera.png', 310, 680)
 
+nome_da_base = 'main.csv'
 df_perguntas = pd.read_csv('base/main.csv', encoding='utf-8', sep=';')
 df_perguntas['used'] = False
 
