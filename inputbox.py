@@ -65,7 +65,7 @@ class OptionBox:
                            'Bot Normal', 'Bot Inteligente', 'Bot Cacá Rosset na Final']
         self.color = color
         self.highlight_color = highlight_color
-        self.rect = pygame.Rect(x, y, w, h)
+        self.rect = pygame.Rect(x * get_ratio(), y * get_ratio(), w * get_ratio(), h * get_ratio())
         self.tam = tam
         self.font = pygame.font.Font('fonts/' + font + '.ttf', int(self.tam * get_ratio()))
         self.option_list = option_list
