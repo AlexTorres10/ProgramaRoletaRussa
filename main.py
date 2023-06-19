@@ -1806,6 +1806,7 @@ def configuracoes():
     global df_perguntas
     global nome_da_base
 
+    nome_inicial = nome_da_base
     limpa_tela(window)
     sons['start_game'].play()
     x = 60
@@ -1860,9 +1861,12 @@ def configuracoes():
                     pygame.mixer.music.set_volume(vol)
                     for som in sons.keys():
                         sons[som].set_volume(vol)
+
                     nome_da_base = base.option_list[base.selected]
-                    df_perguntas = pd.read_csv('base/'+nome_da_base, encoding='utf-8', sep=';')
-                    df_perguntas['used'] = False
+                    if nome_da_base != nome_inicial:
+                        df_perguntas = pd.read_csv('base/'+nome_da_base, encoding='utf-8', sep=';')
+                        df_perguntas['used'] = False
+                        nome_inicial = nome_da_base
                     config_salva = True
                 for i in range(len(tipos)):
                     opcoes_bot[i].update(ev)
