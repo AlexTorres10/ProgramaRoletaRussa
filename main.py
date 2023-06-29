@@ -1184,11 +1184,13 @@ def iniciar_jogo():
                                 if sair_do_jogo.check_click():
                                     pygame.mixer.stop()
                                     return
-                tempo_restante = int(ceil(time))
-                if tempo_restante < -3:
+
+                if time < -3:
                     tempo_restante = 0
-                elif tempo_restante < 0:
+                elif time < 0:
                     tempo_restante = 1
+                else:
+                    tempo_restante = int(ceil(time))
                 seg = Texto(str(tempo_restante), 'ArialBlack', 120, 428, 924)
                 seg.show_texto(window, 'center')
                 pygame.mixer.stop()
@@ -1225,6 +1227,26 @@ def iniciar_jogo():
                                     loop_jogo = False
                                 if ev.key == pygame.K_F1:
                                     time_limit = 40000
+                                if ev.key == pygame.K_a or ev.key == pygame.K_1 or ev.key == pygame.K_KP1:
+                                    blit_resposta_escolhida(pergunta, alternativas, 0)
+                                    resposta_escolhida = alternativas[0]
+                                    pos_resp_escolh = 1
+                                    respondeu = True
+                                if ev.key == pygame.K_b or ev.key == pygame.K_2 or ev.key == pygame.K_KP2:
+                                    blit_resposta_escolhida(pergunta, alternativas, 1)
+                                    resposta_escolhida = alternativas[1]
+                                    pos_resp_escolh = 2
+                                    respondeu = True
+                                if ev.key == pygame.K_c or ev.key == pygame.K_3 or ev.key == pygame.K_KP3:
+                                    blit_resposta_escolhida(pergunta, alternativas, 2)
+                                    resposta_escolhida = alternativas[2]
+                                    pos_resp_escolh = 3
+                                    respondeu = True
+                                if rodada >= 3:
+                                    if ev.key == pygame.K_d or ev.key == pygame.K_4 or ev.key == pygame.K_KP4:
+                                        blit_resposta_escolhida(pergunta, alternativas, 3)
+                                        resposta_escolhida = alternativas[3]
+                                        pos_resp_escolh = 4
                         time = pygame.time.get_ticks() - start
                         if time > time_limit:  # Botando 20 segundos até revelar
                             loop_jogo = False
@@ -1386,7 +1408,8 @@ def iniciar_jogo():
         # RODADA FINAL
         prompt_rever_quedas(window)
 
-        rodada=5
+        rodada = 5
+        jogadores = [Jogador('Eu', 3, 0)]
 
         finalista = get_leader(jogadores)  # O líder é logicamente o finalista!
         alavanca.update_image('img/alavanca1-0.png')
@@ -1484,7 +1507,7 @@ def iniciar_jogo():
                         if (ev.key == pygame.K_c or ev.key == pygame.K_3 or ev.key == pygame.K_KP3) and \
                                 (len(perguntas_da_final[num_pergunta]['alternativas']) == 3):
                             num_resposta = 3
-                if time > 15000:  # Espera 15 segundos para contar o tempo
+                if time > 20000:  # Espera 15 segundos para contar o tempo
                     loop_1pergunta = False
             else:
                 if time > 10000:
@@ -1513,6 +1536,7 @@ def iniciar_jogo():
         if finalista.tipo == 0:
             while loop_final:
                 if check_resposta:
+                    process_time = pygame.time.get_ticks()
                     opcoes = ['A', 'B', 'C']
                     num_resp_certa = opcoes.index(perguntas_da_final[num_pergunta]['certa']) + 1
                     if num_resposta == num_resp_certa:
@@ -1534,10 +1558,15 @@ def iniciar_jogo():
                         break
                     num_resposta = 0
                     check_resposta = False
+                    process_time = pygame.time.get_ticks() - process_time
+                    start += process_time
                 if num_certas == 8:
                     break
+                process_time_2 = pygame.time.get_ticks()
                 while perguntas_da_final[num_pergunta]['status']:
                     num_pergunta = (num_pergunta + 1) % 8
+                process_time_2 = pygame.time.get_ticks() - process_time_2
+                start += process_time_2
                 window.fill('black')
                 time = (60000 - (pygame.time.get_ticks() - start)) / 1000
                 seg = Texto(str(int(ceil(time))), 'ArialBlack', 120, 428, 924)
@@ -1593,14 +1622,14 @@ def iniciar_jogo():
                         if ev.key == pygame.K_RETURN:
                             check_resposta = True
                         if ev.key == pygame.K_p:
+                            process_time = pygame.time.get_ticks()
                             num_pergunta = (num_pergunta + 1) % 8
                             num_resposta = 0
                         if ev.key == pygame.K_a or ev.key == pygame.K_1 or ev.key == pygame.K_KP1:
                             num_resposta = 1
                         if ev.key == pygame.K_b or ev.key == pygame.K_2 or ev.key == pygame.K_KP2:
                             num_resposta = 2
-                        if (ev.key == pygame.K_c or ev.key == pygame.K_3 or ev.key == pygame.K_KP3) and \
-                                (len(perguntas_da_final[num_pergunta]['alternativas']) == 3):  # Perguntas de V ou F
+                        if ev.key == pygame.K_c or ev.key == pygame.K_3 or ev.key == pygame.K_KP3:
                             num_resposta = 3
                 # pygame.display.update()
         else:  # AQUI, O BOT RESPONDE
@@ -1785,9 +1814,11 @@ def iniciar_jogo():
         pygame.display.update()
         if finalista.tipo == 0:
             df_recordes = pd.read_json("records.json")
-            df_recordes = df_recordes.append({'nome': finalista.nome, 'dinheiro': finalista.dinheiro,
-                                              'dinheiro_antes_final': dinheiro_antes_final,
-                                              'final_certas': num_certas}, ignore_index=True, sort=False)
+            vencedor = {'nome': finalista.nome, 'dinheiro': finalista.dinheiro,
+                        'dinheiro_antes_final': dinheiro_antes_final,
+                        'final_certas': num_certas}
+            df_vencedor = pd.DataFrame(vencedor, index=[0])
+            df_recordes = pd.concat([df_recordes, df_vencedor], ignore_index=True)
             df_recordes = df_recordes.sort_values(by=['dinheiro', 'final_certas', 'dinheiro_antes_final'],
                                                   ascending=False)
             df_recordes = df_recordes.head(10)
@@ -1864,7 +1895,7 @@ def configuracoes():
 
                     nome_da_base = base.option_list[base.selected]
                     if nome_da_base != nome_inicial:
-                        df_perguntas = pd.read_csv('base/'+nome_da_base, encoding='utf-8', sep=';')
+                        df_perguntas = pd.read_csv('base/' + nome_da_base, encoding='utf-8', sep=';')
                         df_perguntas['used'] = False
                         nome_inicial = nome_da_base
                     config_salva = True
