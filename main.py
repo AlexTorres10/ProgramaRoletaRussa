@@ -40,9 +40,9 @@ def fadeout(width=1920, height=1080, img="img/Roleta_Russa.jpg"):
         pygame.display.update()
 
 
-def fadein(width=1920, height=1080, img="img/Roleta_Russa.jpg"):
+def fadein(width=1920, height=1080, img="img/Roleta_Russa.jpg", x=240, y=0):
     global window
-    rr_centro = Image(img, 240, 0)
+    rr_centro = Image(img, x, y)
     fade = pygame.Surface((width * get_ratio(), height * get_ratio()))
     fade.fill((0, 0, 0))
     for alpha in range(300, 0, -10):
@@ -1227,26 +1227,26 @@ def iniciar_jogo():
                                     loop_jogo = False
                                 if ev.key == pygame.K_F1:
                                     time_limit = 40000
-                                if ev.key == pygame.K_a or ev.key == pygame.K_1 or ev.key == pygame.K_KP1:
-                                    blit_resposta_escolhida(pergunta, alternativas, 0)
-                                    resposta_escolhida = alternativas[0]
-                                    pos_resp_escolh = 1
-                                    respondeu = True
-                                if ev.key == pygame.K_b or ev.key == pygame.K_2 or ev.key == pygame.K_KP2:
-                                    blit_resposta_escolhida(pergunta, alternativas, 1)
-                                    resposta_escolhida = alternativas[1]
-                                    pos_resp_escolh = 2
-                                    respondeu = True
-                                if ev.key == pygame.K_c or ev.key == pygame.K_3 or ev.key == pygame.K_KP3:
-                                    blit_resposta_escolhida(pergunta, alternativas, 2)
-                                    resposta_escolhida = alternativas[2]
-                                    pos_resp_escolh = 3
-                                    respondeu = True
-                                if rodada >= 3:
-                                    if ev.key == pygame.K_d or ev.key == pygame.K_4 or ev.key == pygame.K_KP4:
-                                        blit_resposta_escolhida(pergunta, alternativas, 3)
-                                        resposta_escolhida = alternativas[3]
-                                        pos_resp_escolh = 4
+                                # if ev.key == pygame.K_a or ev.key == pygame.K_1 or ev.key == pygame.K_KP1:
+                                #     blit_resposta_escolhida(pergunta, alternativas, 0)
+                                #     resposta_escolhida = alternativas[0]
+                                #     pos_resp_escolh = 1
+                                #     respondeu = True
+                                # if ev.key == pygame.K_b or ev.key == pygame.K_2 or ev.key == pygame.K_KP2:
+                                #     blit_resposta_escolhida(pergunta, alternativas, 1)
+                                #     resposta_escolhida = alternativas[1]
+                                #     pos_resp_escolh = 2
+                                #     respondeu = True
+                                # if ev.key == pygame.K_c or ev.key == pygame.K_3 or ev.key == pygame.K_KP3:
+                                #     blit_resposta_escolhida(pergunta, alternativas, 2)
+                                #     resposta_escolhida = alternativas[2]
+                                #     pos_resp_escolh = 3
+                                #     respondeu = True
+                                # if rodada >= 3:
+                                #     if ev.key == pygame.K_d or ev.key == pygame.K_4 or ev.key == pygame.K_KP4:
+                                #         blit_resposta_escolhida(pergunta, alternativas, 3)
+                                #         resposta_escolhida = alternativas[3]
+                                #         pos_resp_escolh = 4
                         time = pygame.time.get_ticks() - start
                         if time > time_limit:  # Botando 20 segundos até revelar
                             loop_jogo = False
@@ -1409,7 +1409,6 @@ def iniciar_jogo():
         prompt_rever_quedas(window)
 
         rodada = 5
-        jogadores = [Jogador('Eu', 3, 0)]
 
         finalista = get_leader(jogadores)  # O líder é logicamente o finalista!
         alavanca.update_image('img/alavanca1-0.png')
@@ -1504,10 +1503,9 @@ def iniciar_jogo():
                             num_resposta = 1
                         if ev.key == pygame.K_b or ev.key == pygame.K_2 or ev.key == pygame.K_KP2:
                             num_resposta = 2
-                        if (ev.key == pygame.K_c or ev.key == pygame.K_3 or ev.key == pygame.K_KP3) and \
-                                (len(perguntas_da_final[num_pergunta]['alternativas']) == 3):
+                        if ev.key == pygame.K_c or ev.key == pygame.K_3 or ev.key == pygame.K_KP3:
                             num_resposta = 3
-                if time > 20000:  # Espera 15 segundos para contar o tempo
+                if time > 20000:
                     loop_1pergunta = False
             else:
                 if time > 10000:
@@ -1565,11 +1563,7 @@ def iniciar_jogo():
                 process_time_2 = pygame.time.get_ticks()
                 while perguntas_da_final[num_pergunta]['status']:
                     num_pergunta = (num_pergunta + 1) % 8
-                process_time_2 = pygame.time.get_ticks() - process_time_2
-                start += process_time_2
                 window.fill('black')
-                time = (60000 - (pygame.time.get_ticks() - start)) / 1000
-                seg = Texto(str(int(ceil(time))), 'ArialBlack', 120, 428, 924)
                 qtd_certas = Texto(str(int(num_certas)) + '/8', 'FreeSansBold', 90, 150, 960)
 
                 if time < 0:  # Se não responde...
@@ -1582,6 +1576,10 @@ def iniciar_jogo():
                     qtd_buracos_abertos += 1
                     pygame.time.delay(100)
 
+                process_time_2 = pygame.time.get_ticks() - process_time_2
+                start += process_time_2
+                time = (60000 - (pygame.time.get_ticks() - start)) / 1000
+                seg = Texto(str(int(ceil(time))), 'ArialBlack', 120, 428, 924)
                 blit_all(sair_do_jogo, essentials, jogadores)
                 blit_pergunta(perguntas_da_final[num_pergunta]['pergunta'], final=True)
 
