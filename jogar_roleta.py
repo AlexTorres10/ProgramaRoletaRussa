@@ -15,8 +15,15 @@ buraco = pygame.image.load("img/buraco.png")
 buraco = pygame.transform.smoothscale(buraco, (int(buraco.get_width() * get_ratio()),
                                                int(buraco.get_height() * get_ratio())))
 
+assim = pygame.image.load("img/assim_o.png")
+assim = pygame.transform.smoothscale(assim, (int(assim.get_width() * get_ratio()),
+                                             int(assim.get_height() * get_ratio())))
 
-                    #0          #1          #2            #3         #4        #5
+rlt = pygame.image.load("img/roleta_0.png")
+rlt = pygame.transform.smoothscale(rlt, (int(rlt.get_width() * get_ratio()),
+                                         int(rlt.get_height() * get_ratio())))
+
+# 0          #1          #2            #3         #4        #5
 pos_buracos = [(1062, 370), (884, 466), (717, 370), (717, 180), (884, 80), (1062, 180)]
 for i in range(len(pos_buracos)):
     pos_buracos[i] = (int(pos_buracos[i][0] * get_ratio()), int(pos_buracos[i][1] * get_ratio()))
@@ -54,14 +61,15 @@ def queda(window, list_vermelhos, jogador, c='caiu'):
 
 
 def assim_o(window):
-    global vermelho
-    global caiu
+    global assim
+    global rlt
     global pos_buracos
 
-    assim = Texto('ASSIM, Ó!', 'FreeSansBold', 140, 960, 820)
-    assim.show_texto(window, align='center')
+    assim_txt = Texto('ASSIM, Ó!', 'FreeSansBold', 140, 960, 820)
+    assim_txt.show_texto(window, align='center')
     pygame.display.update()
+    window.blit(rlt, (660 * get_ratio(), 50 * get_ratio()))
 
-    window.blit(caiu, pos_buracos[0])
+    window.blit(assim, pos_buracos[0])
 
     pygame.display.update()
