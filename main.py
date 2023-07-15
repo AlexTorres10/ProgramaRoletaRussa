@@ -1726,6 +1726,7 @@ def iniciar_jogo():
             sons['escapou'].play()
             sons['aplausos2'].play()
             finalista.dinheiro = finalista.dinheiro + 5000 * num_certas + 10000
+            roleta.update_image('img/roleta.png')
             blit_all(sair_do_jogo, essentials, jogadores)
             blit_varios_buracos(buracos_abertos_final[1:qtd_buracos_abertos + 1], c='final')
             pygame.display.update()
