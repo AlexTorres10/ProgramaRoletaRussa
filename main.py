@@ -64,7 +64,7 @@ def comeco_jogo():
 
 
 def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 1, 0),
-                 sons={}, jogadores=[], final=False, rodada=0, pergunta=0):
+                 sons={}, jogadores=[], final=False):
     global sair_do_jogo
     global essentials
     global window
@@ -108,8 +108,8 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                     if events.type == pygame.KEYDOWN:
                         if events.key == pygame.K_SPACE:
                             return para_roleta('normal', alav, vermelhos=vermelhos, jogador_em_risco=jogador_em_risco,
-                                               sons=sons, jogadores=jogadores, final=final, rodada=rodada,
-                                               pergunta=pergunta, giros=giros, vermelhos_iniciais=vermelhos_iniciais)
+                                               sons=sons, jogadores=jogadores, final=final, giros=giros,
+                                               vermelhos_iniciais=vermelhos_iniciais)
         else:
             jogando_roleta = uniform(1, 3)
             start = pygame.time.get_ticks()
@@ -126,8 +126,8 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                 giros += 1
                 if segundos > jogando_roleta:
                     return para_roleta('normal', alav, vermelhos=vermelhos, jogador_em_risco=jogador_em_risco,
-                                       sons=sons, jogadores=jogadores, final=final, rodada=rodada,
-                                       pergunta=pergunta, giros=giros, vermelhos_iniciais=vermelhos_iniciais)
+                                       sons=sons, jogadores=jogadores, final=final, giros=giros,
+                                       vermelhos_iniciais=vermelhos_iniciais)
     elif modo == 'carrasco':
         em_risco = get_em_risco(jogadores)
         pos_risco = randrange(len(em_risco))
@@ -261,8 +261,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
 
 
 def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogador_em_risco=Jogador('Zé', 1, 0),
-                jog_comeca=Jogador('Zé', 1, 0), sons={}, jogadores=[], final=False, rodada=0, pergunta=0, giros=0,
-                vermelhos_iniciais=[]):
+                jog_comeca=Jogador('Zé', 1, 0), sons={}, jogadores=[], final=False, giros=0,vermelhos_iniciais=[]):
     global window
     global essentials
     global sair_do_jogo
@@ -319,23 +318,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 quedas.append({'modo': 'normal', 'vermelhos': vermelhos,
                                'jog_eliminado': jogadores_aux[jogador_em_risco.pos - 1],
                                'jogadores': jogadores_aux, 'giros_dramaticos': giros_dramaticos,
-                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais, 'giros': giros,
-                               'vermelhos_iniciais': vermelhos_iniciais})
-                jogador_em_risco.eliminar(jogadores)
-                blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco)
-                return True
-            elif rodada == 4 and pergunta == 5:
-                print("Foi o caso de forçar a queda!")
-                sons['zonas_de_risco'].play(0)
-                vermelhos = [(v + 1) % 6 for v in vermelhos]
-                blit_vermelho(sair_do_jogo, essentials, jogadores, vermelhos)
-                pygame.time.delay(1200)
-                sons['queda'].play(0)
-                jogadores_aux = copy_jogadores(jogadores)
-                quedas.append({'modo': 'normal', 'vermelhos': vermelhos,
-                               'jog_eliminado': jogadores_aux[jogador_em_risco.pos - 1],
-                               'jogadores': jogadores_aux, 'giros_dramaticos': giros_dramaticos,
-                               'giros_para_parar': giros_para_parar, 'giros_a_mais': giros_a_mais + 1, 'giros': giros,
+                               'giros_para_parar': giros_para_parar, 'giros': giros,
                                'vermelhos_iniciais': vermelhos_iniciais})
                 jogador_em_risco.eliminar(jogadores)
                 blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco)
@@ -456,7 +439,6 @@ def mostra_quedas():
                 blit_all(sair_do_jogo, essentials, q['jogadores'])
                 alav.update_image('img/alavanca1-' + str(i) + '.png')
                 pygame.display.update()
-
 
             vermelhos_aux = q['vermelhos_iniciais']
             for i in range(q['giros']):
@@ -1281,8 +1263,7 @@ def iniciar_jogo():
                                 if ev.key == pygame.K_SPACE:
                                     pygame.mixer.stop()
                                     caiu_ou_nao = jogar_roleta('normal', alavanca, num_pergunta + 1, escolhido,
-                                                               sons, jogadores, rodada=rodada,
-                                                               pergunta=num_pergunta + 1)
+                                                               sons, jogadores)
                                     loop = False
                                 if ev.key == pygame.K_RETURN and escolhido.tipo != 0:
                                     joga_roleta = True
@@ -1290,8 +1271,7 @@ def iniciar_jogo():
                                     time_limit *= 10
                         if (segundos > time_limit and escolhido.tipo != 0) or (joga_roleta and escolhido.tipo != 0):
                             pygame.mixer.stop()
-                            caiu_ou_nao = jogar_roleta('normal', alavanca, num_pergunta + 1, escolhido,
-                                                       sons, jogadores, rodada=rodada, pergunta=num_pergunta + 1)
+                            caiu_ou_nao = jogar_roleta('normal', alavanca, num_pergunta + 1, escolhido, sons, jogadores)
                             loop = False
 
                     if caiu_ou_nao:
