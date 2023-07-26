@@ -161,7 +161,7 @@ class Jogador:
                 else:
                     return 0, tempo_final - uniform(3.5, 6.5)
 
-    def bot_escolhe(self, escolhas, lider, nao_respondeu, rodada, pergunta):
+    def bot_escolhe(self, escolhas, lider, nao_respondeu, nao_respondeu_nunca, rodada, pergunta):
         if rodada == 4 and pergunta == 5:  # Se estiver na última pergunta
             outro = [esc for esc in escolhas if esc != self][0]
             if abs(self.dinheiro - outro.dinheiro) > 2500:
@@ -179,7 +179,13 @@ class Jogador:
                         escolhas.append(nr)
                         escolhas.append(nr)
                         escolhas.append(nr)
-            if lider is not None and lider != self:  # Se temos um líder e não é o bot
+            for nr in nao_respondeu_nunca:
+                if rodada > 1:
+                    if nr in escolhas:
+                        escolhas.append(nr)
+                        escolhas.append(nr)
+                        escolhas.append(nr)
+            if lider is not None and lider != self:  # Se temos um líder e não é o bot desafiante
                 escolhas.append(lider)  # Ele terá um peso a mais para ser escolhido. É o líder.
             if self.dinheiro == 0 and lider is not None:  # Se tá sem grana, tem mais tendência a perguntar ao líder!
                 escolhas.append(lider)

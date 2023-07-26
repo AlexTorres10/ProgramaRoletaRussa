@@ -1,5 +1,3 @@
-import pygame
-
 from display import *
 from jogador import *
 from jogar_roleta import *
@@ -726,7 +724,7 @@ def seleciona_pergunta(rodada):
                         df_aux['alternativa_2'], df_aux['alternativa_3']]
         alt_aux = [df_aux['resposta_certa'], df_aux['alternativa_1'],
                    df_aux['alternativa_2'], df_aux['alternativa_3']]
-        if df_aux['embaralhar'] == 'N':
+        if len(df_aux['embaralhar']) < 3:
             shuffle(alternativas)
         else:
             for option, i in zip(df_aux['embaralhar'], range(len(alternativas))):
@@ -900,6 +898,7 @@ def iniciar_jogo():
 
     roleta.update_image('img/roleta.png')
     pygame.display.update()
+    nao_respondeu_nunca = [pl for pl in jogadores if not pl.eliminado]
     loop_jogo = True
     while loop_jogo:
         # RODADAS ELIMINATÓRIAS
@@ -1003,12 +1002,14 @@ def iniciar_jogo():
                 else:
                     wait_until_enter(5)
                     escolhido = desafiante.bot_escolhe(get_escolhas(jogadores, desafiante), get_leader(jogadores),
-                                                       nao_respondeu, rodada, num_pergunta + 1)
+                                                       nao_respondeu, nao_respondeu_nunca, rodada, num_pergunta + 1)
                     # num_pergunta vai de 0 a 4
                 if escolhido is None:
                     return
                 if escolhido in nao_respondeu:
                     nao_respondeu.remove(escolhido)
+                if escolhido in nao_respondeu_nunca:
+                    nao_respondeu_nunca.remove(escolhido)
 
                 roleta.update_image("img/roleta_" + str(escolhido.pos) + ".png")
                 blit_all(sair_do_jogo, essentials, jogadores)
@@ -1423,7 +1424,6 @@ def iniciar_jogo():
 
         img_pergunta.update_image('img/pergunta_espera.png')
         loop_1pergunta = True
-        resposta = None
 
         buracos_abertos_final = [2, 3, 4, 5, 0, 1]
         qtd_buracos_abertos = 0
@@ -1828,7 +1828,6 @@ def configuracoes():
     main_loc = bases.index(nome_da_base)
     base = OptionBox(900, 220, 400, 45, (25, 25, 25), (120, 120, 120), option_list=bases, selected=main_loc)
     loop_config = True
-    selecionada = None
 
     salvar = Botao('Salvar configurações', 1880, 880, align='topright')
     while loop_config:
