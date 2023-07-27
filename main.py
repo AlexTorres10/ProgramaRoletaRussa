@@ -259,7 +259,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
 
 
 def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogador_em_risco=Jogador('Zé', 1, 0),
-                jog_comeca=Jogador('Zé', 1, 0), sons={}, jogadores=[], final=False, giros=0,vermelhos_iniciais=[]):
+                jog_comeca=Jogador('Zé', 1, 0), sons={}, jogadores=[], final=False, giros=0, vermelhos_iniciais=[]):
     global window
     global essentials
     global sair_do_jogo
