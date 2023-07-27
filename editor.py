@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 from tkinter.font import Font
 from random import randint
 from tkinter import filedialog
+
 try:
     df = pd.read_csv("base/main.csv", sep=';', encoding='utf-8')
 except FileNotFoundError:
@@ -70,12 +71,12 @@ def pergunta_selecionada(event):
     selected_index = listbox.curselection()
 
     if len(selected_index) == 1:
-        pergunta = listbox.get(selected_index[0])
-        print(pergunta)
+        pergunta = listbox.get(selected_index[0]).strip()
 
         texto_restante = ''
         search_results = df[df['pergunta'].str.contains(pergunta)][['pergunta', 'resposta_certa', 'alternativa_1',
                                                                     'alternativa_2', 'alternativa_3', 'alternativas']]
+
         row = search_results.iloc[0]
         combobox.current(row['alternativas'] - 3)
         for entry in entries[:-1]:
@@ -98,7 +99,7 @@ def pergunta_selecionada(event):
         else:
             alternativa_3_entry.delete(0, tk.END)
             alternativa_3_entry.configure(state='disabled')
-            perg_split = row['pergunta'].split('. ')[1].split('<br>')
+            perg_split = row['pergunta'].split('. ', 1)[1].split('<br>')
             perg = perg_split[0]
             if len(perg_split) > 1:
                 texto_restante = '<br>' + perg_split[1]
@@ -319,7 +320,7 @@ listbox_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 entry_frame = tk.Frame(root)
 pergunta_label = tk.Label(entry_frame, text="Pergunta:", font=Font(size=12))
 pergunta_label.grid(row=0, column=0, sticky="w")
-pergunta_entry = tk.Entry(entry_frame, width=45, font=Font(size=12), state='disabled')
+pergunta_entry = tk.Entry(entry_frame, width=50, font=Font(size=12), state='disabled')
 pergunta_entry.grid(row=0, column=1)
 obs_label = tk.Label(entry_frame, text="Obs.: Use '<br>' para fazer a quebra de linha.",
                      font=Font(size=9, slant='italic'))
@@ -365,19 +366,20 @@ canvas.pack()
 
 # load the image and create a PhotoImage object from it
 image = Image.open("img/pergunta_espera.png")
-image = image.resize((int(image.width * 0.5), int(image.height * 0.5)))
+image = image.resize((int(image.width * 0.46), int(image.height * 0.46)))
 photo = ImageTk.PhotoImage(image)
 
 # add the image to the canvas
 canvas.create_image(0, 0, anchor="nw", image=photo)
 
 # add text to the image
-perg_img = canvas.create_text(125, 60, text="Lorem ipsum", font=("FreeSans", 13), fill='white', anchor="nw")
-perg_img_2 = canvas.create_text(125, 80, text="Lorem ipsum", font=("FreeSans", 13), fill='white', anchor="nw")
-perg_alt1 = canvas.create_text(125, 120, text="A: Dolor cit amet", font=("FreeSans", 13), fill='white', anchor="nw")
-perg_alt2 = canvas.create_text(400, 120, text="B: Consectetur", font=("FreeSans", 13), fill='white', anchor="nw")
-perg_alt3 = canvas.create_text(125, 145, text="C: Adpiscing elit", font=("FreeSans", 13), fill='white', anchor="nw")
-perg_alt4 = canvas.create_text(400, 145, text="D: Duis efficitur", font=("FreeSans", 13), fill='white', anchor="nw")
+tam_fonte = 13
+perg_img = canvas.create_text(115, 55, text="Lorem ipsum", font=("FreeSans", tam_fonte), fill='white', anchor="nw")
+perg_img_2 = canvas.create_text(115, 75, text="Lorem ipsum", font=("FreeSans", tam_fonte), fill='white', anchor="nw")
+perg_alt1 = canvas.create_text(115, 100, text="A: Dolor cit amet", font=("FreeSans", tam_fonte), fill='white', anchor="nw")
+perg_alt2 = canvas.create_text(370, 100, text="B: Consectetur", font=("FreeSans", tam_fonte), fill='white', anchor="nw")
+perg_alt3 = canvas.create_text(115, 125, text="C: Adpiscing elit", font=("FreeSans", tam_fonte), fill='white', anchor="nw")
+perg_alt4 = canvas.create_text(370, 125, text="D: Duis efficitur", font=("FreeSans", tam_fonte), fill='white', anchor="nw")
 all_canvas = [perg_img, perg_img_2, perg_alt1, perg_alt2, perg_alt3, perg_alt4]
 
 # create the buttons
