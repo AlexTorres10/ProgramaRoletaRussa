@@ -151,7 +151,7 @@ class Jogador:
                 # Retorna o chute (A, B, C, D) e o tempo para responder
                 return alternativas.index(chute)+1, randint(1, 12)
             else:
-                limiar_chute = randint(20, 50)
+                limiar_chute = randint(25, 55)
 
                 # Pode ser que o chute seja mais cedo ou mais tarde. Decidi fazer um limiar variável.
                 if tempo_final < limiar_chute or certas == 7:

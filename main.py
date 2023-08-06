@@ -1,3 +1,5 @@
+import pygame
+
 from display import *
 from jogador import *
 from jogar_roleta import *
@@ -474,7 +476,7 @@ def mostra_quedas():
             q['jog_eliminado'].eliminar(q['jogadores'])
             blit_queda(sair_do_jogo, essentials, q['jogadores'], q['vermelhos'], q['jog_eliminado'])
 
-            wait_until_enter(int(sons['queda'].get_length() + 1))
+            wait_until_enter(int(sons['queda'].get_length()))
         else:
             essentials[0].update_image('img/roleta.png')
             alav.update_image('img/alavanca2-0.png')
@@ -528,7 +530,7 @@ def mostra_quedas():
 
                 q['jog_eliminado'].eliminar(q['jogadores'])
                 blit_queda(sair_do_jogo, essentials, q['jogadores'], q['vermelhos'], q['jog_eliminado'])
-                wait_until_enter(int(sons['queda'].get_length() + 1))
+                wait_until_enter(int(sons['queda'].get_length()))
             else:
                 wait_until_enter(1.5)
                 for i in range(12, -1, -1):
@@ -541,14 +543,14 @@ def mostra_quedas():
                 blit_varios_buracos([q['jog_eliminado'].pos], c='rodada4')
                 pygame.mixer.stop()
                 sons['queda'].play(0)
-                wait_until_enter(int(sons['queda'].get_length() + 1))
+                wait_until_enter(int(sons['queda'].get_length()))
         sons['tema'].play()
     pygame.mixer.stop()
     sons['rever_quedas'].play()
     rr_quedas = Image('img/rr_quedas.png', 0, 0)
     rr_quedas.draw(window)
     pygame.display.update()
-    wait_until_enter(int(sons['rever_quedas'].get_length() + 1))
+    wait_until_enter(int(sons['rever_quedas'].get_length()))
     essentials[0].update_image("img/roleta_inicio.png")
 
 
@@ -1306,8 +1308,12 @@ def iniciar_jogo():
                                              jogadores, img_pergunta)
                     pygame.display.update()
                     desafiante = escolhido
+                    wait_until_enter(2)
                 if not jog_eliminado:
-                    wait_until_enter(3)  # Tempo de espera para próxima pergunta
+                    roleta.update_image('img/roleta.png')
+                    blit_all(sair_do_jogo, essentials, jogadores)
+                    pygame.display.update()
+                    wait_until_enter(1)  # Tempo de espera para próxima pergunta
             if not jog_eliminado:
                 roleta.update_image('img/roleta.png')
                 blit_all(sair_do_jogo, essentials, jogadores)
@@ -1729,7 +1735,7 @@ def iniciar_jogo():
             blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos + 1])
             pygame.display.update()
 
-            wait_until_enter(int(sons['queda'].get_length() + 1))
+            wait_until_enter(int(sons['queda'].get_length()))
         else:
             sons['escapou'].play()
             sons['aplausos2'].play()
@@ -1779,7 +1785,7 @@ def iniciar_jogo():
                 wait_until_enter(int(sons['vitoria'].get_length()))
             else:
                 sons['queda'].play()
-                wait_until_enter(int(sons['queda'].get_length()) + 1)
+                wait_until_enter(int(sons['queda'].get_length()))
         pygame.mixer.stop()
         sons['tema'].play()
         if errou:
@@ -1811,7 +1817,7 @@ def iniciar_jogo():
                                                   ascending=False)
             df_recordes = df_recordes.head(10)
             df_recordes.to_json("records.json", orient="records")
-        wait_until_enter(120)
+        wait_until_enter(150)
         for som in sons.keys():
             sons[som].stop()
         return
@@ -2249,6 +2255,7 @@ pygame.mixer.music.set_volume(vol)
 main_loop = True
 pos_show = 0
 show_player = False
+
 while main_loop:
     quedas = []
     window.fill('black')
