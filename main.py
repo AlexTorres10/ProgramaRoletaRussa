@@ -888,6 +888,7 @@ def iniciar_jogo():
     # VAI COMEÇAR O ROLETA RUSSA!
     pygame.mixer.stop()
     sons['tema'].stop()
+    sons['prejogo'].play()
     comeco_jogo()
     pygame.display.update()
     wait_until_enter(5)
