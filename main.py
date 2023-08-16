@@ -505,8 +505,6 @@ def mostra_quedas():
                 comeca = q['vermelhos_iniciais'][0]
                 sons['jogando_roleta'].play(0)
 
-                # giros = 78 - (q['giros_para_parar'] % 6)
-
                 for i in range(q['giros']):
                     comeca = (comeca + 1) % 6  # São 6 buracos
                     blit_vermelho(sair_do_jogo, essentials, q['jogadores'], [comeca])
@@ -556,10 +554,11 @@ def mostra_quedas():
                 blit_queda(sair_do_jogo, essentials, q['jogadores'], [], q['jog_eliminado'])
                 blit_varios_buracos([q['jog_eliminado'].pos], c='rodada4')
                 pygame.mixer.stop()
-                sons['queda'].play(0)
+                sons['queda'].play()
                 wait_until_enter(int(sons['queda'].get_length()))
         sons['tema'].play()
     pygame.mixer.stop()
+    wait_until_enter(1)
     sons['rever_quedas'].play()
     rr_quedas = Image('img/rr_quedas.png', 0, 0)
     rr_quedas.draw(window)
@@ -801,7 +800,7 @@ def wait_until_enter(segundos, mus=''):
     global sair_do_jogo
     loop_jogo = True
     start = pygame.time.get_ticks()
-
+    pygame.event.clear()
     while loop_jogo:
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
@@ -837,7 +836,6 @@ def wait_until_enter(segundos, mus=''):
         time = pygame.time.get_ticks() - start
         if time > (segundos * 1000):
             loop_jogo = False
-        pygame.event.clear()
 
 
 def get_pulso(pulso_anterior):
@@ -1309,7 +1307,7 @@ def iniciar_jogo():
 
                     if caiu_ou_nao:
                         jog_eliminado = True
-                        wait_until_enter(int(sons['queda'].get_length()))
+                        wait_until_enter(int(sons['queda'].get_length()-1))
                         sons['tema'].play()
                     else:
                         wait_until_enter(int(sons['escapou'].get_length() - 3))
@@ -1407,7 +1405,7 @@ def iniciar_jogo():
                                     if ev.key == pygame.K_F4:
                                         pygame.mixer.stop()
                                         sons['final_inicio'].play()
-                wait_until_enter(int(sons['queda'].get_length()))
+                wait_until_enter(int(sons['queda'].get_length()-1))
                 if lider is not None:
                     lider.change_pos(lider.pos)
                 sons['tema'].play()
