@@ -892,6 +892,7 @@ def iniciar_jogo():
     wait_until_enter(5)
 
     blit_all(sair_do_jogo, essentials, jogadores)
+    pygame.mixer.stop()
     sons['buraco_abre'].play()
     assim_o(window)
     wait_until_enter(3)
