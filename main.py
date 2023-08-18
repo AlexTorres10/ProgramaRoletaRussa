@@ -557,8 +557,8 @@ def mostra_quedas():
                 sons['queda'].play()
                 wait_until_enter(int(sons['queda'].get_length()))
         sons['tema'].play()
-    pygame.mixer.stop()
     wait_until_enter(1)
+    pygame.mixer.stop()
     sons['rever_quedas'].play()
     rr_quedas = Image('img/rr_quedas.png', 0, 0)
     rr_quedas.draw(window)
@@ -1314,14 +1314,16 @@ def iniciar_jogo():
                         wait_until_enter(int(sons['escapou'].get_length() - 3))
                         desafiante = escolhido
                 else:
-                    wait_until_enter(2)
+                    wait_until_enter(0.5)
                     blit_all(sair_do_jogo, essentials, jogadores)
+                    pygame.display.update()
+                    wait_until_enter(2)
                     img_pergunta.update_image('img/grana.png')
                     img_pergunta.draw(window)
                     txt_dinheiro = Texto('R$ ' + str(escolhido.dinheiro), 'ArialBlack', 120, 960, 910)
                     txt_dinheiro.show_texto(window, 'center')
                     pygame.display.update()
-                    wait_until_enter(3)
+                    wait_until_enter(1)
                     sons['dinheiro'].play(0)
                     escolhido.ganha_dinheiro(dinheiro_rodada[rodada - 1], window, sair_do_jogo, essentials,
                                              jogadores, img_pergunta)
@@ -2258,7 +2260,7 @@ creditos = Botao('Créditos', 1850, 850)
 sair = Botao('Sair', 1850, 950)
 sair_do_jogo = Botao('Sair do jogo', 10, 10, tam=30, align='topleft')
 volta_menu = Botao('Voltar para o menu', 10, 10, tam=30, align='topleft')
-versao_do_jogo = Texto('Versão 3.3', 'FreeSansBold', 48, 40, 1000)
+versao_do_jogo = Texto('Versão 3.2.1', 'FreeSansBold', 48, 40, 1000)
 
 img_pergunta = Image('img/pergunta_espera.png', 310, 680)
 
