@@ -277,7 +277,7 @@ def save_database():
     )
 
     if file_path:
-        df.to_csv(file_path, sep=';', index=False)
+        df.to_csv(file_path, sep=';', encoding='utf-8', index=False)
         messagebox.showinfo("Base salva", "A base de perguntas foi salva.")
 
 
