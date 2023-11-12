@@ -796,8 +796,9 @@ def seleciona_pergunta(rodada):
         pergunta = df_aux['pergunta']
         alternativas = [df_aux['resposta_certa'], df_aux['alternativa_1'], df_aux['alternativa_2']]
         alt_aux = [df_aux['resposta_certa'], df_aux['alternativa_1'], df_aux['alternativa_2']]
-        if df_aux['embaralhar'].isdigit():
-            for option, i in zip(df_aux['embaralhar'], range(len(alternativas))):
+        emb = str(df_aux['embaralhar'])
+        if emb.isdigit():
+            for option, i in zip(emb, range(len(alternativas))):
                 option = int(option)
                 alternativas[i] = alt_aux[option - 1]
         else:
@@ -814,12 +815,13 @@ def seleciona_pergunta(rodada):
                         df_aux['alternativa_2'], df_aux['alternativa_3']]
         alt_aux = [df_aux['resposta_certa'], df_aux['alternativa_1'],
                    df_aux['alternativa_2'], df_aux['alternativa_3']]
-        if len(df_aux['embaralhar']) < 3:
-            shuffle(alternativas)
-        else:
-            for option, i in zip(df_aux['embaralhar'], range(len(alternativas))):
+        emb = str(df_aux['embaralhar'])
+        if emb.isdigit():
+            for option, i in zip(emb, range(len(alternativas))):
                 option = int(option)
                 alternativas[i] = alt_aux[option - 1]
+        else:
+            shuffle(alternativas)
         df_perguntas.loc[df_perguntas['pergunta'] == pergunta, 'used'] = True
         return pergunta, alternativas, df_aux['resposta_certa']
     else:
@@ -921,7 +923,7 @@ def iniciar_jogo():
     fadeout()
     sons['aplausos2'].play()
     roleta.update_image('img/roleta_inicio.png')
-    img_dados.update_image('img/jogadores.png', x=355, y=583)
+    img_dados.update_image('img/jogadores.png')
     blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
     pygame.display.update()
     wait_until_enter(10)
