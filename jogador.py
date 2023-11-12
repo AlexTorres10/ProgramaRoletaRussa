@@ -36,6 +36,9 @@ class Jogador:
             s.show_texto(w)
             mostra_essentials(w, ess)
             mostra_jogadores(w, jog)
+            Texto('Responder - A, B, C, D ou 1, 2, 3, 4', 'FreeSans', 24, 5, 450).show_texto(w, 'topleft')
+            Texto('Jogar roleta - Espaço ou clique na alavanca', 'FreeSans', 24, 5, 480).show_texto(w, 'topleft')
+            Texto('Desafiar jogador - Clicar no ícone ou 1, 2, 3, 4 ou 5', 'FreeSans', 24, 5, 510).show_texto(w, 'topleft')
             pygame.time.delay(50)
             pygame.display.update()
         if outro_jogador.dinheiro > 0:
@@ -45,6 +48,9 @@ class Jogador:
             s.show_texto(w)
             mostra_essentials(w, ess)
             mostra_jogadores(w, jog)
+            Texto('Responder - A, B, C, D ou 1, 2, 3, 4', 'FreeSans', 24, 5, 450).show_texto(w, 'topleft')
+            Texto('Jogar roleta - Espaço ou clique na alavanca', 'FreeSans', 24, 5, 480).show_texto(w, 'topleft')
+            Texto('Desafiar jogador - Clicar no ícone ou 1, 2, 3, 4 ou 5', 'FreeSans', 24, 5, 510).show_texto(w, 'topleft')
             pygame.display.update()
 
         if (self.dinheiro % 10) >= 8:
@@ -53,6 +59,9 @@ class Jogador:
             s.show_texto(w)
             mostra_essentials(w, ess)
             mostra_jogadores(w, jog)
+            Texto('Responder - A, B, C, D ou 1, 2, 3, 4', 'FreeSans', 24, 5, 450).show_texto(w, 'topleft')
+            Texto('Jogar roleta - Espaço ou clique na alavanca', 'FreeSans', 24, 5, 480).show_texto(w, 'topleft')
+            Texto('Desafiar jogador - Clicar no ícone ou 1, 2, 3, 4 ou 5', 'FreeSans', 24, 5, 510).show_texto(w, 'topleft')
             pygame.display.update()
 
     def ganha_dinheiro(self, dinheiro, w, s, ess, jog, img_pergunta):
@@ -64,6 +73,9 @@ class Jogador:
             mostra_essentials(w, ess)
             mostra_jogadores(w, jog)
             img_pergunta.draw(w)
+            Texto('Responder - A, B, C, D ou 1, 2, 3, 4', 'FreeSans', 24, 5, 450).show_texto(w, 'topleft')
+            Texto('Jogar roleta - Espaço ou clique na alavanca', 'FreeSans', 24, 5, 480).show_texto(w, 'topleft')
+            Texto('Desafiar jogador - Clicar no ícone ou 1, 2, 3, 4 ou 5', 'FreeSans', 24, 5, 510).show_texto(w, 'topleft')
             txt_dinheiro = Texto('R$ ' + str(self.dinheiro), 'ArialBlack', 120, 960, 910)
             txt_dinheiro.show_texto(w, 'center')
             pygame.time.delay(50)
@@ -96,22 +108,34 @@ class Jogador:
                             if (pl.dinheiro % 10) >= 8:
                                 pl.dinheiro += (10 - (pl.dinheiro % 10))
 
-    def change_pos(self, nova_pos):
-        self.image = Image("img/number" + str(self.pos) + ".png", pos_players[nova_pos - 1][0],
-                           pos_players[nova_pos - 1][1])
+    def change_pos(self, nova_pos, fv=False):
+        if not fv:
+            self.image = Image("img/number" + str(self.pos) + ".png", pos_players[nova_pos - 1][0],
+                               pos_players[nova_pos - 1][1])
+        else:
+            self.image = Image("img/fv/milton.png", pos_players[nova_pos - 1][0], pos_players[nova_pos - 1][1])
 
-    def move_center(self, nova_pos=(910, 300)):
-        self.image = Image("img/number" + str(self.pos) + ".png", nova_pos[0], nova_pos[1])
+    def move_center(self, nova_pos=(910, 300), fv=False):
+        if not fv:
+            self.image = Image("img/number" + str(self.pos) + ".png", nova_pos[0], nova_pos[1])
+        else:
+            self.image = Image("img/fv/milton.png", nova_pos[0], nova_pos[1])
 
-    def display_nome(self, window):
+    def display_nome(self, window, fv=False):
         texto_nome = pygame.font.Font('fonts/FreeSansBold.ttf', self.tam_fonte).render(self.nome, True, (255, 255, 255))
-        text_rect = texto_nome.get_rect(center=pos_nome[self.pos - 1])
+        if not fv:
+            text_rect = texto_nome.get_rect(center=pos_nome[self.pos - 1])
+        else:
+            text_rect = texto_nome.get_rect(center=pos_nome[0])
         window.blit(texto_nome, text_rect)
 
-    def display_dinheiro(self, window):
+    def display_dinheiro(self, window, fv=False):
         texto_dinheiro = pygame.font.Font('fonts/FreeSans.ttf', self.tam_fonte).render("R$ " + str(self.dinheiro),
                                                                                        True, (255, 255, 255))
-        text_rect = texto_dinheiro.get_rect(center=pos_dinheiro[self.pos - 1])
+        if not fv:
+            text_rect = texto_dinheiro.get_rect(center=pos_dinheiro[self.pos - 1])
+        else:
+            text_rect = texto_dinheiro.get_rect(center=pos_dinheiro[0])
         window.blit(texto_dinheiro, text_rect)
 
     def bot_responde(self, rodada, pergunta_final='', alternativas='', resposta_certa='', tempo_final=0, certas=0,
@@ -197,11 +221,17 @@ class Jogador:
 
 
 def mostra_jogadores(window, jogadores):
-    for pl in jogadores:
-        if not pl.eliminado:
+    if len(jogadores) > 1:
+        for pl in jogadores:
+            if not pl.eliminado:
+                pl.image.draw(window)
+                pl.display_nome(window)
+                pl.display_dinheiro(window)
+    else:
+        for pl in jogadores:
             pl.image.draw(window)
-            pl.display_nome(window)
-            pl.display_dinheiro(window)
+            pl.display_nome(window, fv=True)
+            pl.display_dinheiro(window, fv=True)
 
 
 def copy_jogadores(jogadores):
