@@ -39,7 +39,7 @@ class Jogador:
             Texto('Responder - A, B, C, D ou 1, 2, 3, 4', 'FreeSans', 24, 5, 450).show_texto(w, 'topleft')
             Texto('Jogar roleta - Espaço ou clique na alavanca', 'FreeSans', 24, 5, 480).show_texto(w, 'topleft')
             Texto('Desafiar jogador - Clicar no ícone ou 1, 2, 3, 4 ou 5', 'FreeSans', 24, 5, 510).show_texto(w, 'topleft')
-            pygame.time.delay(50)
+            pygame.time.delay(45)
             pygame.display.update()
         if outro_jogador.dinheiro > 0:
             self.dinheiro += outro_jogador.dinheiro
@@ -78,16 +78,15 @@ class Jogador:
             Texto('Desafiar jogador - Clicar no ícone ou 1, 2, 3, 4 ou 5', 'FreeSans', 24, 5, 510).show_texto(w, 'topleft')
             txt_dinheiro = Texto('R$ ' + str(self.dinheiro), 'ArialBlack', 120, 960, 910)
             txt_dinheiro.show_texto(w, 'center')
-            pygame.time.delay(50)
+            pygame.time.delay(45)
             pygame.display.update()
 
     def mostra_dinheiro(self, w, img_pergunta):
-        for i in range(20):
-            img_pergunta.draw(w)
-            txt_dinheiro = Texto('R$ ' + str(self.dinheiro), 'ArialBlack', 120, 960, 910)
-            txt_dinheiro.show_texto(w, 'center')
-            pygame.time.delay(50)
-            pygame.display.update()
+        img_pergunta.draw(w)
+        txt_dinheiro = Texto('R$ ' + str(self.dinheiro), 'ArialBlack', 120, 960, 910)
+        txt_dinheiro.show_texto(w, 'center')
+        pygame.time.delay(50)
+        pygame.display.update()
 
     def eliminar(self, jogadores):
         self.eliminado = True
@@ -101,6 +100,8 @@ class Jogador:
                 for pl in jogadores:
                     if not pl.eliminado:
                         pl.dinheiro += dinheiro_repartido
+                        if (pl.dinheiro % 10) >= 8:
+                            pl.dinheiro += (10 - (pl.dinheiro % 10))
 
                 if count == 1:
                     for pl in jogadores:
@@ -130,7 +131,8 @@ class Jogador:
         window.blit(texto_nome, text_rect)
 
     def display_dinheiro(self, window, fv=False):
-        texto_dinheiro = pygame.font.Font('fonts/FreeSans.ttf', self.tam_fonte).render("R$ " + str(self.dinheiro),
+        dinheiro = f'{self.dinheiro:,.0f}'.replace(',', '.')
+        texto_dinheiro = pygame.font.Font('fonts/FreeSans.ttf', self.tam_fonte).render("R$ " + dinheiro,
                                                                                        True, (255, 255, 255))
         if not fv:
             text_rect = texto_dinheiro.get_rect(center=pos_dinheiro[self.pos - 1])
@@ -166,14 +168,14 @@ class Jogador:
                     if alt == resposta_certa:  # No momento em que tivermos a certa, ele para
                         break
                 # Retorna a resposta certa (1, 2, 3, 4) e o tempo para responder
-                return num_resposta, randint(2 * self.tipo, 15)
+                return num_resposta, uniform(2 * self.tipo, 15)
             else:
                 return respostas.index(pergunta_final['certa'])+1, tempo_final - uniform(3.5, 6.5)
         else:  # SE CHUTAR...
             if rodada < 5:
                 chute = choice(alternativas)
                 # Retorna o chute (A, B, C, D) e o tempo para responder
-                return alternativas.index(chute)+1, randint(1, 12)
+                return alternativas.index(chute)+1, uniform(1, 12)
             else:
                 limiar_chute = randint(25, 55)
 
@@ -242,16 +244,13 @@ def copy_jogadores(jogadores):
 
 
 def get_leader(jogadores):
-    qtd_lideres = 1
     maior_dinheiro = -1
     for pl in jogadores:
         if not pl.eliminado:
             if pl.dinheiro > maior_dinheiro:
-                qtd_lideres = 1
                 maior_dinheiro = pl.dinheiro
                 lider = pl
             elif pl.dinheiro == maior_dinheiro:
-                qtd_lideres += 1
                 lider = None
     return lider
 

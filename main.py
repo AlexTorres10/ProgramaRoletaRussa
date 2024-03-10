@@ -388,8 +388,8 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
 
         giros_para_parar = randint(5, 12)
         pos_final = (loc_vermelho + giros_para_parar) % 6
-        if ((eliminado.pos - pos_final) % 6) >= 3:
-            giros_para_parar = (giros_para_parar + 3) % 6 + 6
+        if ((eliminado.pos - pos_final) % 6) >= 2:
+            giros_para_parar = (giros_para_parar + 2) % 6 + 6
 
         for i in range(giros_para_parar):
             loc_vermelho = (loc_vermelho + 1) % 6
@@ -1064,7 +1064,11 @@ def iniciar_jogo():
             blit_vermelho(sair_do_jogo, essentials, jogadores, zonas_de_risco[num_pergunta])
             sons['question'].play(loops=5)
             pergunta, alternativas, resposta_certa = seleciona_pergunta(rodada)
-            wait_until_enter(3)  # Um tempinho de ‘suspense’
+            if num_pergunta >= 3:
+                wait_time = uniform(2, 9)
+            else:
+                wait_time = uniform(2, 5)
+            wait_until_enter(wait_time)  # Um tempinho de ‘suspense’
             roleta.update_image('img/roleta.png')
             img_pergunta.update_image('img/pergunta_espera.png')
             blit_all(sair_do_jogo, essentials, jogadores)
@@ -1073,10 +1077,11 @@ def iniciar_jogo():
             if desafiante.tipo == 0:
                 escolhido = passa_pra_quem(get_escolhas(jogadores, desafiante), sair_do_jogo)
             else:
-                wait_until_enter(5)
+                wait_time = uniform(5, 20)
+                wait_until_enter(wait_time)
+
                 escolhido = desafiante.bot_escolhe(get_escolhas(jogadores, desafiante), get_leader(jogadores),
                                                    nao_respondeu, nao_respondeu_nunca, rodada, num_pergunta + 1)
-                # num_pergunta vai de 0 a 4
             if escolhido is None:
                 return
             if escolhido in nao_respondeu:
@@ -1103,7 +1108,11 @@ def iniciar_jogo():
             start = pygame.time.get_ticks()
             # PASSOU PARA ALGUÉM — Mostra alternativas
             loop_jogo = True
-            time_limit = 10000 if escolhido.tipo == 0 else 5000
+            if rodada < 3:
+                wait_pc = 7000
+            else:
+                wait_pc = 11000
+            time_limit = 25000 if escolhido.tipo == 0 else wait_pc
             while loop_jogo:
                 blit_all(sair_do_jogo, essentials, jogadores)
                 blit_alternativas(pergunta, alternativas)
@@ -1257,7 +1266,21 @@ def iniciar_jogo():
             pygame.display.update()
 
             # Respondeu a pergunta!
-            time_limit = 20000 if escolhido.tipo == 0 else 5500
+            if tempo_restante >= 13:
+                time_limit = uniform(2, 6)*1000
+            elif tempo_restante >= 11:
+                time_limit = uniform(5, 15)*1000
+            else:
+                if rodada >= 3:
+                    if num_pergunta > 3:
+                        time_limit = uniform(10, 35)*1000
+                    else:
+                        time_limit = uniform(5, 15)*1000
+                else:
+                    if num_pergunta > 3:
+                        time_limit = uniform(10, 25)*1000
+                    else:
+                        time_limit = uniform(5, 15)*1000
             if respondeu:
                 sons['respondeu'].play(0)
                 start = pygame.time.get_ticks()
@@ -1304,8 +1327,7 @@ def iniciar_jogo():
             pygame.time.delay(1000)
             if resposta_escolhida != resposta_certa:
                 sons['bg_errado'].play(0)
-                wait_time = 10 if escolhido.tipo == 0 else 3
-                wait_until_enter(wait_time)
+                wait_until_enter(5)
                 if escolhido.dinheiro > 0:
                     sons['dinheiro'].play(0)
                     sons['aplausos1'].play()
@@ -1319,7 +1341,7 @@ def iniciar_jogo():
                                 outro_jogador = pl
                     outro_jogador.pega_dinheiro_do_outro(escolhido, window, sair_do_jogo, essentials, jogadores)
                 loop = True
-                wait_until_enter(3)
+                wait_until_enter(5)
                 sons['zonas_de_risco'].play(0)  # VOU DESTRAVAR AS ZONAS DE RISCO
                 start = pygame.time.get_ticks()
                 joga_roleta = False
@@ -1371,9 +1393,7 @@ def iniciar_jogo():
                 pygame.display.update()
                 wait_until_enter(2)
                 img_pergunta.update_image('img/grana.png')
-                img_pergunta.draw(window)
-                txt_dinheiro = Texto('R$ ' + str(escolhido.dinheiro), 'ArialBlack', 120, 960, 910)
-                txt_dinheiro.show_texto(window, 'center')
+                escolhido.mostra_dinheiro(window, img_pergunta)
                 pygame.display.update()
                 wait_until_enter(1)
                 sons['dinheiro'].play(0)

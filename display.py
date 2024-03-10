@@ -53,12 +53,7 @@ class Image:
         self.rect.x = self.posX
         self.rect.y = self.posY
 
-    def update_image(self, path, x=0, y=0):
-        if x != 0 and y != 0:
-            self.image = pygame.image.load(path)
-            self.rect = self.image.get_rect()
-            self.defaultx = (float(self.rect[2]) / DISPLAYS[0][0]) * 100
-            self.defaulty = (float(self.rect[3]) / DISPLAYS[0][1]) * 100
+    def update_image(self, path):
         self.image = image_rescaler(pygame.image.load(path), (self.defaultx, self.defaulty))
 
     def draw(self, window):

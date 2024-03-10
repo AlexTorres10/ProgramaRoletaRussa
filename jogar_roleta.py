@@ -60,12 +60,12 @@ def queda(window, list_vermelhos, jogador, c='caiu'):
     pygame.display.update()
 
 
-def assim_o(window):
+def assim_o(window, texto='ASSIM, Ó!'):
     global assim
     global rlt
     global pos_buracos
 
-    assim_txt = Texto('ASSIM, Ó!', 'FreeSansBold', 140, 960, 820)
+    assim_txt = Texto(texto, 'FreeSansBold', 140, 960, 820)
     assim_txt.show_texto(window, align='center')
     pygame.display.update()
     window.blit(rlt, (660 * get_ratio(), 50 * get_ratio()))
