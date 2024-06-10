@@ -116,7 +116,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                                                jogadores=jogadores, final=final, giros=giros,
                                                vermelhos_iniciais=vermelhos_iniciais)
         else:
-            jogando_roleta = uniform(1, 3)
+            jogando_roleta = uniform(0.5, 3)
             start = pygame.time.get_ticks()
             while not space:
                 segundos = (pygame.time.get_ticks() - start) / 1000
@@ -171,7 +171,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                                                    jogadores=jogadores, giros=giros,
                                                    vermelhos_iniciais=vermelhos_iniciais)
             else:
-                jogando_roleta = uniform(1, 4)
+                jogando_roleta = uniform(0.5, 4)
                 start = pygame.time.get_ticks()
                 while not space:
                     segundos = (pygame.time.get_ticks() - start) / 1000
@@ -629,8 +629,8 @@ def prompt_rever_quedas(w):
                     pygame.mixer.stop()
                     return
             if ev.type == pygame.KEYDOWN:
-                pygame.mixer.stop()
                 if ev.key == pygame.K_s:
+                    pygame.mixer.stop()
                     essentials[0].update_image('img/roleta.png')
                     rr_quedas = Image('img/rr_quedas.png', 0, 0)
                     rr_quedas.draw(w)
@@ -640,9 +640,10 @@ def prompt_rever_quedas(w):
                     wait_until_enter(int(sons['rever_quedas'].get_length()))
                     mostra_quedas()
                     sons['aplausos2'].play(0)
-                    loop = False
+                    return True
                 if ev.key == pygame.K_n:
-                    loop = False
+                    pygame.mixer.stop()
+                    return False
 
 
 def blit_all(s, ess, jogadores):
@@ -1859,6 +1860,8 @@ def iniciar_jogo():
         roleta.update_image('img/roleta.png')
         blit_all(sair_do_jogo, essentials, jogadores)
         blit_varios_buracos(buracos_abertos_final[1:qtd_buracos_abertos + 1], c='final')
+        img_pergunta.update_image("img/grana.png")
+        finalista.mostra_dinheiro(window, img_pergunta)
         pygame.display.update()
         wait_until_enter(int(sons['escapou'].get_length() - 3), mus='escapou')
 
@@ -2492,7 +2495,7 @@ creditos = Botao('Créditos', 1850, 850)
 sair = Botao('Sair', 1850, 950)
 sair_do_jogo = Botao('Sair do jogo', 10, 10, tam=30, align='topleft')
 volta_menu = Botao('Voltar para o menu', 10, 10, tam=30, align='topleft')
-versao_do_jogo = Texto('Versão 3.5', 'FreeSansBold', 48, 40, 1000)
+versao_do_jogo = Texto('Versão 3.6', 'FreeSansBold', 48, 40, 1000)
 
 img_pergunta = Image('img/pergunta_espera.png', 310, 680)
 
@@ -2512,39 +2515,3 @@ pygame.mixer.music.set_volume(vol)
 main_loop = True
 quedas = []
 menu_principal()
-
-
-# while main_loop:
-#     quedas = []
-#     window.fill('black')
-#     roleta_logo.draw(window)
-#
-#     iniciar.show_texto(window)
-#     fuja_verm.show_texto(window)
-#     config.show_texto(window)
-#     regras.show_texto(window)
-#     recordes.show_texto(window)
-#     creditos.show_texto(window)
-#     sair.show_texto(window)
-#     versao_do_jogo.show_texto(window, align='topleft')
-#
-#     pygame.display.update()
-#
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             main_loop = False
-#         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-#             if iniciar.check_click():
-#                 iniciar_jogo()
-#             if fuja_verm.check_click():
-#                 fuja_vermelho()
-#             if config.check_click():
-#                 configuracoes()
-#             if regras.check_click():
-#                 mostra_regras()
-#             if recordes.check_click():
-#                 mostra_recordes()
-#             if creditos.check_click():
-#                 mostra_creditos()
-#             if sair.check_click():
-#                 main_loop = False
