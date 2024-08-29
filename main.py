@@ -13,7 +13,17 @@ import random
 import sys
 import locale
 
-locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+try:
+    # Tente definir o locale no formato que é suportado no Windows
+    locale.setlocale(locale.LC_ALL, 'Portuguese_Brazil.1252')  # Tentativa com código de página específico
+    sem_locale = False
+except locale.Error:
+    try:
+        locale.setlocale(locale.LC_ALL, 'pt_BR')  # Tentativa sem a codificação
+        sem_locale = False
+    except locale.Error as e:
+        sem_locale = True
+        print("Não foi possível configurar o locale:", e)
 pygame.init()
 
 
@@ -646,15 +656,26 @@ def prompt_rever_quedas(w):
                     return False
 
 
-def blit_all(s, ess, jogadores):
+def blit_all(s, ess, jogadores, rodada=0):
     global window
     window.fill('black')
     s.show_texto(window)
     mostra_essentials(window, ess)
     mostra_jogadores(window, jogadores)
-    Texto('Responder - A, B, C, D ou 1, 2, 3, 4', 'FreeSans', 24, 5, 450).show_texto(window, 'topleft')
-    Texto('Jogar roleta - Espaço ou clique na alavanca', 'FreeSans', 24, 5, 480).show_texto(window, 'topleft')
-    Texto('Desafiar jogador - Clicar no ícone ou 1, 2, 3, 4 ou 5', 'FreeSans', 24, 5, 510).show_texto(window, 'topleft')
+    if rodada < 5:
+        Texto('Responder - A, B, C, D ou 1, 2, 3, 4',
+              'FreeSans', 24, 5, 450).show_texto(window, 'topleft')
+        Texto('Jogar roleta - Espaço ou clique na alavanca',
+              'FreeSans', 24, 5, 480).show_texto(window, 'topleft')
+        Texto('Desafiar jogador - Clicar no ícone ou 1, 2, 3, 4 ou 5',
+              'FreeSans', 24, 5, 510).show_texto(window, 'topleft')
+    else:
+        Texto('Responder - A, B, C ou 1, 2, 3',
+              'FreeSans', 24, 5, 450).show_texto(window, 'topleft')
+        Texto('Confirmar resposta - ENTER',
+              'FreeSans', 24, 5, 480).show_texto(window, 'topleft')
+        Texto('Passar a resposta - P',
+              'FreeSans', 24, 5, 510).show_texto(window, 'topleft')
 
 
 def blit_vermelho(s, ess, jogadores, vermelhos):
@@ -664,9 +685,6 @@ def blit_vermelho(s, ess, jogadores, vermelhos):
     mostra_essentials(window, ess)
     bota_vermelho(window, vermelhos)
     mostra_jogadores(window, jogadores)
-    Texto('Responder - A, B, C, D ou 1, 2, 3, 4', 'FreeSans', 24, 5, 450).show_texto(window, 'topleft')
-    Texto('Jogar roleta - Espaço ou clique na alavanca', 'FreeSans', 24, 5, 480).show_texto(window, 'topleft')
-    Texto('Desafiar jogador - Clicar no ícone ou 1, 2, 3, 4 ou 5', 'FreeSans', 24, 5, 510).show_texto(window, 'topleft')
     pygame.display.update()
 
 
@@ -677,9 +695,6 @@ def blit_azul(s, ess, jogadores, a):
     mostra_essentials(window, ess)
     bota_azul(window, a)
     mostra_jogadores(window, jogadores)
-    Texto('Responder - A, B, C, D ou 1, 2, 3, 4', 'FreeSans', 24, 5, 450).show_texto(window, 'topleft')
-    Texto('Jogar roleta - Espaço ou clique na alavanca', 'FreeSans', 24, 5, 480).show_texto(window, 'topleft')
-    Texto('Desafiar jogador - Clicar no ícone ou 1, 2, 3, 4 ou 5', 'FreeSans', 24, 5, 510).show_texto(window, 'topleft')
     pygame.display.update()
 
 
@@ -695,9 +710,6 @@ def blit_queda(s, ess, jogadores, vermelhos, jogador, final=False, rodada4=False
     else:
         queda(window, vermelhos, 2)
     mostra_jogadores(window, jogadores)
-    Texto('Responder - A, B, C, D ou 1, 2, 3, 4', 'FreeSans', 24, 5, 450).show_texto(window, 'topleft')
-    Texto('Jogar roleta - Espaço ou clique na alavanca', 'FreeSans', 24, 5, 480).show_texto(window, 'topleft')
-    Texto('Desafiar jogador - Clicar no ícone ou 1, 2, 3, 4 ou 5', 'FreeSans', 24, 5, 510).show_texto(window, 'topleft')
     pygame.display.update()
 
 
@@ -819,6 +831,7 @@ def seleciona_pergunta(rodada):
         else:
             shuffle(alternativas)
         df_perguntas.loc[df_perguntas['pergunta'] == pergunta, 'used'] = True
+
         return pergunta, alternativas, df_aux['resposta_certa']
     elif rodada <= 4:
         df = df[df['alternativas'] == 4]
@@ -925,7 +938,7 @@ def iniciar_jogo():
     df_jogadores = pd.read_json("players.json")
     jogadores = []
     zonas_de_risco = [[0], [0, 3], [0, 2, 4], [0, 2, 3, 4], [0, 1, 2, 3, 4]]
-    dinheiro_rodada = [1000, 1500, 2000, 2500, 5000]
+    dinheiro_rodada = [1000, 1200, 1500, 2000, 3000, 5000]
     qtd_alternativas = [3, 3, 4, 4]
 
     for n, i, tipo in zip(df_jogadores['nome'], range(1, 6), df_jogadores['tipo']):
@@ -942,7 +955,7 @@ def iniciar_jogo():
     blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
     pygame.display.update()
     wait_until_enter(10)
-    blit_all(sair_do_jogo, essentials, jogadores)
+    blit_all(sair_do_jogo, essentials, jogadores, 0)
 
     # VAI COMEÇAR O ROLETA RUSSA!
     pygame.mixer.stop()
@@ -952,7 +965,7 @@ def iniciar_jogo():
     pygame.display.update()
     wait_until_enter(5)
 
-    blit_all(sair_do_jogo, essentials, jogadores)
+    blit_all(sair_do_jogo, essentials, jogadores, 0)
     pygame.mixer.stop()
     sons['buraco_abre'].play()
     assim_o(window)
@@ -960,7 +973,7 @@ def iniciar_jogo():
 
     sons['start_game'].play(0)
     wait_until_enter(2)
-    blit_all(sair_do_jogo, essentials, jogadores)
+    blit_all(sair_do_jogo, essentials, jogadores, 0)
     frase_dist = ['Vamos distribuir R$ 1.000,00 para cada ', 'um no começo deste jogo e jogar a ',
                   'roleta para decidir quem começa jogando!']
     for i in range(len(frase_dist)):
@@ -979,7 +992,7 @@ def iniciar_jogo():
         jogadores[2].dinheiro += fatias
         jogadores[3].dinheiro += fatias
         jogadores[4].dinheiro += fatias
-        blit_all(sair_do_jogo, essentials, jogadores)
+        blit_all(sair_do_jogo, essentials, jogadores, 0)
         pygame.display.update()
         pygame.time.delay(50)
 
@@ -988,7 +1001,7 @@ def iniciar_jogo():
     nao_respondeu_nunca = [pl for pl in jogadores if not pl.eliminado]
     # RODADAS ELIMINATÓRIAS
     for rodada in range(1, 5):
-        blit_all(sair_do_jogo, essentials, jogadores)
+        blit_all(sair_do_jogo, essentials, jogadores, rodada)
         pygame.display.update()
 
         # Primeiro, veremos quem é líder
@@ -997,7 +1010,7 @@ def iniciar_jogo():
             # Se não há líder, jogamos a roleta para ver quem começa.
             alavanca.update_image('img/alavanca2-0.png')
             roleta.update_image('img/roleta.png')
-            blit_all(sair_do_jogo, essentials, jogadores)
+            blit_all(sair_do_jogo, essentials, jogadores, rodada)
             sons['tema'].stop()
             if rodada > 1:
                 frase_dist = ['Temos um empate na liderança! ', 'Portanto a roleta deve ser jogada para',
@@ -1044,11 +1057,15 @@ def iniciar_jogo():
         wait_until_enter(1)
         sons['aplausos1'].play()
         wait_until_enter(1)
-        blit_all(sair_do_jogo, essentials, jogadores)
+        blit_all(sair_do_jogo, essentials, jogadores, rodada)
 
-        frase_dist = ['Cada resposta certa valerá ' + str(locale.currency(dinheiro_rodada[rodada - 1],
-                                                                          grouping=True)) + ', e',
-                      'teremos ' + str(qtd_alternativas[rodada - 1]) + ' alternativas para cada pergunta!']
+        if not sem_locale:
+            frase_dist = ['Cada resposta certa valerá ' + str(locale.currency(dinheiro_rodada[rodada - 1],
+                                                                              grouping=True)) + ', e',
+                          'teremos ' + str(qtd_alternativas[rodada - 1]) + ' alternativas para cada pergunta!']
+        else:
+            frase_dist = ['Cada resposta certa valerá R$ ' + str(dinheiro_rodada[rodada - 1]) + ', e',
+                          'teremos ' + str(qtd_alternativas[rodada - 1]) + ' alternativas para cada pergunta!']
         x = 820
         tam = 72
         enter = 80
@@ -1086,7 +1103,7 @@ def iniciar_jogo():
             wait_until_enter(wait_time)  # Um tempinho de ‘suspense’
             roleta.update_image('img/roleta.png')
             img_pergunta.update_image('img/pergunta_espera.png')
-            blit_all(sair_do_jogo, essentials, jogadores)
+            blit_all(sair_do_jogo, essentials, jogadores, rodada)
             blit_pergunta(pergunta)
             pygame.display.update()
             if desafiante.tipo == 0:
@@ -1096,7 +1113,8 @@ def iniciar_jogo():
                 wait_until_enter(wait_time)
 
                 escolhido = desafiante.bot_escolhe(get_escolhas(jogadores, desafiante), get_leader(jogadores),
-                                                   nao_respondeu, nao_respondeu_nunca, rodada, num_pergunta + 1)
+                                                   nao_respondeu, nao_respondeu_nunca, rodada, num_pergunta + 1,
+                                                   dinheiro_rodada)
             if escolhido is None:
                 return
             if escolhido in nao_respondeu:
@@ -1105,7 +1123,7 @@ def iniciar_jogo():
                 nao_respondeu_nunca.remove(escolhido)
 
             roleta.update_image("img/roleta_" + str(escolhido.pos) + ".png")
-            blit_all(sair_do_jogo, essentials, jogadores)
+            blit_all(sair_do_jogo, essentials, jogadores, rodada)
             blit_pergunta(pergunta)
             pygame.display.update()
             pygame.mixer.stop()
@@ -1114,7 +1132,7 @@ def iniciar_jogo():
             # PASSOU PARA ALGUÉM — Sem alternativas ainda
             wait_time = 15 if escolhido.tipo == 0 else 4
             wait_until_enter(wait_time, mus='chosen')
-            blit_all(sair_do_jogo, essentials, jogadores)
+            blit_all(sair_do_jogo, essentials, jogadores, rodada)
             blit_alternativas(pergunta, alternativas)
             pygame.display.update()
             # Um tempo para ler as alternativas
@@ -1129,7 +1147,7 @@ def iniciar_jogo():
                 wait_pc = 11000
             time_limit = 25000 if escolhido.tipo == 0 else wait_pc
             while loop_jogo:
-                blit_all(sair_do_jogo, essentials, jogadores)
+                blit_all(sair_do_jogo, essentials, jogadores, rodada)
                 blit_alternativas(pergunta, alternativas)
                 img_pulso.update_image('img/pulso/pulso-' + str(pulso) + '.png')
                 img_pulso.draw(window)
@@ -1170,7 +1188,7 @@ def iniciar_jogo():
                         seg = Texto(str(int(ceil(time))), 'ArialBlack', 120, 428, 924)
                     else:
                         seg = Texto('1', 'ArialBlack', 120, 428, 924)
-                    blit_all(sair_do_jogo, essentials, jogadores)
+                    blit_all(sair_do_jogo, essentials, jogadores, rodada)
                     blit_alternativas(pergunta, alternativas)
                     img_pulso.update_image('img/pulso/pulso-' + str(pulso) + '.png')
                     img_pulso.draw(window)
@@ -1237,7 +1255,7 @@ def iniciar_jogo():
                         seg = Texto(str(int(ceil(time))), 'ArialBlack', 120, 428, 924)
                     else:
                         seg = Texto('1', 'ArialBlack', 120, 428, 924)
-                    blit_all(sair_do_jogo, essentials, jogadores)
+                    blit_all(sair_do_jogo, essentials, jogadores, rodada)
                     blit_alternativas(pergunta, alternativas)
                     img_pulso.update_image('img/pulso/pulso-' + str(pulso) + '.png')
                     img_pulso.draw(window)
@@ -1301,7 +1319,7 @@ def iniciar_jogo():
                 start = pygame.time.get_ticks()
                 loop_jogo = True
                 while loop_jogo:
-                    blit_all(sair_do_jogo, essentials, jogadores)
+                    blit_all(sair_do_jogo, essentials, jogadores, rodada)
                     blit_alternativas(pergunta, alternativas)
                     blit_resposta_escolhida(pergunta, alternativas, pos_resp_escolh - 1)
                     img_pulso.update_image('img/pulso/pulso-' + str(pulso) + '.png')
@@ -1404,7 +1422,7 @@ def iniciar_jogo():
                     desafiante = escolhido
             else:
                 wait_until_enter(0.5)
-                blit_all(sair_do_jogo, essentials, jogadores)
+                blit_all(sair_do_jogo, essentials, jogadores, rodada)
                 pygame.display.update()
                 wait_until_enter(2)
                 img_pergunta.update_image('img/grana.png')
@@ -1419,12 +1437,12 @@ def iniciar_jogo():
                 wait_until_enter(2)
             if not jog_eliminado:
                 roleta.update_image('img/roleta.png')
-                blit_all(sair_do_jogo, essentials, jogadores)
+                blit_all(sair_do_jogo, essentials, jogadores, rodada)
                 pygame.display.update()
                 wait_until_enter(1)  # Tempo de espera para próxima pergunta
         if not jog_eliminado:
             roleta.update_image('img/roleta.png')
-            blit_all(sair_do_jogo, essentials, jogadores)
+            blit_all(sair_do_jogo, essentials, jogadores, rodada)
             pygame.display.update()
             wait_until_enter(1)
             alavanca.update_image('img/alavanca2-0.png')
@@ -1439,7 +1457,7 @@ def iniciar_jogo():
             if lider is not None:
                 lider.move_center()
 
-            blit_all(sair_do_jogo, essentials, jogadores)
+            blit_all(sair_do_jogo, essentials, jogadores, rodada)
             pygame.display.update()
             loop = True
             wait_until_enter(1)
@@ -1534,7 +1552,7 @@ def iniciar_jogo():
     img_pergunta.draw(window)
     finalista.change_pos(2)
     roleta.update_image('img/roleta_inicio.png')
-    blit_all(sair_do_jogo, essentials, jogadores)
+    blit_all(sair_do_jogo, essentials, jogadores, rodada)
     dinheiro_antes_final = finalista.dinheiro
     finalista.mostra_dinheiro(window, img_pergunta)
     pygame.display.update()
@@ -1542,7 +1560,7 @@ def iniciar_jogo():
 
     perguntas_da_final = seleciona_pergunta(rodada)
 
-    blit_all(sair_do_jogo, essentials, jogadores)
+    blit_all(sair_do_jogo, essentials, jogadores, rodada)
     frase_dist = ['Vamos começar a 5ª e última rodada',
                   'da Roleta Russa!']
     for i in range(len(frase_dist)):
@@ -1553,12 +1571,30 @@ def iniciar_jogo():
     pygame.mixer.stop()
     sons['round'].play(0)
     wait_until_enter(2)
-    blit_all(sair_do_jogo, essentials, jogadores)
-    frase_dist = ['Você terá 1 minuto para responder 8 perguntas. Cada resposta certa valerá R$ 5.000. Se errar,',
-                  'cai no buraco. Acertando todas, ganha um bônus de R$ 10.000 e jogará a roleta com o número de',
-                  'buracos abertos. Se escapar, ganha o PRÊMIO MÁXIMO DE R$ 500.000!!!!!',
-                  'Instruções: A ou 1 seleciona a 1ª alternativa, B ou 2 a 2ª, C ou 3 a 3ª,',
-                  ' P passa/pula a pergunta, e ENTER confirma a resposta.']
+    blit_all(sair_do_jogo, essentials, jogadores, rodada)
+
+    if not sem_locale:
+        frase_dist = [
+            'Você terá 1 minuto para responder 8 perguntas. Cada resposta certa valerá ' +
+            str(locale.currency(int(dinheiro_rodada[rodada - 1]), grouping=True)).replace(',00', '') + '. Se errar,',
+            'cai no buraco. Acertando todas, ganha um bônus de ' +
+            str(locale.currency(int(dinheiro_rodada[rodada]), grouping=True)).replace(',00', '') +
+            ' e jogará a roleta com o número de',
+            'buracos abertos. Se escapar, ganha o PRÊMIO MÁXIMO DE R$ 500.000!!!!!',
+            'Instruções: A ou 1 seleciona a 1ª alternativa, B ou 2 a 2ª, C ou 3 a 3ª,',
+            'P passa/pula a pergunta, e ENTER confirma a resposta.'
+        ]
+    else:
+        frase_dist = [
+            'Você terá 1 minuto para responder 8 perguntas. Cada resposta certa valerá ' +
+            str(int(dinheiro_rodada[rodada - 1])) + '. Se errar,',
+            'cai no buraco. Acertando todas, ganha um bônus de ' +
+            str(int(dinheiro_rodada[rodada])) +
+            ' e jogará a roleta com o número de',
+            'buracos abertos. Se escapar, ganha o PRÊMIO MÁXIMO DE R$ 500.000!!!!!',
+            'Instruções: A ou 1 seleciona a 1ª alternativa, B ou 2 a 2ª, C ou 3 a 3ª,',
+            'P passa/pula a pergunta, e ENTER confirma a resposta.'
+        ]
     for i in range(len(frase_dist)):
         frase = Texto(frase_dist[i], 'FreeSans', 42, 960, 700 + 80 * i)
         frase.show_texto(window, align='center')
@@ -1596,7 +1632,7 @@ def iniciar_jogo():
     time_limit = 20000
 
     while loop_1pergunta:
-        blit_all(sair_do_jogo, essentials, jogadores)
+        blit_all(sair_do_jogo, essentials, jogadores, rodada)
         blit_pergunta(perguntas_da_final[num_pergunta]['pergunta'])
         blit_resposta_final(perguntas_da_final[num_pergunta]['alternativas'], num_resposta)
 
@@ -1700,7 +1736,7 @@ def iniciar_jogo():
             start += process_time_2
             time = ((72000 - (pygame.time.get_ticks() - start)) / 1000) * (60 / 72)
             seg = Texto(str(int(ceil(time))), 'ArialBlack', 120, 428, 924)
-            blit_all(sair_do_jogo, essentials, jogadores)
+            blit_all(sair_do_jogo, essentials, jogadores, rodada)
             blit_pergunta(perguntas_da_final[num_pergunta]['pergunta'], final=True)
 
             img_pulso.update_image('img/pulso/pulso-' + str(pulso) + '.png')
@@ -1779,7 +1815,7 @@ def iniciar_jogo():
             while perguntas_da_final[num_pergunta]['status']:
                 num_pergunta = (num_pergunta + 1) % 8
             window.fill('black')
-            blit_all(sair_do_jogo, essentials, jogadores)
+            blit_all(sair_do_jogo, essentials, jogadores, rodada)
             blit_pergunta(perguntas_da_final[num_pergunta]['pergunta'], final=True)
 
             img_pulso.update_image('img/pulso/pulso-' + str(pulso) + '.png')
@@ -1848,7 +1884,7 @@ def iniciar_jogo():
     if errou:
         sons['queda'].play()
         finalista.eliminar(jogadores)
-        finalista.dinheiro = finalista.dinheiro + 5000 * num_certas
+        finalista.dinheiro = finalista.dinheiro + 3000 * num_certas
         blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos + 1])
         pygame.display.update()
 
@@ -1856,9 +1892,9 @@ def iniciar_jogo():
     else:
         sons['escapou'].play()
         sons['aplausos2'].play()
-        finalista.dinheiro = finalista.dinheiro + 5000 * num_certas + 10000
+        finalista.dinheiro = finalista.dinheiro + 3000 * num_certas + 5000
         roleta.update_image('img/roleta.png')
-        blit_all(sair_do_jogo, essentials, jogadores)
+        blit_all(sair_do_jogo, essentials, jogadores, rodada)
         blit_varios_buracos(buracos_abertos_final[1:qtd_buracos_abertos + 1], c='final')
         img_pergunta.update_image("img/grana.png")
         finalista.mostra_dinheiro(window, img_pergunta)
@@ -1947,6 +1983,7 @@ def iniciar_jogo():
     img_pergunta.update_image("img/grana.png")
     finalista.mostra_dinheiro(window, img_pergunta)
     pygame.display.update()
+    sons['aplausos2'].play()
     if finalista.tipo == 0:
         df_recordes = pd.read_json("records.json")
         vencedor = {'nome': finalista.nome, 'dinheiro': finalista.dinheiro,
@@ -2112,7 +2149,6 @@ def configuracoes():
     main_loc = bases.index(nome_da_base)
     base = OptionBox(900, 220, 400, 45, (25, 25, 25), (120, 120, 120), option_list=bases, selected=main_loc)
     loop_config = True
-    selecionada = None
 
     salvar = Botao('Salvar configurações', 1880, 880, align='topright')
     while loop_config:
@@ -2142,6 +2178,8 @@ def configuracoes():
                     if nome_da_base != nome_inicial:
                         df_perguntas = pd.read_csv('base/' + nome_da_base, encoding='utf-8', sep=';')
                         df_perguntas['used'] = False
+                        df_perguntas = df_perguntas.fillna('-')
+
                         nome_inicial = nome_da_base
                     config_salva = True
                 for i in range(len(tipos)):
@@ -2256,25 +2294,22 @@ def mostra_regras():
             'mais jogadores, ninguém fica imune e a roleta deverá ser jogada \ncom todos os jogadores tendo chance ' \
             'de cair. O jogador que for eliminado terá seu dinheiro repartido igualmente ' \
             'entre os jogadores restantes.\n           Da 1ª à 4ª rodada, os valores da resposta certa são R$ 1.000, ' \
-            'R$ 1.500, R$ 2.000 e R$ 2.500, respectivamente. No programa original, os valores \neram outros, ' \
-            'mas agora foram atualizados pelo criador do jogo pois a ' \
-            'inflação desvalorizou muito a moeda de 2003 para ' \
-            'cá. Nas 1ª e 2ª rodadas, cada \npergunta terá 3 alternativas de resposta, e na 3ª e 4ª rodadas, serão ' \
+            'R$ 1.200, R$ 1.500 e R$ 2.000, respectivamente. Nas 1ª e 2ª rodadas, cada per-\ngunta terá 3 alternativas ' \
+            'de resposta, e na 3ª e 4ª rodadas, serão ' \
             '4 alternativas de resposta.\n           Ao restar 1 jogador apenas, este será o finalista e ' \
             'participará da rodada ' \
             'final. O finalista já tem garantido, no mínimo, todo o dinheiro acumulado \naté então no jogo. Na ' \
             'rodada ' \
             'final, ele terá 1 minuto para responder corretamente 8 perguntas. A cada 10 segundos, um buraco se ' \
-            'abre. Caso a resposta \nesteja certa, ele ganha R$ 5.000 (valor atualizado pelo ' \
-            'mesmo motivo dito acima), se não souber ele pode ' \
-            'passar a pergunta e respondê-la em outro mo-\nmento. Se ele errar ou o tempo acabar, o jogador cai no ' \
-            'buraco ganhando o dinheiro inicial + R$ 5.000 por cada resposta certa. Se conseguir acertar as 8 \n' \
-            'perguntas em menos de 1 minuto, a contagem é parada, e além dos R$ 5.000 por cada resposta certa, ' \
-            'receberá um adicional de R$ 10.000, totalizando \nR$ 50.000 por ter passado pelas 8 perguntas. Depois, ' \
+            'abre. Caso a resposta \nesteja certa, ele ganha R$ 3.000, se não souber ele pode ' \
+            'passar a pergunta e respondê-la em outro momento. Se ele errar ou o tempo acabar, o jogador \ncai no ' \
+            'buraco ganhando o dinheiro inicial + R$ 3.000 por cada resposta certa. Se conseguir acertar as 8 ' \
+            'perguntas em menos de 1 minuto, a contagem é \nparada, e além dos R$ 5.000 por cada resposta certa, ' \
+            'receberá um adicional de R$ 5.000, totalizando R$ 50.000 por ter passado pelas 8 perguntas. \nDepois, ' \
             'são contados os buracos abertos durante as perguntas para ver quantas chances o ' \
-            'finalista terá \npara ganhar o prêmio máximo de R$ 500.000. Por exemplo, ' \
+            'finalista terá para ganhar o prêmio máximo de R$ 500.000. \nPor exemplo, ' \
             'se 5 buracos se abriram, a roleta será jogada ' \
-            'com 5 chances de cair e 1 de continuar. Se o \nfinalista escapar do vermelho, ganha os R$ 500.000. ' \
+            'com 5 chances de cair e 1 de continuar. Se o finalista escapar do vermelho, ganha os \nR$ 500.000. ' \
             'Caso contrário, ele cai no buraco, mas com todo o dinheiro ganho até então.'
 
     frase = '"Um vacilo, um erro, e um de vocês irá para o buraco. ASSIM Ó!" - Milton Neves'
@@ -2495,7 +2530,7 @@ creditos = Botao('Créditos', 1850, 850)
 sair = Botao('Sair', 1850, 950)
 sair_do_jogo = Botao('Sair do jogo', 10, 10, tam=30, align='topleft')
 volta_menu = Botao('Voltar para o menu', 10, 10, tam=30, align='topleft')
-versao_do_jogo = Texto('Versão 3.6', 'FreeSansBold', 48, 40, 1000)
+versao_do_jogo = Texto('Versão 3.6.1', 'FreeSansBold', 48, 40, 1000)
 
 img_pergunta = Image('img/pergunta_espera.png', 310, 680)
 
@@ -2506,6 +2541,7 @@ except:
     nome_da_base = listdir('base')[0]
     df_perguntas = pd.read_csv('base/'+nome_da_base, encoding='utf-8', sep=';')
 df_perguntas['used'] = False
+df_perguntas = df_perguntas.fillna('-')
 
 sons = load_sounds()
 vol = round(0.10, 2)
