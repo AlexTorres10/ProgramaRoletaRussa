@@ -1899,7 +1899,9 @@ def iniciar_jogo():
         img_pergunta.update_image("img/grana.png")
         finalista.mostra_dinheiro(window, img_pergunta)
         pygame.display.update()
-        wait_until_enter(int(sons['escapou'].get_length() - 3), mus='escapou')
+        wait_until_enter(int(sons['escapou'].get_length() - 3))
+        blit_all(sair_do_jogo, essentials, jogadores, rodada)
+        blit_varios_buracos(buracos_abertos_final[1:qtd_buracos_abertos + 1], c='final')
 
         if qtd_buracos_abertos > 0:
             frase_dist = ['Hora de jogar a roleta com ' + str(qtd_buracos_abertos) + ' chances de cair!',
@@ -2468,9 +2470,8 @@ def mostra_recordes():
 def menu_principal():
     global quedas
     loop = True
-    quedas = []
     while loop:
-
+        quedas = []
         window.fill('black')
         roleta_logo.draw(window)
         iniciar.show_texto(window)
