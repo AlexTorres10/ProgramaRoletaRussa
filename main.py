@@ -342,7 +342,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 blit_varios_buracos(list_buracos=aberto_e_vermelho)
             sons['zonas_de_risco'].play(0)
             pygame.time.delay(int((1000 / giros_para_parar) * (i + 1)))
-        giros_a_mais = randint(-1, 2)
+        giros_a_mais = randint(-3, 3) if giros_para_parar > 7 else randint(-3, 2)
         for i in range(giros_a_mais):
             sons['zonas_de_risco'].play(0)
             vermelhos = [(v + 1) % 6 for v in vermelhos]
@@ -444,7 +444,7 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
         sons['jogando_roleta'].play(0)
         comeca = randrange(6)
         blit_azul(sair_do_jogo, essentials, jogadores, comeca)
-        giros = randint(25, 75)
+        giros = randint(20, 70)
         for i in range(giros):
             comeca = (comeca + 1) % 6  # São 6 buracos
             blit_azul(sair_do_jogo, essentials, jogadores, comeca)
@@ -985,16 +985,17 @@ def iniciar_jogo():
     # Distribuindo dinheiro para cada jogador!
 
     sons['dinheiro'].play(0)
-    fatias = int(1000 / 20)
-    for i in range(20):
-        jogadores[0].dinheiro += fatias
-        jogadores[1].dinheiro += fatias
-        jogadores[2].dinheiro += fatias
-        jogadores[3].dinheiro += fatias
-        jogadores[4].dinheiro += fatias
+    for i in range(15):
+        for j in jogadores:
+            j.dinheiro = randint(100, 999)
         blit_all(sair_do_jogo, essentials, jogadores, 0)
         pygame.display.update()
-        pygame.time.delay(50)
+        pygame.time.delay(40)
+
+    for j in jogadores:
+        j.dinheiro = 1000
+
+    blit_all(sair_do_jogo, essentials, jogadores)
 
     roleta.update_image('img/roleta.png')
     pygame.display.update()

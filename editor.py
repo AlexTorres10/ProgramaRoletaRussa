@@ -6,6 +6,7 @@ from PIL import Image, ImageTk
 from tkinter.font import Font
 from random import randint
 from tkinter import filedialog
+import random
 
 try:
     df = pd.read_csv("base/main.csv", sep=';', encoding='utf-8')
@@ -71,13 +72,22 @@ def pergunta_selecionada(event):
     selected_index = listbox.curselection()
 
     if len(selected_index) == 1:
-        pergunta = listbox.get(selected_index[0]).strip()
+        pergunta = listbox.get(selected_index[0]).strip().split('<br>')[0]
+        print(pergunta)
 
         texto_restante = ''
         search_results = df[df['pergunta'].str.contains(pergunta)][['pergunta', 'resposta_certa', 'alternativa_1',
                                                                     'alternativa_2', 'alternativa_3', 'alternativas']]
-
-        row = search_results.iloc[0]
+        if search_results.shape[0] == 1:
+            row = search_results.iloc[0]
+        else:
+            seg_parte = listbox.get(selected_index[0]).strip().split('<br>')[1]
+            search_results = search_results[search_results['pergunta'].str.contains(seg_parte)][['pergunta',
+                                                                                                 'resposta_certa',
+                                                                                                 'alternativa_1',
+                                                                        'alternativa_2', 'alternativa_3',
+                                                                        'alternativas']]
+            row = search_results.iloc[0]
         combobox.current(row['alternativas'] - 3)
         for entry in entries[:-1]:
             entry.configure(state='normal')
@@ -96,6 +106,10 @@ def pergunta_selecionada(event):
                 texto_restante = perg_split[1]
             textos = [perg, texto_restante, row['resposta_certa'], row['alternativa_1'], row['alternativa_2'],
                       row['alternativa_3']]
+            if row['alternativas'] == 3:
+                textos[2:-1] = random.sample(textos[2:-1], len(textos[2:-1]))
+            else:
+                textos[2:] = random.sample(textos[2:], len(textos[2:]))
         else:
             alternativa_3_entry.delete(0, tk.END)
             alternativa_3_entry.configure(state='disabled')
@@ -142,7 +156,7 @@ def opcao_combobox(event):
 def add_question():
     global df
     nova_pergunta_dados = []
-
+    valid = True
     dict_nova_pergunta = {'pergunta': '', 'resposta_certa': '', 'alternativa_1': '',
                           'alternativa_2': '', 'alternativa_3': ''}
 
@@ -162,59 +176,66 @@ def add_question():
         dict_nova_pergunta['embaralhar'] = 'N'
         df = pd.concat([df, pd.DataFrame(dict_nova_pergunta, index=[0])], ignore_index=True)
     else:
-        pos_resp_certa = randint(1, 3)
-        comb = randint(0, 1)
-        if pos_resp_certa == 1:
-            if comb == 0:
-                texto_pergunta = dict_nova_pergunta['resposta_certa'] + ", " + dict_nova_pergunta['alternativa_1'] + \
-                                 " ou " + dict_nova_pergunta['alternativa_2'] + ". " + \
-                                 dict_nova_pergunta['pergunta']
+        valid = not any('.' in dict_nova_pergunta[i] for i in ['resposta_certa', 'alternativa_1', 'alternativa_2'])
+        if valid:
+            pos_resp_certa = randint(1, 3)
+            comb = randint(0, 1)
+            if pos_resp_certa == 1:
+                if comb == 0:
+                    texto_pergunta = dict_nova_pergunta['resposta_certa'] + ", " + dict_nova_pergunta['alternativa_1'] + \
+                                     " ou " + dict_nova_pergunta['alternativa_2'] + ". " + \
+                                     dict_nova_pergunta['pergunta']
+                else:
+                    texto_pergunta = dict_nova_pergunta['resposta_certa'] + ", " + dict_nova_pergunta['alternativa_2'] + \
+                                     " ou " + dict_nova_pergunta['alternativa_1'] + ". " + \
+                                     dict_nova_pergunta['pergunta']
+                dict_nova_pergunta['pergunta'] = texto_pergunta
+                dict_nova_pergunta['resposta_certa'] = 'A'
+            elif pos_resp_certa == 2:
+                if comb == 0:
+                    texto_pergunta = dict_nova_pergunta['alternativa_1'] + ", " + dict_nova_pergunta['resposta_certa'] \
+                                     + " ou " + dict_nova_pergunta['alternativa_2'] + ". " + \
+                                     dict_nova_pergunta['pergunta']
+                else:
+                    texto_pergunta = dict_nova_pergunta['alternativa_2'] + ", " + dict_nova_pergunta['resposta_certa'] \
+                                     + " ou " + dict_nova_pergunta['alternativa_1'] + ". " + \
+                                     dict_nova_pergunta['pergunta']
+                dict_nova_pergunta['pergunta'] = texto_pergunta
+                dict_nova_pergunta['resposta_certa'] = 'B'
             else:
-                texto_pergunta = dict_nova_pergunta['resposta_certa'] + ", " + dict_nova_pergunta['alternativa_2'] + \
-                                 " ou " + dict_nova_pergunta['alternativa_1'] + ". " + \
-                                 dict_nova_pergunta['pergunta']
-            dict_nova_pergunta['pergunta'] = texto_pergunta
-            dict_nova_pergunta['resposta_certa'] = 'A'
-        elif pos_resp_certa == 2:
-            if comb == 0:
-                texto_pergunta = dict_nova_pergunta['alternativa_1'] + ", " + dict_nova_pergunta['resposta_certa'] \
-                                 + " ou " + dict_nova_pergunta['alternativa_2'] + ". " + \
-                                 dict_nova_pergunta['pergunta']
-            else:
-                texto_pergunta = dict_nova_pergunta['alternativa_2'] + ", " + dict_nova_pergunta['resposta_certa'] \
-                                 + " ou " + dict_nova_pergunta['alternativa_1'] + ". " + \
-                                 dict_nova_pergunta['pergunta']
-            dict_nova_pergunta['pergunta'] = texto_pergunta
-            dict_nova_pergunta['resposta_certa'] = 'B'
-        else:
-            if comb == 0:
-                texto_pergunta = dict_nova_pergunta['alternativa_2'] + ", " + dict_nova_pergunta['alternativa_1'] + \
-                                 " ou " + dict_nova_pergunta['resposta_certa'] + ". " + dict_nova_pergunta['pergunta']
-            else:
-                texto_pergunta = dict_nova_pergunta['alternativa_1'] + ", " + dict_nova_pergunta['alternativa_2'] + \
-                                 " ou " + dict_nova_pergunta['resposta_certa'] + ". " + dict_nova_pergunta['pergunta']
-            dict_nova_pergunta['pergunta'] = texto_pergunta
-            dict_nova_pergunta['resposta_certa'] = 'C'
-        dict_nova_pergunta['alternativa_1'] = '-'
-        dict_nova_pergunta['alternativa_2'] = '-'
-        dict_nova_pergunta['alternativa_3'] = '-'
-        dict_nova_pergunta['alternativas'] = 5
-        dict_nova_pergunta['embaralhar'] = 'N'
-        df = pd.concat([df, pd.DataFrame(dict_nova_pergunta, index=[0])], ignore_index=True)
-    listbox.delete(0, tk.END)
-    for row in df.itertuples(index=False):
-        listbox.insert(tk.END, row.pergunta)
-
-    # show a message box to confirm the question was added
-    messagebox.showinfo("Pergunta adicionada", f"A pergunta '{dict_nova_pergunta['pergunta']}' foi adicionada à base. "
-                                               f"Lembre-se de salvar a base ao final da sua edição para que as "
-                                               "mudanças tenham efeito!")
+                if comb == 0:
+                    texto_pergunta = dict_nova_pergunta['alternativa_2'] + ", " + dict_nova_pergunta['alternativa_1'] + \
+                                     " ou " + dict_nova_pergunta['resposta_certa'] + ". " + dict_nova_pergunta['pergunta']
+                else:
+                    texto_pergunta = dict_nova_pergunta['alternativa_1'] + ", " + dict_nova_pergunta['alternativa_2'] + \
+                                     " ou " + dict_nova_pergunta['resposta_certa'] + ". " + dict_nova_pergunta['pergunta']
+                dict_nova_pergunta['pergunta'] = texto_pergunta
+                dict_nova_pergunta['resposta_certa'] = 'C'
+            dict_nova_pergunta['alternativa_1'] = '-'
+            dict_nova_pergunta['alternativa_2'] = '-'
+            dict_nova_pergunta['alternativa_3'] = '-'
+            dict_nova_pergunta['alternativas'] = 5
+            dict_nova_pergunta['embaralhar'] = 'N'
+            df = pd.concat([df, pd.DataFrame(dict_nova_pergunta, index=[0])], ignore_index=True)
+    if valid:
+        listbox.delete(0, tk.END)
+        for row in df.itertuples(index=False):
+            listbox.insert(tk.END, row.pergunta)
+        # show a message box to confirm the question was replaced
+        messagebox.showinfo("Pergunta substituída!",
+                            "A pergunta está substituída! Lembre-se de salvar a base ao final da sua edição para "
+                            "que as mudanças tenham efeito.")
+    else:
+        messagebox.showinfo("Pergunta inválida!",
+                            "Na final, as alternativas não podem ter ponto (.), pois isso vai confundir o "
+                            "jogo. Retire os pontos das alternativas e tente novamente.")
 
 
 def replace_question():
     # get the selected question
     pergunta = canvas.itemcget(perg_img, 'text')
     pergunta_2 = canvas.itemcget(perg_img_2, 'text')
+    valid = True
 
     if pergunta_2 != '':
         pergunta = pergunta + '<br>' + pergunta_2
@@ -237,35 +258,42 @@ def replace_question():
         df.loc[df["pergunta"] == pergunta, "pergunta"] = nova_pergunta[0]
     else:
         pos_resp_certa = randint(1, 3)
+        valid = not any('.' in nova_pergunta[i] for i in range(1, 4))
         perg = pergunta.split('. ')[1]
 
-        df.loc[df["pergunta"].str.contains(perg), "alternativa_1"] = '-'
-        df.loc[df["pergunta"].str.contains(perg), "alternativa_2"] = '-'
-        df.loc[df["pergunta"].str.contains(perg), "alternativa_3"] = '-'
-        df.loc[df["pergunta"].str.contains(perg), "alternativas"] = 5
-        if pos_resp_certa == 1:
-            texto_pergunta = nova_pergunta[1] + ", " + nova_pergunta[2] + " ou " + nova_pergunta[3] + ". " + \
-                             nova_pergunta[0]
-            df.loc[df["pergunta"].str.contains(perg), "resposta_certa"] = 'A'
-            df.loc[df["pergunta"].str.contains(perg), "pergunta"] = texto_pergunta
-        elif pos_resp_certa == 2:
-            texto_pergunta = nova_pergunta[2] + ", " + nova_pergunta[1] + " ou " + nova_pergunta[3] + ". " + \
-                             nova_pergunta[0]
-            df.loc[df["pergunta"].str.contains(perg), "resposta_certa"] = 'B'
-            df.loc[df["pergunta"].str.contains(perg), "pergunta"] = texto_pergunta
-        else:
-            texto_pergunta = nova_pergunta[3] + ", " + nova_pergunta[2] + " ou " + nova_pergunta[1] + ". " + \
-                             nova_pergunta[0]
-            df.loc[df["pergunta"].str.contains(perg), "resposta_certa"] = 'C'
-            df.loc[df["pergunta"].str.contains(perg), "pergunta"] = texto_pergunta
+        if valid:
+            df.loc[df["pergunta"].str.contains(perg), "alternativa_1"] = '-'
+            df.loc[df["pergunta"].str.contains(perg), "alternativa_2"] = '-'
+            df.loc[df["pergunta"].str.contains(perg), "alternativa_3"] = '-'
+            df.loc[df["pergunta"].str.contains(perg), "alternativas"] = 5
+            if pos_resp_certa == 1:
+                texto_pergunta = nova_pergunta[1] + ", " + nova_pergunta[2] + " ou " + nova_pergunta[3] + ". " + \
+                                 nova_pergunta[0]
+                df.loc[df["pergunta"].str.contains(perg), "resposta_certa"] = 'A'
+                df.loc[df["pergunta"].str.contains(perg), "pergunta"] = texto_pergunta
+            elif pos_resp_certa == 2:
+                texto_pergunta = nova_pergunta[2] + ", " + nova_pergunta[1] + " ou " + nova_pergunta[3] + ". " + \
+                                 nova_pergunta[0]
+                df.loc[df["pergunta"].str.contains(perg), "resposta_certa"] = 'B'
+                df.loc[df["pergunta"].str.contains(perg), "pergunta"] = texto_pergunta
+            else:
+                texto_pergunta = nova_pergunta[3] + ", " + nova_pergunta[2] + " ou " + nova_pergunta[1] + ". " + \
+                                 nova_pergunta[0]
+                df.loc[df["pergunta"].str.contains(perg), "resposta_certa"] = 'C'
+                df.loc[df["pergunta"].str.contains(perg), "pergunta"] = texto_pergunta
 
-    listbox.delete(0, tk.END)
-    for row in df.itertuples(index=False):
-        listbox.insert(tk.END, row.pergunta)
-    # show a message box to confirm the question was replaced
-    messagebox.showinfo("Pergunta substituída!",
-                        "A pergunta está substituída! Lembre-se de salvar a base ao final da sua edição para que as "
-                        "mudanças tenham efeito.")
+        if valid:
+            listbox.delete(0, tk.END)
+            for row in df.itertuples(index=False):
+                listbox.insert(tk.END, row.pergunta)
+            # show a message box to confirm the question was replaced
+            messagebox.showinfo("Pergunta substituída!",
+                                "A pergunta está substituída! Lembre-se de salvar a base ao final da sua edição para "
+                                "que as mudanças tenham efeito.")
+        else:
+            messagebox.showinfo("Pergunta inválida!",
+                                "Na final, as alternativas não podem ter ponto (.), pois isso vai confundir o "
+                                "jogo.")
 
 
 def save_database():

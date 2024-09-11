@@ -168,16 +168,16 @@ class Jogador:
                     if alt == resposta_certa:  # No momento em que tivermos a certa, ele para
                         break
                 # Retorna a resposta certa (1, 2, 3, 4) e o tempo para responder
-                return num_resposta, uniform(2 * self.tipo, 15)
+                return num_resposta, uniform(5 + self.tipo, 15)
             else:
                 return respostas.index(pergunta_final['certa'])+1, tempo_final - uniform(3.5, 6.5)
         else:  # SE CHUTAR...
             if rodada < 5:
                 chute = choice(alternativas)
                 # Retorna o chute (A, B, C, D) e o tempo para responder
-                return alternativas.index(chute)+1, uniform(1, 12)
+                return alternativas.index(chute)+1, uniform(0, 15)
             else:
-                limiar_chute = randint(25, 55)
+                limiar_chute = randint(20, 60)
 
                 # Pode ser que o chute seja mais cedo ou mais tarde. Decidi fazer um limiar variável.
                 if tempo_final < limiar_chute or certas == 7:
