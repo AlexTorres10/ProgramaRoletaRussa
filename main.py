@@ -674,7 +674,7 @@ def blit_all(s, ess, jogadores, rodada=0):
               'FreeSans', 24, 5, 450).show_texto(window, 'topleft')
         Texto('Confirmar resposta - ENTER',
               'FreeSans', 24, 5, 480).show_texto(window, 'topleft')
-        Texto('Passar a resposta - P',
+        Texto('Passar a pergunta - P',
               'FreeSans', 24, 5, 510).show_texto(window, 'topleft')
 
 
@@ -942,7 +942,7 @@ def iniciar_jogo():
     qtd_alternativas = [3, 3, 4, 4]
 
     for n, i, tipo in zip(df_jogadores['nome'], range(1, 6), df_jogadores['tipo']):
-        jogadores.append(Jogador(n, i, tipo))
+        jogadores.append(Jogador(str(n), i, tipo))
 
     img_pulso = Image("img/pulso/pulso-0.png", 830, 726)
 
@@ -955,7 +955,7 @@ def iniciar_jogo():
     blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
     pygame.display.update()
     wait_until_enter(10)
-    blit_all(sair_do_jogo, essentials, jogadores, 0)
+    blit_all(sair_do_jogo, essentials, jogadores)
 
     # VAI COMEÇAR O ROLETA RUSSA!
     pygame.mixer.stop()
@@ -965,7 +965,7 @@ def iniciar_jogo():
     pygame.display.update()
     wait_until_enter(5)
 
-    blit_all(sair_do_jogo, essentials, jogadores, 0)
+    blit_all(sair_do_jogo, essentials, jogadores)
     pygame.mixer.stop()
     sons['buraco_abre'].play()
     assim_o(window)
@@ -973,7 +973,7 @@ def iniciar_jogo():
 
     sons['start_game'].play(0)
     wait_until_enter(2)
-    blit_all(sair_do_jogo, essentials, jogadores, 0)
+    blit_all(sair_do_jogo, essentials, jogadores)
     frase_dist = ['Vamos distribuir R$ 1.000,00 para cada ', 'um no começo deste jogo e jogar a ',
                   'roleta para decidir quem começa jogando!']
     for i in range(len(frase_dist)):
@@ -988,7 +988,7 @@ def iniciar_jogo():
     for i in range(15):
         for j in jogadores:
             j.dinheiro = randint(100, 999)
-        blit_all(sair_do_jogo, essentials, jogadores, 0)
+        blit_all(sair_do_jogo, essentials, jogadores)
         pygame.display.update()
         pygame.time.delay(40)
 
@@ -1534,11 +1534,17 @@ def iniciar_jogo():
             fadein()
             pygame.time.delay(3000)
             fadeout()
-
             roleta.update_image('img/roleta_inicio.png')
             blit_vermelho(sair_do_jogo, essentials, jogadores, range(0, 6))
             pygame.display.update()
             wait_until_enter(5)
+        else:
+            get_leader(jogadores).move_center()
+            if len(quedas[3]['vermelhos']) > 0:
+                blit_queda(sair_do_jogo, essentials, jogadores, quedas[3]['vermelhos'], quedas[3]['jog_eliminado'])
+            else:
+                blit_queda(sair_do_jogo, essentials, jogadores, quedas[3]['vermelhos'], quedas[3]['jog_eliminado'],
+                           rodada4=True)
 
         # RODADA FINAL
     prompt_rever_quedas(window)
@@ -2168,7 +2174,7 @@ def configuracoes():
                 if salvar.check_click():
                     novos_jogadores = []
                     for box in input_boxes:
-                        novos_jogadores.append(box.text)
+                        novos_jogadores.append(str(box.text))
                     for i in range(len(novos_jogadores)):
                         df_jogadores.loc[i, 'nome'] = novos_jogadores[i]
                         df_jogadores.loc[i, 'tipo'] = opcoes_bot[i].selected
@@ -2195,13 +2201,8 @@ def configuracoes():
                 box.handle_event(ev)
             if ev.type == pygame.KEYDOWN:
                 if ev.key == pygame.K_MINUS:
-                    input_box_active = False
-                    for ib in input_boxes:
-                        if ib.active:
-                            input_box_active = True
-                            break
-                    if not input_box_active:
-                        vol -= 0.1
+                    vol -= 0.1
+                    vol = 0 if vol < 0 else vol
                     # pygame.mixer.music.set_volume(vol)
                 if ev.key == pygame.K_EQUALS or ev.key == pygame.K_PLUS:
                     vol += 0.1
@@ -2532,7 +2533,7 @@ creditos = Botao('Créditos', 1850, 850)
 sair = Botao('Sair', 1850, 950)
 sair_do_jogo = Botao('Sair do jogo', 10, 10, tam=30, align='topleft')
 volta_menu = Botao('Voltar para o menu', 10, 10, tam=30, align='topleft')
-versao_do_jogo = Texto('Versão 3.6.1', 'FreeSansBold', 48, 40, 1000)
+versao_do_jogo = Texto('Versão 3.7', 'FreeSansBold', 48, 40, 1000)
 
 img_pergunta = Image('img/pergunta_espera.png', 310, 680)
 

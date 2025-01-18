@@ -9,13 +9,19 @@ class InputBox:
     def __init__(self, x, y, w, h, font='FreeSansBold', tam=30, text=''):
         self.rect = pygame.Rect(x * get_ratio(), y * get_ratio(), w * get_ratio(), h * get_ratio())
         self.color = COLOR_INACTIVE
-        self.text = text
         self.font = pygame.font.Font('fonts/' + font + '.ttf', int(tam * get_ratio()))
-        self.txt_surface = self.font.render(self.text, True, self.color)
+        try:
+            self.text = text
+            self.txt_surface = self.font.render(self.text, True, self.color)
+        except Exception as e:
+            # Remover caracteres problemáticos
+            self.text = ''.join(char for char in str(text) if char.isalnum() or char.isspace() or char in ".,!?")
+            self.txt_surface = self.font.render(self.text, True, self.color)
         self.active = False
         self.espacos = 0
 
     def handle_event(self, event):
+        caracteres_indesejados = {"~", "`"}
         if event.type == pygame.MOUSEBUTTONDOWN:
             # If the user clicked on the input_box rect.
             if self.rect.collidepoint(event.pos):
@@ -35,11 +41,15 @@ class InputBox:
                     else:
                         self.text = ''
                         self.espacos = 0
-                # elif event.key == pygame.K_EQUALS or event.key == pygame.K_MINUS:
-                #     pass
+                elif event.key == pygame.K_EQUALS or event.key == pygame.K_MINUS:
+                    pass
                 else:
-                    if event.unicode != '~':
+                    if event.unicode not in caracteres_indesejados:
                         self.text += event.unicode
+                        for char in ["ê", "â", "ô", "Ê", "Â", "Ô"]:
+                            self.text = self.text.replace(f"6{char}", char)
+                        for char in ["á", "é", "í", "ó", "ú", "Á", "É", "Í", "Ó", "Ú", "Ç", "ç"]:
+                            self.text = self.text.replace(f"'{char}", char)
                         self.espacos = 0
                 # Re-render the text.
                 self.txt_surface = self.font.render(self.text, True, self.color)

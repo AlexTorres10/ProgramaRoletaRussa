@@ -15,7 +15,7 @@ for list_of_pos in [pos_dinheiro, pos_nome]:
 
 
 class Jogador:
-    def __init__(self, nome, pos, tipo):
+    def __init__(self, nome, pos, tipo, currency="R$", sep='.', front=True):
         self.nome = nome
         self.dinheiro = 0
         self.eliminado = False
@@ -23,6 +23,9 @@ class Jogador:
         self.image = Image("img/number" + str(pos) + ".png", pos_players[pos - 1][0], pos_players[pos - 1][1])
         self.tam_fonte = int(30 * get_ratio())
         self.tipo = tipo
+        self.currency = currency
+        self.sep = sep
+        self.front = front
 
     def set_tipo(self, tipo):
         self.tipo = tipo
@@ -35,10 +38,7 @@ class Jogador:
             w.fill('black')
             s.show_texto(w)
             mostra_essentials(w, ess)
-            mostra_jogadores(w, jog)
-            # Texto('Responder - A, B, C, D ou 1, 2, 3, 4', 'FreeSans', 24, 5, 450).show_texto(w, 'topleft')
-            # Texto('Jogar roleta - Espaço ou clique na alavanca', 'FreeSans', 24, 5, 480).show_texto(w, 'topleft')
-            # Texto('Desafiar jogador - Clicar no ícone ou 1, 2, 3, 4 ou 5', 'FreeSans', 24, 5, 510).show_texto(w, 'topleft')
+            mostra_jogadores(w, jog, self.currency, self.sep, self.front)
             pygame.time.delay(45)
             pygame.display.update()
         if outro_jogador.dinheiro > 0:
@@ -47,10 +47,7 @@ class Jogador:
             w.fill('black')
             s.show_texto(w)
             mostra_essentials(w, ess)
-            mostra_jogadores(w, jog)
-            # Texto('Responder - A, B, C, D ou 1, 2, 3, 4', 'FreeSans', 24, 5, 450).show_texto(w, 'topleft')
-            # Texto('Jogar roleta - Espaço ou clique na alavanca', 'FreeSans', 24, 5, 480).show_texto(w, 'topleft')
-            # Texto('Desafiar jogador - Clicar no ícone ou 1, 2, 3, 4 ou 5', 'FreeSans', 24, 5, 510).show_texto(w, 'topleft')
+            mostra_jogadores(w, jog, self.currency, self.sep, self.front)
             pygame.display.update()
 
         if (self.dinheiro % 10) >= 8:
@@ -58,10 +55,7 @@ class Jogador:
             w.fill('black')
             s.show_texto(w)
             mostra_essentials(w, ess)
-            mostra_jogadores(w, jog)
-            # Texto('Responder - A, B, C, D ou 1, 2, 3, 4', 'FreeSans', 24, 5, 450).show_texto(w, 'topleft')
-            # Texto('Jogar roleta - Espaço ou clique na alavanca', 'FreeSans', 24, 5, 480).show_texto(w, 'topleft')
-            # Texto('Desafiar jogador - Clicar no ícone ou 1, 2, 3, 4 ou 5', 'FreeSans', 24, 5, 510).show_texto(w, 'topleft')
+            mostra_jogadores(w, jog, self.currency, self.sep, self.front)
             pygame.display.update()
 
     def ganha_dinheiro(self, dinheiro, w, s, ess, jog, img_pergunta):
@@ -71,19 +65,26 @@ class Jogador:
             s.show_texto(w)
             self.dinheiro += fatias
             mostra_essentials(w, ess)
-            mostra_jogadores(w, jog)
+            mostra_jogadores(w, jog, self.currency, self.sep, self.front)
             img_pergunta.draw(w)
-            # Texto('Responder - A, B, C, D ou 1, 2, 3, 4', 'FreeSans', 24, 5, 450).show_texto(w, 'topleft')
-            # Texto('Jogar roleta - Espaço ou clique na alavanca', 'FreeSans', 24, 5, 480).show_texto(w, 'topleft')
-            # Texto('Desafiar jogador - Clicar no ícone ou 1, 2, 3, 4 ou 5', 'FreeSans', 24, 5, 510).show_texto(w, 'topleft')
-            txt_dinheiro = Texto('R$ ' + str(self.dinheiro), 'ArialBlack', 120, 960, 910)
+
+            if self.front:
+                text_dinheiro = self.currency + " " + str(self.dinheiro)
+            else:
+                text_dinheiro = str(self.dinheiro) + " " + self.currency
+            txt_dinheiro = Texto(text_dinheiro, 'ArialBlack', 120, 960, 910)
             txt_dinheiro.show_texto(w, 'center')
             pygame.time.delay(45)
             pygame.display.update()
 
     def mostra_dinheiro(self, w, img_pergunta):
         img_pergunta.draw(w)
-        txt_dinheiro = Texto('R$ ' + str(self.dinheiro), 'ArialBlack', 120, 960, 910)
+        if self.front:
+            text_dinheiro = self.currency + " " + str(self.dinheiro)
+        else:
+            text_dinheiro = str(self.dinheiro) + " " + self.currency
+
+        txt_dinheiro = Texto(text_dinheiro, 'ArialBlack', 120, 960, 910)
         txt_dinheiro.show_texto(w, 'center')
         pygame.time.delay(50)
         pygame.display.update()
@@ -130,9 +131,13 @@ class Jogador:
             text_rect = texto_nome.get_rect(center=pos_nome[0])
         window.blit(texto_nome, text_rect)
 
-    def display_dinheiro(self, window, fv=False):
-        dinheiro = f'{self.dinheiro:,.0f}'.replace(',', '.')
-        texto_dinheiro = pygame.font.Font('fonts/FreeSans.ttf', self.tam_fonte).render("R$ " + dinheiro,
+    def display_dinheiro(self, window, fv=False, currency="R$", sep='.', front=True):
+        dinheiro = f'{self.dinheiro:,.0f}'.replace(',', sep)
+        if front:
+            text_dinheiro = currency + " " + dinheiro
+        else:
+            text_dinheiro = dinheiro + " " + currency
+        texto_dinheiro = pygame.font.Font('fonts/FreeSans.ttf', self.tam_fonte).render(text_dinheiro,
                                                                                        True, (255, 255, 255))
         if not fv:
             text_rect = texto_dinheiro.get_rect(center=pos_dinheiro[self.pos - 1])
@@ -222,18 +227,18 @@ class Jogador:
         return choice(escolhas)
 
 
-def mostra_jogadores(window, jogadores):
+def mostra_jogadores(window, jogadores, currency="R$", sep='.', front=True):
     if len(jogadores) > 1:
         for pl in jogadores:
             if not pl.eliminado:
                 pl.image.draw(window)
                 pl.display_nome(window)
-                pl.display_dinheiro(window)
+                pl.display_dinheiro(window, currency=currency, sep=sep, front=front)
     else:
         for pl in jogadores:
             pl.image.draw(window)
             pl.display_nome(window, fv=True)
-            pl.display_dinheiro(window, fv=True)
+            pl.display_dinheiro(window, fv=True, currency=currency, sep=sep, front=front)
 
 
 def copy_jogadores(jogadores):
