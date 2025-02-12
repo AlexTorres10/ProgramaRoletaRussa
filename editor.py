@@ -13,12 +13,12 @@ class EditorPerguntas:
     """
     def __init__(self, root):
         """
-        Construtor que inicializa a janela, carrega dados e cria os widgets.
+        Construtor que inicializa a janela, carrega os dados e cria os widgets.
         """
         self.root = root
         self.root.geometry("960x600")
 
-        # Carregar dados padrão ou arquivo existente
+        # Carrega os dados padrão ou uma base existente
         self.df = self.carregar_dados_padrao()
 
         # Cria o menu principal
@@ -59,7 +59,7 @@ class EditorPerguntas:
 
     def criar_widgets(self):
         """
-        Cria todos os elementos da interface gráfica: campos de texto, listbox, canvas etc.
+        Cria todos os elementos da interface gráfica: campos de texto, listbox, canvas, etc.
         """
 
         # --- Seção de pesquisa ---
@@ -240,8 +240,14 @@ class EditorPerguntas:
         row = self.df[self.df['pergunta'].str.contains(selected_text)].iloc[0]
 
         # Ajusta o Combobox de Rodada com base no valor de 'alternativas'
-        self.round_combobox.current(row['alternativas'] - 3)
-        # Atualiza a ordem das respostas para refletir a rodada correta
+        # (1ª e 2ª rodadas: alternativas = 3 ou 4; 3ª e 4ª: alternativas = 4)
+        if row['alternativas'] == 3:
+            self.round_combobox.current(0)
+        elif row['alternativas'] == 4:
+            self.round_combobox.current(1)
+        else:
+            self.round_combobox.current(2)
+        # Atualiza as opções de ordem para refletir a rodada correta
         self.atualizar_opcoes_ordem()
 
         # Habilita e limpa as entradas
@@ -261,19 +267,20 @@ class EditorPerguntas:
 
     def atualizar_canvas(self, row):
         """
-        Exibe a pergunta e as alternativas no Canvas, de acordo com o número de alternativas.
+        Updates the canvas with the question and answer choices based on the selected round.
+        Clears D: when switching from a 3rd/4th round question to a 1st/2nd round question.
         """
-        # Divide a pergunta em partes usando <br>
-        pergunta_parts = row['pergunta'].split('<br>')
+        # Split the question for <br> support
+        partes_pergunta = row['pergunta'].split('<br>')
 
-        # Atualiza a parte principal da pergunta
-        self.canvas.itemconfig(self.text_ids["perg1"], text=pergunta_parts[0])
-        if len(pergunta_parts) > 1:
-            self.canvas.itemconfig(self.text_ids["perg2"], text=pergunta_parts[1])
+        # Update the main question text
+        self.canvas.itemconfig(self.text_ids["perg1"], text=partes_pergunta[0])
+        if len(partes_pergunta) > 1:
+            self.canvas.itemconfig(self.text_ids["perg2"], text=partes_pergunta[1])
         else:
             self.canvas.itemconfig(self.text_ids["perg2"], text="")
 
-        # Se for rodada final, normalmente o texto já contém as alternativas
+        # If it's a Final Round question, remove all answer choices from the canvas
         if row['alternativas'] == 5:
             self.canvas.itemconfig(self.text_ids["alt1"], text="")
             self.canvas.itemconfig(self.text_ids["alt2"], text="")
@@ -281,65 +288,88 @@ class EditorPerguntas:
             self.canvas.itemconfig(self.text_ids["alt4"], text="")
             return
 
-        # Para as demais rodadas, exibe as alternativas individualmente
-        self.canvas.itemconfig(self.text_ids["alt1"], text=f"A: {row['resposta_certa']}")
-        self.canvas.itemconfig(self.text_ids["alt2"], text=f"B: {row['alternativa_1']}")
-        self.canvas.itemconfig(self.text_ids["alt3"], text=f"C: {row['alternativa_2']}")
+        # Default order for 1st/2nd and 3rd/4th rounds
+        alternativas_originais = [row['resposta_certa'], row['alternativa_1'], row['alternativa_2']]
+        labels = ["A: ", "B: ", "C: "]
+
+        # If it's a 3rd/4th round question, add the 4th answer choice
         if row['alternativas'] == 4:
-            self.canvas.itemconfig(self.text_ids["alt4"], text=f"D: {row['alternativa_3']}")
+            alternativas_originais.append(row['alternativa_3'])
+            labels.append("D: ")
+
+        # If 'embaralhar' is not "N", reorder the choices accordingly
+        if row['embaralhar'] != "N":
+            perm = str(row['embaralhar'])
+            nova_ordem = [alternativas_originais[int(ch) - 1] for ch in perm]
         else:
+            nova_ordem = alternativas_originais  # Keep original order
+
+        # Update the canvas with the reordered options
+        self.canvas.itemconfig(self.text_ids["alt1"], text=f"{labels[0]}{nova_ordem[0]}")
+        self.canvas.itemconfig(self.text_ids["alt2"], text=f"{labels[1]}{nova_ordem[1]}")
+        self.canvas.itemconfig(self.text_ids["alt3"], text=f"{labels[2]}{nova_ordem[2]}")
+
+        # If it's a 1st/2nd round question, clear the "D:" option
+        if row['alternativas'] == 3:
             self.canvas.itemconfig(self.text_ids["alt4"], text="")
+        else:
+            self.canvas.itemconfig(self.text_ids["alt4"], text=f"{labels[3]}{nova_ordem[3]}")
 
     def atualizar_opcoes_ordem(self, event=None):
         """
         Atualiza as opções de 'Ordem das Respostas' com base na rodada selecionada.
+        Se a opção for "Qualquer ordem", não haverá alteração (embaralhar = "N").
+        Caso contrário, o valor selecionado será convertido (ex.: "DCBA" → "4321").
         """
-        round_selected = self.round_combobox.get()
-        if round_selected in ["1ª e 2ª rodadas", "Rodada Final"]:
-            new_options = ["Qualquer ordem"] + [''.join(p) for p in permutations("ABC")]
-        elif round_selected == "3ª e 4ª rodadas":
-            new_options = ["Qualquer ordem"] + [''.join(p) for p in permutations("ABCD")]
+        rodada_selecionada = self.round_combobox.get()
+        if rodada_selecionada in ["1ª e 2ª rodadas", "Rodada Final"]:
+            novas_opcoes = ["Qualquer ordem"] + [''.join(p) for p in permutations("ABC")]
+        elif rodada_selecionada == "3ª e 4ª rodadas":
+            novas_opcoes = ["Qualquer ordem"] + [''.join(p) for p in permutations("ABCD")]
         else:
-            new_options = ["Qualquer ordem"]
+            novas_opcoes = ["Qualquer ordem"]
 
-        self.order_combobox["values"] = new_options
+        self.order_combobox["values"] = novas_opcoes
         self.order_combobox.current(0)
 
     def adicionar_pergunta(self):
         """
         Adiciona uma nova pergunta ao DataFrame, dependendo da rodada selecionada.
-        Para a Rodada Final, valida que o formato da pergunta seja "A, B, C. Question" e
-        que a resposta certa seja A, B, C ou 1, 2, 3 (convertendo se necessário).
+        Para rodadas 1/2 e 3/4, valida e armazena a ordem das respostas escolhida.
+        Para a Rodada Final, a validação permanece conforme implementado anteriormente.
         """
         data = {key: entry.get() for key, entry in self.entries.items()}
 
-        # Rodadas 1 e 2
+        # Rodadas 1 e 2 (índices 0 e 1 na combobox)
         if self.round_combobox.current() < 2:
             if self.round_combobox.current() == 0:
                 data['alternativa_3'] = '-'
-            data['alternativas'] = self.round_combobox.current() + 3
-            data['embaralhar'] = 'N'
+                data['alternativas'] = 3
+            else:
+                data['alternativas'] = 4
+            # Processa a opção de ordem selecionada
+            ordem = self.order_combobox.get()
+            if ordem == "Qualquer ordem":
+                data['embaralhar'] = "N"
+            else:
+                mapeamento = {'A': '1', 'B': '2', 'C': '3', 'D': '4'}
+                data['embaralhar'] = "".join(mapeamento[letra] for letra in ordem)
+            data['embaralhar'] = data['embaralhar']
+            print(data)
             self.df = pd.concat([self.df, pd.DataFrame(data, index=[0])], ignore_index=True)
 
         # Rodada Final
         else:
             text = data["pergunta"].strip()
-            # Valida se há um ponto e divide a string
             if '.' not in text:
-                messagebox.showerror("Pergunta inválida!",
-                                     "A pergunta da rodada final precisa estar separada das alternativas por ponto.")
+                messagebox.showerror("Pergunta inválida!", "A pergunta da rodada final precisa ter 3 alternativas")
                 return
-            alternatives_text, question_text = text.split('.', 1)
-            # Divide as alternativas usando vírgula e espaço
-            alternatives_list = [alt.strip() for alt in alternatives_text.split(',')]
-            if len(alternatives_list) != 3:
-                messagebox.showerror("Pergunta inválida!",
-                                     "A pergunta da rodada final precisa ter 3 alternativas ou uma das alternativas " +
-                                     "tem ponto ou vírgula, o que pode confundir o jogo. Se isso for o caso, retire " +
-                                     "o ponto ou vírgula para que o jogo não tenha problemas ao ler a pergunta.")
+            alternativas_texto, texto_pergunta = text.split('.', 1)
+            alternativas_lista = [alt.strip() for alt in alternativas_texto.split(',')]
+            if len(alternativas_lista) != 3:
+                messagebox.showerror("Pergunta inválida!", "A pergunta da rodada final precisa ter 3 alternativas")
                 return
 
-            # Validação e conversão da resposta certa
             resp_certa = data["resposta_certa"].strip()
             if resp_certa in ['1', '2', '3']:
                 data["resposta_certa"] = chr(64 + int(resp_certa))  # Converte 1->A, 2->B, 3->C
@@ -349,8 +379,7 @@ class EditorPerguntas:
                 messagebox.showerror("Pergunta inválida!", "A resposta certa deve ser A, B, C ou 1, 2, 3")
                 return
 
-            # Reconstroi a pergunta de forma normalizada
-            data["pergunta"] = f"{', '.join(alternatives_list)}. {question_text.strip()}"
+            data["pergunta"] = f"{', '.join(alternativas_lista)}. {texto_pergunta.strip()}"
             data['alternativas'] = 5
             data['embaralhar'] = 'N'
             self.df = pd.concat([self.df, pd.DataFrame(data, index=[0])], ignore_index=True)
@@ -362,55 +391,81 @@ class EditorPerguntas:
     def substituir_pergunta(self):
         """
         Substitui a pergunta selecionada no DataFrame pelos dados atualmente nos campos de texto.
-        Para a Rodada Final, valida o formato da pergunta e da resposta certa.
+        Agora captura a pergunta completa do Canvas, garantindo a substituição correta.
+        Para a Rodada Final, mantém a lógica de validação e atualização correta.
         """
-        # Usa o texto atual do Canvas (perg1) para identificar a pergunta (poderia ser melhorado)
-        current_text = self.canvas.itemcget(self.text_ids["perg1"], 'text')
-        new_data = {key: entry.get() for key, entry in self.entries.items()}
+        # Obtém o texto completo da pergunta do Canvas
+        pergunta_parte1 = self.canvas.itemcget(self.text_ids["perg1"], 'text')
+        pergunta_parte2 = self.canvas.itemcget(self.text_ids["perg2"], 'text')
 
-        # Rodadas 1 e 2
+        # Junta as partes da pergunta, tratando casos onde há apenas uma linha
+        pergunta_completa = pergunta_parte1
+        if pergunta_parte2:
+            pergunta_completa += "<br>" + pergunta_parte2
+
+        # Obtém os novos valores dos campos de entrada
+        nova_pergunta = {key: entry.get().strip() for key, entry in self.entries.items()}
+
+        # Localiza a pergunta correta na base de dados
+        mask = self.df["pergunta"] == pergunta_completa
+        if not mask.any():
+            messagebox.showerror("Erro ao substituir", "A pergunta não foi encontrada na base.")
+            return
+
+        # Se for uma pergunta das rodadas 1/2 ou 3/4
         if self.round_combobox.current() < 2:
-            self.df.loc[self.df["pergunta"] == current_text, "pergunta"] = new_data["pergunta"]
-            self.df.loc[self.df["pergunta"] == current_text, "resposta_certa"] = new_data["resposta_certa"]
-            self.df.loc[self.df["pergunta"] == current_text, "alternativa_1"] = new_data["alternativa_1"]
-            self.df.loc[self.df["pergunta"] == current_text, "alternativa_2"] = new_data["alternativa_2"]
-            self.df.loc[self.df["pergunta"] == current_text, "alternativa_3"] = (
-                new_data["alternativa_3"] if self.round_combobox.current() == 1 else '-'
-            )
-            self.df.loc[self.df["pergunta"] == current_text, "alternativas"] = self.round_combobox.current() + 3
+            self.df.loc[mask, "pergunta"] = nova_pergunta["pergunta"]
+            self.df.loc[mask, "resposta_certa"] = nova_pergunta["resposta_certa"]
+            self.df.loc[mask, "alternativa_1"] = nova_pergunta["alternativa_1"]
+            self.df.loc[mask, "alternativa_2"] = nova_pergunta["alternativa_2"]
 
-        # Rodada Final
-        else:
-            text = new_data["pergunta"].strip()
-            if '.' not in text:
-                messagebox.showerror("Pergunta inválida!",
-                                     "A pergunta da rodada final precisa estar separada das alternativas por ponto.")
-                return
-            alternatives_text, question_text = text.split('.', 1)
-            alternatives_list = [alt.strip() for alt in alternatives_text.split(',')]
-            if len(alternatives_list) != 3:
-                messagebox.showerror("Pergunta inválida!",
-                                     "A pergunta da rodada final precisa ter 3 alternativas ou uma das alternativas " +
-                                     "tem ponto ou vírgula, o que pode confundir o jogo. Se isso for o caso, retire " +
-                                     "o ponto ou vírgula para que o jogo não tenha problemas ao ler a pergunta.")
-                return
+            if self.round_combobox.current() == 1:  # Rodadas 3 e 4 (com 4 alternativas)
+                self.df.loc[mask, "alternativa_3"] = nova_pergunta["alternativa_3"]
+                self.df.loc[mask, "alternativas"] = 4
+            else:  # Rodadas 1 e 2 (com 3 alternativas)
+                self.df.loc[mask, "alternativa_3"] = "-"
+                self.df.loc[mask, "alternativas"] = 3
 
-            resp_certa = new_data["resposta_certa"].strip()
-            if resp_certa in ['1', '2', '3']:
-                new_data["resposta_certa"] = chr(64 + int(resp_certa))
-            elif resp_certa.upper() in ['A', 'B', 'C']:
-                new_data["resposta_certa"] = resp_certa.upper()
+            # Atualiza a ordem das respostas
+            ordem = self.order_combobox.get()
+            if ordem == "Qualquer ordem":
+                self.df.loc[mask, "embaralhar"] = "N"
             else:
-                messagebox.showerror("Pergunta inválida!", "A resposta certa deve ser A, B, C ou 1, 2, 3")
+                mapeamento = {'A': '1', 'B': '2', 'C': '3', 'D': '4'}
+                nova_ordem = "".join(mapeamento[letra] for letra in ordem)
+                self.df.loc[mask, "embaralhar"] = nova_ordem
+
+        # Se for uma pergunta da Rodada Final
+        else:
+            text = nova_pergunta["pergunta"].strip()
+            if '.' not in text:
+                messagebox.showerror("Pergunta inválida!", "A pergunta da rodada final precisa ter 3 alternativas.")
+                return
+            alternativas_texto, texto_pergunta = text.split('.', 1)
+            alternativas_lista = [alt.strip() for alt in alternativas_texto.split(',')]
+            if len(alternativas_lista) != 3:
+                messagebox.showerror("Pergunta inválida!", "A pergunta da rodada final precisa ter 3 alternativas.")
                 return
 
-            new_question_text = f"{', '.join(alternatives_list)}. {question_text.strip()}"
-            mask = self.df["pergunta"].str.contains(current_text)
-            self.df.loc[mask, "pergunta"] = new_question_text
-            self.df.loc[mask, "resposta_certa"] = new_data["resposta_certa"]
+            # Valida e converte a resposta correta
+            resp_certa = nova_pergunta["resposta_certa"].strip()
+            if resp_certa in ['1', '2', '3']:
+                nova_pergunta["resposta_certa"] = chr(64 + int(resp_certa))  # Converte 1→A, 2→B, 3→C
+            elif resp_certa.upper() in ['A', 'B', 'C']:
+                nova_pergunta["resposta_certa"] = resp_certa.upper()
+            else:
+                messagebox.showerror("Pergunta inválida!", "A resposta certa deve ser A, B, C ou 1, 2, 3.")
+                return
+
+            # Atualiza a pergunta com a formatação correta
+            nova_pergunta_texto = f"{', '.join(alternativas_lista)}. {texto_pergunta.strip()}"
+            self.df.loc[mask, "pergunta"] = nova_pergunta_texto
+            self.df.loc[mask, "resposta_certa"] = nova_pergunta["resposta_certa"]
             self.df.loc[mask, ["alternativa_1", "alternativa_2", "alternativa_3"]] = '-'
             self.df.loc[mask, "alternativas"] = 5
+            self.df.loc[mask, "embaralhar"] = "N"  # Rodada final não tem ordem embaralhada
 
+        # Atualiza a lista de perguntas
         self.atualizar_listbox(self.df)
         messagebox.showinfo("Pergunta substituída!",
                             "A pergunta foi substituída com sucesso! Não esqueça de salvar a base.")
