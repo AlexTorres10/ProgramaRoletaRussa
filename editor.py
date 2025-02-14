@@ -262,6 +262,22 @@ class EditorPerguntas:
         self.entries["alternativa_2"].insert(0, row['alternativa_2'])
         self.entries["alternativa_3"].insert(0, row['alternativa_3'] if row['alternativas'] >= 4 else '')
 
+        # Verifica o valor de 'embaralhar' e atualiza o order_combobox
+        embaralhar_val = str(row['embaralhar']).strip()
+        # Para rodadas 1/2 ou 3/4, o número esperado de dígitos é igual ao número de alternativas (3 ou 4)
+        expected_len = row['alternativas'] if row['alternativas'] in [3, 4] else 0
+
+        # Se 'embaralhar' for "N" ou não tiver o tamanho esperado ou não conter exatamente os dígitos necessários,
+        # define a opção como "Qualquer ordem"
+        if embaralhar_val == "N" or len(embaralhar_val) != expected_len or set(embaralhar_val) != set(
+                str(i) for i in range(1, expected_len + 1)):
+            self.order_combobox.set("Qualquer ordem")
+        else:
+            # Converte cada dígito para a letra correspondente (1->A, 2->B, 3->C, 4->D)
+            mapping = {'1': 'A', '2': 'B', '3': 'C', '4': 'D'}
+            order_letters = "".join(mapping[d] for d in embaralhar_val)
+            self.order_combobox.set(order_letters)
+
         # Atualiza o Canvas
         self.atualizar_canvas(row)
 
