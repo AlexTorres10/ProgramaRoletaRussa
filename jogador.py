@@ -195,7 +195,7 @@ class Jogador:
     def bot_escolhe(self, escolhas, lider, nao_respondeu, nao_respondeu_nunca, rodada, pergunta, dinheiro_rodada):
         if rodada == 4 and pergunta == 5:  # Se estiver na última pergunta
             outro = [esc for esc in escolhas if esc != self][0]
-            if abs(self.dinheiro - outro.dinheiro) > dinheiro_rodada[rodada]:
+            if abs(self.dinheiro - outro.dinheiro) > dinheiro_rodada:
                 # Se não alcança o outro se acertar...
                 escolhas = [esc for esc in escolhas if esc != self]
                 # Desafie o outro obrigatoriamente.

@@ -351,11 +351,10 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 blit_varios_buracos(list_buracos=buracos_abertos_final, c='final')
                 aberto_e_vermelho = [v for v in vermelhos if v in buracos_abertos_final]
                 blit_varios_buracos(list_buracos=aberto_e_vermelho)
-            pygame.time.delay(1000)
-        pygame.time.delay(300)
+            pygame.time.delay(randint(1000))
+        pygame.time.delay(randint(50, 300))
         if not final:
             if jogador_em_risco.pos in vermelhos:
-                pygame.time.delay(200)
                 sons['queda'].play(0)
                 jogadores_aux = copy_jogadores(jogadores)
                 quedas.append({'modo': 'normal', 'vermelhos': vermelhos,
@@ -367,7 +366,6 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
                 blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco)
                 return True
             else:
-                pygame.time.delay(200)
                 sons['escapou'].play(0)
                 sons['aplausos2'].play()
                 return False
@@ -1115,7 +1113,7 @@ def iniciar_jogo():
 
                 escolhido = desafiante.bot_escolhe(get_escolhas(jogadores, desafiante), get_leader(jogadores),
                                                    nao_respondeu, nao_respondeu_nunca, rodada, num_pergunta + 1,
-                                                   dinheiro_rodada)
+                                                   dinheiro_rodada[rodada - 1])
             if escolhido is None:
                 return
             if escolhido in nao_respondeu:
@@ -2533,7 +2531,7 @@ creditos = Botao('Créditos', 1850, 850)
 sair = Botao('Sair', 1850, 950)
 sair_do_jogo = Botao('Sair do jogo', 10, 10, tam=30, align='topleft')
 volta_menu = Botao('Voltar para o menu', 10, 10, tam=30, align='topleft')
-versao_do_jogo = Texto('Versão 3.7', 'FreeSansBold', 48, 40, 1000)
+versao_do_jogo = Texto('Versão 3.7.1', 'FreeSansBold', 48, 40, 1000)
 
 img_pergunta = Image('img/pergunta_espera.png', 310, 680)
 
