@@ -38,7 +38,7 @@ class Jogador:
             w.fill('black')
             s.show_texto(w)
             mostra_essentials(w, ess)
-            mostra_jogadores(w, jog, self.currency, self.sep, self.front)
+            mostra_jogadores(w, jog)
             pygame.time.delay(45)
             pygame.display.update()
         if outro_jogador.dinheiro > 0:
@@ -47,7 +47,7 @@ class Jogador:
             w.fill('black')
             s.show_texto(w)
             mostra_essentials(w, ess)
-            mostra_jogadores(w, jog, self.currency, self.sep, self.front)
+            mostra_jogadores(w, jog)
             pygame.display.update()
 
         if (self.dinheiro % 10) >= 8:
@@ -55,7 +55,7 @@ class Jogador:
             w.fill('black')
             s.show_texto(w)
             mostra_essentials(w, ess)
-            mostra_jogadores(w, jog, self.currency, self.sep, self.front)
+            mostra_jogadores(w, jog)
             pygame.display.update()
 
     def ganha_dinheiro(self, dinheiro, w, s, ess, jog, img_pergunta):
@@ -65,7 +65,7 @@ class Jogador:
             s.show_texto(w)
             self.dinheiro += fatias
             mostra_essentials(w, ess)
-            mostra_jogadores(w, jog, self.currency, self.sep, self.front)
+            mostra_jogadores(w, jog)
             img_pergunta.draw(w)
 
             if self.front:
@@ -131,12 +131,12 @@ class Jogador:
             text_rect = texto_nome.get_rect(center=pos_nome[0])
         window.blit(texto_nome, text_rect)
 
-    def display_dinheiro(self, window, fv=False, currency="R$", sep='.', front=True):
-        dinheiro = f'{self.dinheiro:,.0f}'.replace(',', sep)
-        if front:
-            text_dinheiro = currency + " " + dinheiro
+    def display_dinheiro(self, window, fv=False):
+        dinheiro = f'{self.dinheiro:,.0f}'.replace(',', self.sep)
+        if self.front:
+            text_dinheiro = self.currency + " " + dinheiro
         else:
-            text_dinheiro = dinheiro + " " + currency
+            text_dinheiro = dinheiro + " " + self.currency
         texto_dinheiro = pygame.font.Font('fonts/FreeSans.ttf', self.tam_fonte).render(text_dinheiro,
                                                                                        True, (255, 255, 255))
         if not fv:
@@ -227,18 +227,18 @@ class Jogador:
         return choice(escolhas)
 
 
-def mostra_jogadores(window, jogadores, currency="R$", sep='.', front=True):
+def mostra_jogadores(window, jogadores):
     if len(jogadores) > 1:
         for pl in jogadores:
             if not pl.eliminado:
                 pl.image.draw(window)
                 pl.display_nome(window)
-                pl.display_dinheiro(window, currency=currency, sep=sep, front=front)
+                pl.display_dinheiro(window)
     else:
         for pl in jogadores:
             pl.image.draw(window)
             pl.display_nome(window, fv=True)
-            pl.display_dinheiro(window, fv=True, currency=currency, sep=sep, front=front)
+            pl.display_dinheiro(window, fv=True)
 
 
 def copy_jogadores(jogadores):
@@ -318,3 +318,7 @@ def passa_pra_quem(escolhas, s):
                     return [pl for pl in escolhas if pl.pos == 4][0]
                 if ((ev.key == pygame.K_5) or (ev.key == pygame.K_KP5)) and (5 in num_escolhas):
                     return [pl for pl in escolhas if pl.pos == 5][0]
+                if ev.key == pygame.K_F11:
+                    pygame.mixer.Sound('sons/rr_aplausos1.mp3').play()
+                if ev.key == pygame.K_F12:
+                    pygame.mixer.Sound('sons/rr_aplausos2.mp3').play()
