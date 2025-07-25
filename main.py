@@ -952,7 +952,7 @@ def iniciar_jogo():
     df_jogadores = pd.read_json("players.json")
     jogadores = []
     zonas_de_risco = [[0], [0, 3], [0, 2, 4], [0, 2, 3, 4], [0, 1, 2, 3, 4]]
-    dinheiro_rodada = [1000, 1200, 1500, 2000, 3000, 5000]
+    dinheiro_rodada = [1000, 1200, 1500, 2000, 5000, 10000]
     qtd_alternativas = [3, 3, 4, 4]
 
     sons['tema'].play(0)
@@ -2069,65 +2069,80 @@ def mostra_regras():
     limpa_tela(window)
     sons['question'].play()
     titulo = 'REGRAS: ROLETA RUSSA'
-    texto = '           O jogo possui exatamente 6 buracos, 5 jogadores, 4 rodadas de eliminação e a rodada final. ' \
-            'No início do ' \
-            'jogo, cada jogador recebe R$ 1.000. Ao \nfinal de ' \
-            'cada uma das rodadas, um jogador é eliminado. Cada rodada tem até 5 perguntas, que serão repassadas de ' \
-            'jogador para jogador, com exceção \nda 4ª rodada, onde é possível repassar para si mesmo.\n           ' \
-            'O jogador terá 15 segundos para responder a pergunta. Se não responder, é eliminado e cai no buraco ' \
-            'automaticamente, perdendo seu dinheiro \npara o desafiante e encerrando a rodada. Se acertar a ' \
-            'pergunta, ele ganha dinheiro. Mas se errar, ele perde seu dinheiro para o ' \
-            'desafiante e deverá jogar \na roleta com uma determinada chance de cair, ' \
-            'representada pela quantidade de buracos vermelhos apresentados antes da pergunta. ' \
-            'Se o vermelho não \nparar no jogador, a rodada continua e ele será ' \
-            'o próximo desafiante, ' \
-            'caso não seja a última pergunta da rodada. Caso pare, o jogador cai no buraco, está \neliminado ' \
-            'e a rodada está encerrada.\n           A cada pergunta, o risco de cair aumenta. Na ' \
-            '1ª pergunta, um erro dá 1 chance ' \
-            'em 6 de cair, na 2ª pergunta, serão 2 chances de cair e ' \
-            'assim por\ndiante até a 5ª pergunta. Se após as 5 perguntas, ninguém for eliminado, o jogador que ' \
-            'tiver mais dinheiro entre todos, denominado líder, está imune e \n' \
-            'jogará a roleta para eliminar um de seus oponentes. Caso haja um empate entre dois ou ' \
-            'mais jogadores, ninguém fica imune e a roleta deverá ser jogada \ncom todos os jogadores tendo chance ' \
-            'de cair. O jogador que for eliminado terá seu dinheiro repartido igualmente ' \
-            'entre os jogadores restantes.\n           Da 1ª à 4ª rodada, os valores da resposta certa são R$ 1.000, ' \
-            'R$ 1.200, R$ 1.500 e R$ 2.000, respectivamente. Nas 1ª e 2ª rodadas, cada per-\ngunta terá 3 alternativas ' \
-            'de resposta, e na 3ª e 4ª rodadas, serão ' \
-            '4 alternativas de resposta.\n           Ao restar 1 jogador apenas, este será o finalista e ' \
-            'participará da rodada ' \
-            'final. O finalista já tem garantido, no mínimo, todo o dinheiro acumulado \naté então no jogo. Na ' \
-            'rodada ' \
-            'final, ele terá 1 minuto para responder corretamente 8 perguntas. A cada 10 segundos, um buraco se ' \
-            'abre. Caso a resposta \nesteja certa, ele ganha R$ 3.000, se não souber ele pode ' \
-            'passar a pergunta e respondê-la em outro momento. Se ele errar ou o tempo acabar, o jogador \ncai no ' \
-            'buraco ganhando o dinheiro inicial + R$ 3.000 por cada resposta certa. Se conseguir acertar as 8 ' \
-            'perguntas em menos de 1 minuto, a contagem é \nparada, e além dos R$ 5.000 por cada resposta certa, ' \
-            'receberá um adicional de R$ 5.000, totalizando R$ 50.000 por ter passado pelas 8 perguntas. \nDepois, ' \
-            'são contados os buracos abertos durante as perguntas para ver quantas chances o ' \
-            'finalista terá para ganhar o prêmio máximo de R$ 500.000. \nPor exemplo, ' \
-            'se 5 buracos se abriram, a roleta será jogada ' \
-            'com 5 chances de cair e 1 de continuar. Se o finalista escapar do vermelho, ganha os \nR$ 500.000. ' \
-            'Caso contrário, ele cai no buraco, mas com todo o dinheiro ganho até então.'
-
     frase = '"Um vacilo, um erro, e um de vocês irá para o buraco. ASSIM Ó!" - Milton Neves'
-    texto_split = texto.split('\n')
+
+    # Fonte usada para medir largura
+    import pygame.freetype
+    font_path = 'fonts/FreeSans.ttf'
+    font_size = 27
+    font = pygame.freetype.Font(font_path, font_size)
+    max_width = 1840
+
+    # Texto bruto (sem quebras)
+    texto_bruto = (
+        'O jogo possui exatamente 6 buracos, 5 jogadores, 4 rodadas de eliminação e a rodada final. No início do '
+        'jogo, cada jogador recebe R$ 1.000. Ao final de cada uma das rodadas, um jogador é eliminado. Cada rodada '
+        'tem até 5 perguntas, que serão repassadas de jogador para jogador, com exceção da 4ª rodada, onde é possível '
+        'repassar para si mesmo. O jogador terá 15 segundos para responder a pergunta. Se não responder, é eliminado '
+        'e cai no buraco automaticamente, perdendo seu dinheiro para o desafiante e encerrando a rodada. Se acertar a '
+        'pergunta, ele ganha dinheiro. Mas se errar, ele perde seu dinheiro para o desafiante e deverá jogar a roleta '
+        'com uma determinada chance de cair, representada pela quantidade de buracos vermelhos apresentados antes da '
+        'pergunta. Se o vermelho não parar no jogador, a rodada continua e ele será o próximo desafiante, caso não '
+        'seja a última pergunta da rodada. Caso pare, o jogador cai no buraco, está eliminado e a rodada está '
+        'encerrada. A cada pergunta, o risco de cair aumenta. Na 1ª pergunta, um erro dá 1 chance em 6 de cair, na 2ª '
+        'pergunta, serão 2 chances de cair e assim por diante até a 5ª pergunta. Se após as 5 perguntas, ninguém for '
+        'eliminado, o jogador que tiver mais dinheiro entre todos, denominado líder, está imune e jogará a roleta para '
+        'eliminar um de seus oponentes. Caso haja um empate entre dois ou mais jogadores, ninguém fica imune e a '
+        'roleta deverá ser jogada com todos os jogadores tendo chance de cair. O jogador que for eliminado terá seu '
+        'dinheiro repartido igualmente entre os jogadores restantes. Da 1ª à 4ª rodada, os valores da resposta certa '
+        'são R$ 1.000, R$ 1.200, R$ 1.500 e R$ 2.000, respectivamente. Nas 1ª e 2ª rodadas, cada pergunta terá 3 '
+        'alternativas de resposta, e na 3ª e 4ª rodadas, serão 4 alternativas de resposta. Ao restar 1 jogador apenas, '
+        'este será o finalista e participará da rodada final. O finalista já tem garantido, no mínimo, todo o dinheiro '
+        'acumulado até então no jogo. Na rodada final, ele terá 1 minuto para responder corretamente 8 perguntas. A '
+        'cada 10 segundos, um buraco se abre. Caso a resposta esteja certa, ele ganha R$ 5.000, se não souber ele pode '
+        'passar a pergunta e respondê-la em outro momento. Se ele errar ou o tempo acabar, o jogador cai no buraco '
+        'ganhando o dinheiro inicial + R$ 5.000 por cada resposta certa. Se conseguir acertar as 8 perguntas em menos '
+        'de 1 minuto, a contagem é parada, e além dos R$ 5.000 por cada resposta certa, receberá um adicional de '
+        'R$ 10.000, totalizando R$ 50.000 por ter passado pelas 8 perguntas. Depois, são contados os buracos abertos '
+        'durante as perguntas para ver quantas chances o finalista terá para ganhar o prêmio máximo de R$ 500.000. '
+        'Por exemplo, se 5 buracos se abriram, a roleta será jogada com 5 chances de cair e 1 de continuar. Se o '
+        'finalista escapar do vermelho, ganha os R$ 500.000. Caso contrário, ele cai no buraco, mas com todo o dinheiro '
+        'ganho até então.'
+    )
+
+    # Quebra de linha automática
+    palavras = texto_bruto.split()
+    linhas = []
+    linha_atual = ""
+    for palavra in palavras:
+        tentativa = f"{linha_atual} {palavra}".strip()
+        largura = font.get_rect(tentativa).width
+        if largura <= max_width:
+            linha_atual = tentativa
+        else:
+            linhas.append(linha_atual)
+            linha_atual = palavra
+    if linha_atual:
+        linhas.append(linha_atual)
+
+    # Título
     txt_titulo = Texto(titulo, 'FreeSansBold', 48, 960, 40)
     txt_titulo.show_texto(window, 'center')
 
     volta_menu.show_texto(window)
 
-    for t, i in zip(texto_split, range(len(texto_split))):
-        txt_regras = Texto(t, 'FreeSans', 27, 45, 80 + 35 * i)
-        txt_regras.show_texto(window, 'topleft')
+    # Renderizar texto linha por linha
+    for i, linha in enumerate(linhas):
+        txt = Texto(linha, 'FreeSans', font_size, 45, 80 + 35 * i)
+        txt.show_texto(window, 'topleft')
 
     txt_frase = Texto(frase, 'FreeSansBold', 48, 960, 1020)
     txt_frase.show_texto(window, 'center')
 
+    # Loop
     loop_regras = True
     while loop_regras:
-
         pygame.display.update()
-
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
                 pygame.quit()
@@ -2145,54 +2160,86 @@ def mostra_creditos():
     sons['creditos'].play()
 
     titulo = 'CRÉDITOS'
-    cred = ['Códigos e imagens - Alex Torres',
-            'Tecnologias utilizadas - Biblioteca Pygame',
-            'Músicas de fundo - Network Music Ensemble (c) 2011',
-            'Inspiração de código - QWERule Studios (autores da versão russa do jogo que colocaram parte do '
-            'código no GitHub)',
-            'Criação do formato de jogo e outras músicas de fundo e sons - Gunnar Wetterberg e Sony Pictures Television']
-    agrad = 'AGRADECIMENTOS'
-    list_ag = ['- Jesus Cristo. Primeiramente e principalmente, a Ele, pois sem Ele nada sou. O desejo de fazer '
-               'o jogo da versão brasileira do ',
-               'Roleta Russa (havia as versões americana e russa) sempre esteve na minha mente e só consigo ver Ele '
-               'como a pessoa que nunca ',
-               'tirou esse pensamento da mente. '
-               'Foi somente quando encontrei uma por uma as músicas de fundo usadas quando vi que esse jogo ',
-               'poderia ser feito. Não é dos mais sofisticados, na verdade é o primeiro jogo que fiz, mas é feito com '
-               'muito amor. Não tenho intenção de ',
-               'lucrar com o jogo (tanto que está no GitHub) nem infringir direitos autorais, apenas de divertir '
-               '(e dar um upgrade no currículo, né?).',
-               ' ',
-               '- Meus pais Alex & Juliana - Por me fazerem a pessoa que eu sou. Inclusive eles assistiam o programa e '
-               'eu por consequência também, ',
-               'aos meros 5 anos. E gostei tanto do programa que fiz um jogo.', ' ',
-               '- Misael Castro - Meu discipulador que me motivou a fazer o jogo após eu ter encontrado as '
-               'músicas utilizadas no programa.', ' ',
-               '- Alexandre Simplício - Líder da minha célula que inspira muito a todos em seu redor.',
-               ' ',
-               '- Emilia Tainá - Amiga de célula, professora de português que revisou meus textos do jogo.', ' ',
-               '- Célula HOME (@gdshome no Instagram) - Ter amigos como vocês é 1000000x melhor do que escapar de 5 '
-               'vermelhos.', ' ',
-               '- RecordTV - Por ter trazido este magnífico programa à televisão brasileira.', ' ',
-               '- Milton Neves - Por ter conduzido cada Roleta Russa com maestria, emoção e dedicação. Olho para o '
-               'Milton e continuo o associando ', 'muito mais ao Roleta Russa do que programas esportivos.', ' ',
-               '- Stack Overflow - E qual programador não agradeceria?']
-
     txt_titulo = Texto(titulo, 'FreeSansBold', 48, 960, 40)
     txt_titulo.show_texto(window, 'center')
-    for c, i in zip(cred, range(len(cred))):
-        txt_cred = Texto(c, 'FreeSans', 30, 100, 70 + 35 * i)
-        txt_cred.show_texto(window, 'topleft')
 
-    txt_titulo_2 = Texto(agrad, 'FreeSansBold', 48, 960, 280)
+    cred = [
+        'Códigos e imagens - Alex Torres',
+        'Tecnologias utilizadas - Biblioteca Pygame',
+        'Músicas de fundo - Network Music Ensemble (c) 2011',
+        'Inspiração de código - QWERule Studios (autores da versão russa do jogo que colocaram parte do código no GitHub)',
+        'Criação do formato de jogo e outras músicas de fundo e sons - Gunnar Wetterberg e Sony Pictures Television'
+    ]
+
+    agrad = 'AGRADECIMENTOS'
+    list_ag = [
+        '- Jesus Cristo. Primeiramente e principalmente, a Ele, pois sem Ele nada sou. O desejo de fazer o jogo da versão brasileira do Roleta Russa (havia as versões americana e russa) sempre esteve na minha mente e só consigo ver Ele como a pessoa que nunca tirou esse pensamento da mente. Foi somente quando encontrei uma por uma as músicas de fundo usadas quando vi que esse jogo poderia ser feito. Não é dos mais sofisticados, na verdade é o primeiro jogo que fiz, mas é feito com muito amor. Não tenho intenção de lucrar com o jogo (tanto que está no GitHub) nem infringir direitos autorais, apenas de divertir (e dar um upgrade no currículo, né?).',
+        '- Meus pais Alex & Juliana - Por me fazerem a pessoa que eu sou. Inclusive eles assistiam o programa e eu por consequência também, aos meros 5 anos. E gostei tanto do programa que fiz um jogo.',
+        '- Misael Castro - Meu discipulador que me motivou a fazer o jogo após eu ter encontrado as músicas utilizadas no programa.',
+        '- Alexandre Simplício - Líder da minha célula que inspira muito a todos em seu redor.',
+        '- Emilia Tainá - Amiga de célula, professora de português que revisou meus textos do jogo.',
+        '- Célula HOME (@gdshome no Instagram) - Ter amigos como vocês é 1000000x melhor do que escapar de 5 vermelhos.',
+        '- RecordTV - Por ter trazido este magnífico programa à televisão brasileira.',
+        '- Milton Neves - Por ter conduzido cada Roleta Russa com maestria, emoção e dedicação. Olho para o Milton e continuo o associando muito mais ao Roleta Russa do que programas esportivos.',
+        '- Stack Overflow - E qual programador não agradeceria?'
+    ]
+
+    font = pygame.font.Font('fonts/FreeSans.ttf', 30)
+    max_width = 1700
+    y = 80
+
+    for linha in cred:
+        palavras = linha.split()
+        linha_atual = ""
+        for palavra in palavras:
+            tentativa = f"{linha_atual} {palavra}".strip()
+            largura = font.size(tentativa)[0]
+            if largura <= max_width:
+                linha_atual = tentativa
+            else:
+                txt = Texto(linha_atual, 'FreeSans', 30, 100, y)
+                txt.show_texto(window, 'topleft')
+                y += 35
+                linha_atual = palavra
+        if linha_atual:
+            txt = Texto(linha_atual, 'FreeSans', 30, 100, y)
+            txt.show_texto(window, 'topleft')
+            y += 35
+
+    # Título dos agradecimentos
+    txt_titulo_2 = Texto(agrad, 'FreeSansBold', 48, 960, y + 50)
     txt_titulo_2.show_texto(window, 'center')
-    for ag, i in zip(list_ag, range(len(list_ag))):
-        txt_agrad = Texto(ag, 'FreeSans', 30, 100, 310 + 32 * i)
-        txt_agrad.show_texto(window, 'topleft')
+    y += 100
+
+    for bloco in list_ag:
+        if bloco.strip() == "":
+            y += 16  # espaço extra
+            continue
+        palavras = bloco.split()
+        linha_atual = ""
+        primeira_linha = True
+        for palavra in palavras:
+            tentativa = f"{linha_atual} {palavra}".strip()
+            largura = font.size(tentativa)[0]
+            if largura <= max_width:
+                linha_atual = tentativa
+            else:
+                if primeira_linha and bloco.strip().startswith('-'):
+                    linha_atual = "     " + linha_atual
+                    primeira_linha = False
+                txt = Texto(linha_atual, 'FreeSans', 30, 100, y)
+                txt.show_texto(window, 'topleft')
+                y += 35
+                linha_atual = palavra
+        if linha_atual:
+            if primeira_linha and bloco.strip().startswith('-'):
+                linha_atual = "     " + linha_atual
+            txt = Texto(linha_atual, 'FreeSans', 30, 100, y)
+            txt.show_texto(window, 'topleft')
+            y += 35
 
     loop_creditos = True
     while loop_creditos:
-
         pygame.display.update()
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:

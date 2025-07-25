@@ -5,7 +5,8 @@ from PIL import Image, ImageTk
 from tkinter.font import Font
 from random import randint, shuffle
 from itertools import permutations
-
+import os
+from PIL import ImageFont
 
 class EditorPerguntas:
     """
@@ -165,15 +166,25 @@ class EditorPerguntas:
 
     def carregar_imagem_canvas(self):
         """
-        Carrega a imagem de fundo no Canvas. Ajuste o caminho conforme necessário.
+        Carrega a imagem de fundo no Canvas. Tenta primeiro a pasta local,
+        depois a pasta de instalação padrão.
         """
-        try:
-            image = Image.open("img/pergunta_espera.png")
-            image = image.resize((int(image.width * 0.46), int(image.height * 0.46)))
-            self.photo = ImageTk.PhotoImage(image)
-            self.canvas.create_image(0, 0, anchor="nw", image=self.photo)
-        except Exception as e:
-            print("Erro ao carregar a imagem:", e)
+        caminhos = [
+            "img/pergunta_espera.png",
+            r"C:\Program Files (x86)\Roleta Russa\img\pergunta_espera.png"
+        ]
+
+        for caminho in caminhos:
+            if os.path.exists(caminho):
+                try:
+                    image = Image.open(caminho)
+                    image = image.resize((int(image.width * 0.46), int(image.height * 0.46)))
+                    self.photo = ImageTk.PhotoImage(image)
+                    self.canvas.create_image(0, 0, anchor="nw", image=self.photo)
+                    return  # imagem carregada com sucesso
+                except Exception as e:
+                    print(f"Erro ao carregar a imagem em '{caminho}':", e)
+                    break
 
     def atualizar_listbox(self, df_subset):
         """
@@ -201,16 +212,20 @@ class EditorPerguntas:
     def abrir_base(self):
         """
         Abre um arquivo CSV e carrega seu conteúdo no DataFrame.
+        Se ocorrer algum erro, exibe uma messagebox com o erro.
         """
-        file_path = filedialog.askopenfilename(
-            filetypes=[('Arquivo CSV', '*.csv')],
-            title='Abra um arquivo CSV'
-        )
-        if file_path:
-            self.df = pd.read_csv(file_path, sep=';', encoding='utf-8')
-            self.atualizar_listbox(self.df)
-        else:
-            print("Sem arquivo")
+        try:
+            file_path = filedialog.askopenfilename(
+                filetypes=[('Arquivo CSV', '*.csv')],
+                title='Abra um arquivo CSV'
+            )
+            if file_path:
+                self.df = pd.read_csv(file_path, sep=';', encoding='utf-8')
+                self.atualizar_listbox(self.df)
+            else:
+                print("Sem arquivo")
+        except Exception as e:
+            messagebox.showerror("Erro ao abrir CSV", f"Ocorreu o seguinte erro: {e}")
 
     def atualizar_pesquisa(self, event):
         """
@@ -237,7 +252,7 @@ class EditorPerguntas:
 
         selected_text = self.listbox.get(selection[0])
         # Localiza a linha correspondente no DataFrame (caso haja duplicados, pega a primeira)
-        row = self.df[self.df['pergunta'].str.contains(selected_text)].iloc[0]
+        row = self.df[self.df['pergunta'].str.contains(selected_text.strip(), regex=False)].iloc[0]
 
         # Ajusta o Combobox de Rodada com base no valor de 'alternativas'
         # (1ª e 2ª rodadas: alternativas = 3 ou 4; 3ª e 4ª: alternativas = 4)
@@ -284,19 +299,36 @@ class EditorPerguntas:
     def atualizar_canvas(self, row):
         """
         Updates the canvas with the question and answer choices based on the selected round.
-        Clears D: when switching from a 3rd/4th round question to a 1st/2nd round question.
+        Wraps long questions based on pixel width using the same font as Pygame.
         """
-        # Split the question for <br> support
-        partes_pergunta = row['pergunta'].split('<br>')
 
-        # Update the main question text
-        self.canvas.itemconfig(self.text_ids["perg1"], text=partes_pergunta[0])
-        if len(partes_pergunta) > 1:
-            self.canvas.itemconfig(self.text_ids["perg2"], text=partes_pergunta[1])
-        else:
-            self.canvas.itemconfig(self.text_ids["perg2"], text="")
+        # Fonte usada para medir o texto
+        tam_fonte = 36
+        font_path = "fonts/FreeSans.ttf"
+        font = ImageFont.truetype(font_path, tam_fonte)
 
-        # If it's a Final Round question, remove all answer choices from the canvas
+        # Quebrar a pergunta em linhas com até 1000px
+        palavras = row['pergunta'].split(' ')
+        linhas = []
+        linha_atual = ""
+
+        for palavra in palavras:
+            test_line = f"{linha_atual} {palavra}".strip()
+            largura = font.getbbox(test_line)[2]
+            if largura <= 1000:
+                linha_atual = test_line
+            else:
+                linhas.append(linha_atual)
+                linha_atual = palavra
+
+        if linha_atual:
+            linhas.append(linha_atual)
+
+        # Atualizar canvas com no máximo 2 linhas da pergunta
+        self.canvas.itemconfig(self.text_ids["perg1"], text=linhas[0])
+        self.canvas.itemconfig(self.text_ids["perg2"], text=linhas[1] if len(linhas) > 1 else "")
+
+        # Se for pergunta da final, limpar as alternativas
         if row['alternativas'] == 5:
             self.canvas.itemconfig(self.text_ids["alt1"], text="")
             self.canvas.itemconfig(self.text_ids["alt2"], text="")
@@ -304,33 +336,31 @@ class EditorPerguntas:
             self.canvas.itemconfig(self.text_ids["alt4"], text="")
             return
 
-        # Default order for 1st/2nd and 3rd/4th rounds
+        # Alternativas e rótulos
         alternativas_originais = [row['resposta_certa'], row['alternativa_1'], row['alternativa_2']]
         labels = ["A: ", "B: ", "C: "]
 
-        # If it's a 3rd/4th round question, add the 4th answer choice
         if row['alternativas'] == 4:
             alternativas_originais.append(row['alternativa_3'])
             labels.append("D: ")
 
-        # If 'embaralhar' is not "N", reorder the choices accordingly
-        if row['embaralhar'] != "N":
-            perm = str(row['embaralhar'])
+        if row['embaralhar'].isdigit():
+            perm = row['embaralhar']
             nova_ordem = [alternativas_originais[int(ch) - 1] for ch in perm]
         else:
-            nova_ordem = alternativas_originais  # Keep original order
+            nova_ordem = alternativas_originais
 
-        # Update the canvas with the reordered options
+        # Atualizar alternativas no canvas
         self.canvas.itemconfig(self.text_ids["alt1"], text=f"{labels[0]}{nova_ordem[0]}")
         self.canvas.itemconfig(self.text_ids["alt2"], text=f"{labels[1]}{nova_ordem[1]}")
         self.canvas.itemconfig(self.text_ids["alt3"], text=f"{labels[2]}{nova_ordem[2]}")
 
-        # If it's a 1st/2nd round question, clear the "D:" option
         if row['alternativas'] == 3:
             self.canvas.itemconfig(self.text_ids["alt4"], text="")
         else:
             self.canvas.itemconfig(self.text_ids["alt4"], text=f"{labels[3]}{nova_ordem[3]}")
 
+    
     def atualizar_opcoes_ordem(self, event=None):
         """
         Atualiza as opções de 'Ordem das Respostas' com base na rodada selecionada.
