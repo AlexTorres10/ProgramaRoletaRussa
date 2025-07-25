@@ -728,7 +728,6 @@ def blit_pergunta(perg):
     for word in words:
         test_line = f"{current_line} {word}".strip()
         line_width, _ = pygame.font.Font('fonts/FreeSans.ttf', int(tam_fonte)).size(test_line)
-        print(line_width)
         if line_width <= 1000:
             current_line = test_line
         else:
