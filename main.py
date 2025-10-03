@@ -1254,7 +1254,7 @@ def iniciar_jogo():
 
             # Respondeu a pergunta!
             if escolhido.tipo == 0:
-                time_reveal = 45000
+                time_reveal = randint(3,45)*1000
             else:
                 time_reveal = 5000
             if respondeu:
@@ -1281,25 +1281,7 @@ def iniciar_jogo():
                         elif ev.type == pygame.KEYDOWN:
                             if ev.key == pygame.K_RETURN:
                                 loop_jogo = False
-                            elif ev.key == pygame.K_F1:
-                                time_reveal = 45000
-                        if escolhido.tipo == 0 and ev.type == pygame.KEYDOWN:
-                            key_map = {
-                                pygame.K_a: 0, pygame.K_1: 0, pygame.K_KP1: 0,
-                                pygame.K_b: 1, pygame.K_2: 1, pygame.K_KP2: 1,
-                                pygame.K_c: 2, pygame.K_3: 2, pygame.K_KP3: 2,
-                                pygame.K_d: 3, pygame.K_4: 3, pygame.K_KP4: 3
-                            }
-
-                            index = key_map.get(ev.key)
-                            if index is not None and index < len(alternativas):
-                                # Condicional extra para não permitir tecla D antes da rodada 3
-                                if index >= 3 and rodada < 3:
-                                    continue
-
-                                resposta_escolhida = alternativas[index]
-                                blit_resposta_escolhida(pergunta, alternativas, resposta_escolhida)
-                                pos_resp_escolh = index + 1
+                        
 
                     if pygame.time.get_ticks() - start > time_reveal:
                         loop_jogo = False
