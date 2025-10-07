@@ -1,0 +1,28 @@
+{
+    "jogadores": [
+        {
+            "nome": "Torradeira Filosófica",
+            "tipo": 5
+        },
+        {
+            "nome": "Senhor Picles",
+            "tipo": 1
+        },
+        {
+            "nome": "Kazuo das Batatas",
+            "tipo": 4
+        },
+        {
+            "nome": "Dr. Espaguete Nervoso",
+            "tipo": 2
+        },
+        {
+            "nome": "Lamparida Destemida",
+            "tipo": 4
+        }
+    ],
+    "extra_nao_responde": true,
+    "extra_escapa": true,
+    "bonus_acerto_todas": true,
+    "valores_novos": true
+}

@@ -12,6 +12,7 @@ from random import randrange, shuffle, uniform
 import random
 import sys
 import locale
+import json
 
 try:
     # Tente definir o locale no formato que é suportado no Windows
@@ -948,10 +949,15 @@ def iniciar_jogo():
         sons[som].stop()
     
     window.fill('black')
-    df_jogadores = pd.read_json("players.json")
+    with open("config.json", "r", encoding="utf-8") as f:
+        config_data = json.load(f)
+    df_jogadores = pd.DataFrame(config_data["jogadores"])
     jogadores = []
     zonas_de_risco = [[0], [0, 3], [0, 2, 4], [0, 2, 3, 4], [0, 1, 2, 3, 4]]
-    dinheiro_rodada = [1000, 1200, 1500, 2000, 5000, 10000]
+    if config_data["valores_novos"]:
+        dinheiro_rodada = [1000, 1500, 2000, 2500, 5000, 10000]
+    else:
+        dinheiro_rodada = [1000, 1200, 1500, 2000, 5000, 10000]
     qtd_alternativas = [3, 3, 4, 4]
 
     sons['tema'].play(0)
@@ -1001,6 +1007,7 @@ def iniciar_jogo():
     nao_respondeu_nunca = [pl for pl in jogadores if not pl.eliminado]
     # RODADAS ELIMINATÓRIAS
     for rodada in range(1, 5):
+        certas = 0
         blit_all(sair_do_jogo, essentials, jogadores, rodada, display_update=True)
 
         # Primeiro, veremos quem é líder
@@ -1294,6 +1301,7 @@ def iniciar_jogo():
             pygame.display.update()
 
             if resposta_escolhida == resposta_certa:
+                certas += 1
                 sons['right'].play(0)
                 sons['aplausos1'].play()
                 pygame.time.delay(2000)
@@ -1383,28 +1391,28 @@ def iniciar_jogo():
                 wait_until_enter(1)  # Tempo de espera para próxima pergunta
                 num_pergunta += 1
 
-            # if num_pergunta > 7:
-            #     break
+            if num_pergunta > 7:
+                break
 
-            # # Caso especial: jogador com R$ 0 após a 6ª pergunta escapa e seguimos
-            # if num_pergunta >= 6 and desafiante.dinheiro == 0:
-            #     continue
+            # Jogador escapa de 5x1 e tem pergunta extra
+            if num_pergunta >= 6 and desafiante.dinheiro == 0 and config_data["extra_escapa"]:
+                print("ESCAPOU DE 5X1!")
+                continue
 
-            # # Lógica específica da primeira rodada após a 6ª pergunta
-            # if rodada == 1 and num_pergunta >= 6:
-            #     soma_total = sum(j.dinheiro for j in jogadores if not j.eliminado)
+            # Lógica extra para perguntas após a 5ª, conforme configurações
+            if num_pergunta >= 6:
+                # Bônus: todos acertaram as 5 primeiras perguntas
+                if num_pergunta == 6 and config_data.get("bonus_acerto_todas", False) and certas == 5:
+                    print("Bônus por acertar todas as 5 primeiras perguntas!")
+                    continue  # Permite pergunta bônus
 
-            #     if len(nao_respondeu_nunca) > 0:
-            #         continue  # Ainda tem jogador que nunca respondeu
+                # Permite estender até a 7ª pergunta se ainda houver jogadores que nunca responderam
+                if num_pergunta >= 7 and nao_respondeu_nunca and config_data.get("extra_nao_responde", False):
+                    print("Bônus para todos responderem!")
+                    continue  # Permite perguntas extras até todos responderem
 
-            #     if num_pergunta == 6 and soma_total == 10000:
-            #         continue  # Todos responderam até a 6ª e acertaram
-
-            #     if num_pergunta == 7 and soma_total == 11000:
-            #         continue  # Todos responderam a 7ª e ainda acertaram
-
-            #     # Se nenhuma das exceções acima, encerra
-            #     break
+                # Caso contrário, encerra
+                break
 
             # Encerrar após pergunta 5 (caso não tenha entrado em nenhuma lógica anterior)
             if num_pergunta > 5:
@@ -1965,8 +1973,9 @@ def configuracoes():
     x = 60
     y = 170
 
-    df_jogadores = pd.read_json("players.json")
-    df_jogadores = df_jogadores.copy()
+    with open("config.json", "r", encoding="utf-8") as f:
+        config_data = json.load(f)
+    df_jogadores = pd.DataFrame(config_data["jogadores"])
     input_boxes = []
     opcoes_bot = []
     config_salva = False
@@ -1980,7 +1989,6 @@ def configuracoes():
         option_box_tipo = OptionBox(x + 360, y, 375, 45, (25, 25, 25), (120, 120, 120), selected=t)
         opcoes_bot.append(option_box_tipo)
         tipos.append(t)
-        # x += 360
         y += 50
 
     txt_base = Texto('Base de perguntas', 'FreeSansBold', tam=48, x=1100, y=170)
@@ -1988,11 +1996,33 @@ def configuracoes():
 
     main_loc = bases.index(nome_da_base)
     base = OptionBox(900, 220, 400, 45, (25, 25, 25), (120, 120, 120), option_list=bases, selected=main_loc)
+    
+    # Configurações extras de perguntas
+    txt_extras = Texto('Configurações de Perguntas Extras', 'FreeSansBold', tam=40, x=1300, y=290)
+    
+    # Carrega configurações atuais do JSON
+    extra_nao_responde = config_data.get("extra_nao_responde", True)
+    extra_escapa = config_data.get("extra_escapa", True)
+    bonus_acerto_todas = config_data.get("bonus_acerto_todas", True)
+    valores_novos = config_data.get("valores_novos", False)
+    
+    # Cria os controles toggle para cada configuração
+    toggle_nao_responde = ToggleButton(1640, 330, 120, 45, state=extra_nao_responde)
+    toggle_escapa = ToggleButton(1640, 380, 120, 45, state=extra_escapa)
+    toggle_bonus = ToggleButton(1640, 430, 120, 45, state=bonus_acerto_todas)
+    
+    # Valores do jogo (mantém OptionBox porque tem mais de 2 opções)
+    valores_opcoes = [
+        'R$ 1.000 - R$ 1.200 - R$ 1.500 - R$ 2.000 - R$ 5.000',
+        'R$ 1.000 - R$ 1.500 - R$ 2.000 - R$ 2.500 - R$ 5.000'
+    ]
+    toggle_valores = OptionBox(850, 530, 800, 45, (25, 25, 25), (120, 120, 120), 
+                               option_list=valores_opcoes, selected=1 if valores_novos else 0)
+    
     loop_config = True
-
     salvar = Botao('Salvar configurações', 1880, 880, align='topright')
+    
     while loop_config:
-
         limpa_tela(window)
 
         for ev in pygame.event.get():
@@ -2009,7 +2039,20 @@ def configuracoes():
                     for i in range(len(novos_jogadores)):
                         df_jogadores.loc[i, 'nome'] = novos_jogadores[i]
                         df_jogadores.loc[i, 'tipo'] = opcoes_bot[i].selected
-                    df_jogadores.to_json("players.json", orient="records")
+                    
+                    # Atualiza config.json com todas as configurações
+                    with open("config.json", "r", encoding="utf-8") as f:
+                        config_data = json.load(f)
+                    
+                    config_data["jogadores"] = df_jogadores.to_dict(orient="records")
+                    config_data["extra_nao_responde"] = toggle_nao_responde.get_state()
+                    config_data["extra_escapa"] = toggle_escapa.get_state()
+                    config_data["bonus_acerto_todas"] = toggle_bonus.get_state()
+                    config_data["valores_novos"] = toggle_valores.selected == 1
+                    
+                    with open("config.json", "w", encoding="utf-8") as f:
+                        json.dump(config_data, f, ensure_ascii=False, indent=4)
+                    
                     pygame.mixer.music.set_volume(vol)
                     for som in sons.keys():
                         sons[som].set_volume(vol)
@@ -2019,12 +2062,19 @@ def configuracoes():
                         df_perguntas = pd.read_csv('base/' + nome_da_base, encoding='utf-8', sep=';')
                         df_perguntas['used'] = False
                         df_perguntas = df_perguntas.fillna('-')
-
                         nome_inicial = nome_da_base
+                    
                     config_salva = True
+                
+                # Atualiza os toggles
+                toggle_nao_responde.update(ev)
+                toggle_escapa.update(ev)
+                toggle_bonus.update(ev)
+                
                 for i in range(len(tipos)):
                     opcoes_bot[i].update(ev)
                 base.update(ev)
+                toggle_valores.update(ev)
 
             active_box = False
             for box in input_boxes:
@@ -2039,11 +2089,9 @@ def configuracoes():
                     if ev.key == pygame.K_MINUS:
                         vol -= 0.1
                         vol = 0 if vol < 0 else vol
-                        # pygame.mixer.music.set_volume(vol)
                     if ev.key == pygame.K_EQUALS or ev.key == pygame.K_PLUS:
                         vol += 0.1
                         vol = 1 if vol > 1 else vol
-                        # pygame.mixer.music.set_volume(vol)
 
         for box in input_boxes:
             box.update()
@@ -2061,37 +2109,52 @@ def configuracoes():
         txt_jogadores = Texto('Jogadores', 'FreeSansBold', 48, 45, 100)
         txt_jogadores.show_texto(window, 'topleft')
 
-        txt_controles = Texto('Como jogar: ', 'FreeSansBold', 48, 45, 450)
+        txt_controles = Texto('Como jogar: ', 'FreeSansBold', 48, 45, 490)
         txt_controles.show_texto(window, 'topleft')
 
-        txt_controles_1 = Texto('ESPAÇO - Jogar a roleta ', 'FreeSans', 30, 60, 525)
+        txt_controles_1 = Texto('ESPAÇO - Jogar a roleta ', 'FreeSans', 30, 60, 565)
         txt_controles_1.show_texto(window, 'topleft')
 
         txt_controles_1 = Texto(
             'ENTER - Pular (caso alguma ação do jogo esteja demorando); Inserir resposta na rodada final',
-            'FreeSans', 30, 60, 575)
+            'FreeSans', 30, 60, 615)
         txt_controles_1.show_texto(window, 'topleft')
 
         txt_controles_2 = Texto('Para passar a pergunta - Clicar no número do jogador ou digitar o número do jogador',
-                                'FreeSans', 30, 60, 625)
+                                'FreeSans', 30, 60, 665)
         txt_controles_2.show_texto(window, 'topleft')
 
         txt_controles_2 = Texto('Para responder a pergunta - Digitar a letra da alternativa (A a D) ou o número (1 a '
                                 '4)',
-                                'FreeSans', 30, 60, 675)
+                                'FreeSans', 30, 60, 715)
         txt_controles_2.show_texto(window, 'topleft')
 
         txt_controles_2 = Texto('P - Pausar o jogo (menos na rodada final). Na rodada final, pula a pergunta.',
-                                'FreeSans', 30, 60, 725)
+                                'FreeSans', 30, 60, 765)
         txt_controles_2.show_texto(window, 'topleft')
 
-        txt_volume = Texto('Volume: ' + str(int(vol * 100)) + '%', 'FreeSansBold', 48, 45, 800)
+        txt_volume = Texto('Volume: ' + str(int(vol * 100)) + '%', 'FreeSansBold', 48, 45, 840)
         txt_volume.show_texto(window, 'topleft')
 
-        txt_volume = Texto('+ - aumenta o volume; - diminui o volume', 'FreeSansBold', 36, 45, 860)
+        txt_volume = Texto('+ - aumenta o volume; - diminui o volume', 'FreeSansBold', 36, 45, 900)
         txt_volume.show_texto(window, 'topleft')
 
         txt_base.show_texto(window, 'center')
+        
+        # Desenha textos e controles das configurações extras
+        txt_extras.show_texto(window, 'center')
+        
+        txt_nao_responde = Texto('Rodadas terão máx. 7 perguntas (até todos responderem 1x):', 'FreeSans', 30, 1620, 330)
+        txt_nao_responde.show_texto(window, 'midright')
+        
+        txt_escapa_5x1 = Texto('Pergunta extra ao escapar de 5x1 (somente 5ª pergunta):', 'FreeSans', 30, 1620, 380)
+        txt_escapa_5x1.show_texto(window, 'midright')
+        
+        txt_bonus_todas = Texto('Pergunta bônus se todos acertarem as 5 perguntas:', 'FreeSans', 30, 1620, 430)
+        txt_bonus_todas.show_texto(window, 'midright')
+
+        txt_valores_titulo = Texto('Valores do Jogo', 'FreeSansBold', tam=40, x=1300, y=500)
+        txt_valores_titulo.show_texto(window, 'center')
 
         salvar.show_texto(window)
 
@@ -2101,10 +2164,17 @@ def configuracoes():
         for op in opcoes_bot:
             if op.draw_menu:
                 op.draw(window)
+        
         base.draw(window)
+        
+        # Desenha os toggle buttons
+        toggle_nao_responde.draw(window)
+        toggle_escapa.draw(window)
+        toggle_bonus.draw(window)
+        
+        toggle_valores.draw(window)
 
         pygame.display.update()
-
 
 def mostra_regras():
     global window

@@ -91,12 +91,6 @@ class EditorPerguntas:
         self.entries["pergunta"] = tk.Entry(entry_frame, width=50, font=font_label, state='disabled')
         self.entries["pergunta"].grid(row=0, column=1, padx=5, pady=2)
 
-        # Observação para quebra de linha
-        tk.Label(
-            entry_frame,
-            text="Obs.: Use '<br>' para fazer a quebra de linha.",
-            font=Font(size=9, slant='italic')
-        ).grid(row=1, column=1, sticky="w")
 
         # Label e campo para "Resposta certa"
         tk.Label(entry_frame, text="Resposta certa:", font=font_label).grid(row=2, column=0, sticky="w")
