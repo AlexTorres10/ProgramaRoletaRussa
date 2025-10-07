@@ -2021,6 +2021,13 @@ def configuracoes():
     
     loop_config = True
     salvar = Botao('Salvar configurações', 1880, 880, align='topright')
+
+    def contar_perguntas(nome_base):
+        try:
+            df_temp = pd.read_csv('base/' + nome_base, encoding='utf-8', sep=';')
+            return len(df_temp)
+        except:
+            return 0
     
     while loop_config:
         limpa_tela(window)
@@ -2140,6 +2147,11 @@ def configuracoes():
         txt_volume.show_texto(window, 'topleft')
 
         txt_base.show_texto(window, 'center')
+
+        base_selecionada = base.option_list[base.selected]
+        num_perguntas = contar_perguntas(base_selecionada)
+        txt_num_perguntas = Texto(f'{num_perguntas} perguntas', 'FreeSans', tam=28, x=1320, y=222)
+        txt_num_perguntas.show_texto(window, 'topleft')
         
         # Desenha textos e controles das configurações extras
         txt_extras.show_texto(window, 'center')
