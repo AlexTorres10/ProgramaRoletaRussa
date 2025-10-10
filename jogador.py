@@ -4,8 +4,8 @@ from textos_menu import Texto
 from copy import copy
 from random import randint, choice, uniform
 
-pos_buracos = [(884, 466), (717, 370), (717, 180), (884, 80), (1062, 180)]
-pos_players = [(910, 495), (742, 398), (742, 208), (910, 107), (1090, 208)]
+pos_buracos = [(1062, 370), (884, 466), (717, 370), (717, 180), (884, 80), (1062, 180)]
+pos_players = [(910, 495), (742, 398), (742, 208), (910, 107), (1090, 208), (1090, 398)]
 pos_nome = [(1722, 80), (1722, 195), (1722, 315), (1722, 435), (1722, 555)]
 pos_dinheiro = [(1722, 130), (1722, 250), (1722, 370), (1722, 490), (1722, 610)]
 
@@ -20,7 +20,9 @@ class Jogador:
         self.dinheiro = 0
         self.eliminado = False
         self.pos = pos
-        self.image = Image("img/number" + str(pos) + ".png", pos_players[pos - 1][0], pos_players[pos - 1][1])
+        self.pos_orig = self.pos
+        self.image = Image("img/number" + str(self.pos_orig) + ".png", 
+                           pos_players[self.pos_orig - 1][0], pos_players[self.pos_orig - 1][1])
         self.tam_fonte = int(30 * get_ratio())
         self.tipo = tipo
         self.currency = currency
@@ -123,15 +125,12 @@ class Jogador:
         else:
             self.image = Image("img/fv/milton.png", nova_pos[0], nova_pos[1])
 
-    def display_nome(self, window, fv=False):
+    def display_nome(self, window):
         texto_nome = pygame.font.Font('fonts/FreeSansBold.ttf', self.tam_fonte).render(self.nome, True, (255, 255, 255))
-        if not fv:
-            text_rect = texto_nome.get_rect(center=pos_nome[self.pos - 1])
-        else:
-            text_rect = texto_nome.get_rect(center=pos_nome[0])
+        text_rect = texto_nome.get_rect(center=pos_nome[self.pos_orig - 1])
         window.blit(texto_nome, text_rect)
 
-    def display_dinheiro(self, window, fv=False):
+    def display_dinheiro(self, window):
         dinheiro = f'{self.dinheiro:,.0f}'.replace(',', self.sep)
         if self.front:
             text_dinheiro = self.currency + " " + dinheiro
@@ -139,10 +138,7 @@ class Jogador:
             text_dinheiro = dinheiro + " " + self.currency
         texto_dinheiro = pygame.font.Font('fonts/FreeSans.ttf', self.tam_fonte).render(text_dinheiro,
                                                                                        True, (255, 255, 255))
-        if not fv:
-            text_rect = texto_dinheiro.get_rect(center=pos_dinheiro[self.pos - 1])
-        else:
-            text_rect = texto_dinheiro.get_rect(center=pos_dinheiro[0])
+        text_rect = texto_dinheiro.get_rect(center=pos_dinheiro[self.pos_orig - 1])
         window.blit(texto_dinheiro, text_rect)
 
     def bot_responde(self, rodada, pergunta_final='', alternativas='', resposta_certa='', tempo_final=0, certas=0,
@@ -228,18 +224,11 @@ class Jogador:
 
 
 def mostra_jogadores(window, jogadores):
-    if len(jogadores) > 1:
-        for pl in jogadores:
-            if not pl.eliminado:
-                pl.image.draw(window)
-                pl.display_nome(window)
-                pl.display_dinheiro(window)
-    else:
-        for pl in jogadores:
+    for pl in jogadores:
+        if not pl.eliminado:
             pl.image.draw(window)
-            pl.display_nome(window, fv=True)
-            pl.display_dinheiro(window, fv=True)
-
+            pl.display_nome(window)
+            pl.display_dinheiro(window)
 
 def copy_jogadores(jogadores):
     jogadores_copy = []
@@ -280,6 +269,19 @@ def click_on_player(jogadores, mouse_pos):
         # se clicou na imagem
         if pl.image.rect.collidepoint(mouse_pos):
             return pl
+
+def click_on_buraco(mouse_pos):
+    """
+    Retorna o índice do buraco clicado, de 0 a 5.
+    Se nenhum buraco foi clicado, retorna None.
+    """
+    largura = altura = int(154 * get_ratio())
+    for i, (x, y) in enumerate(pos_buracos):
+        rect = pygame.Rect(x, y, largura, altura)
+        if rect.collidepoint(mouse_pos):
+            return i
+    return None
+
 
 
 def get_escolhas(jogadores, desafiante):

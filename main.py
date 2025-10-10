@@ -356,11 +356,12 @@ def para_roleta(modo, alav, eliminado=Jogador('Zé', 1, 0), vermelhos=[0], jogad
             if jogador_em_risco.pos in vermelhos:
                 sons['queda'].play(0)
                 jogadores_aux = copy_jogadores(jogadores)
-                quedas.append({'modo': 'normal', 'vermelhos': vermelhos,
-                               'jog_eliminado': jogadores_aux[jogador_em_risco.pos - 1],
-                               'jogadores': jogadores_aux, 'giros_dramaticos': giros_dramaticos,
-                               'giros_para_parar': giros_para_parar, 'giros': giros,
-                               'vermelhos_iniciais': vermelhos_iniciais})
+                if len(jogadores) > 1:
+                    quedas.append({'modo': 'normal', 'vermelhos': vermelhos,
+                                'jog_eliminado': jogadores_aux[jogador_em_risco.pos - 1],
+                                'jogadores': jogadores_aux, 'giros_dramaticos': giros_dramaticos,
+                                'giros_para_parar': giros_para_parar, 'giros': giros,
+                                'vermelhos_iniciais': vermelhos_iniciais})
                 jogador_em_risco.eliminar(jogadores)
                 blit_queda(sair_do_jogo, essentials, jogadores, vermelhos, jogador_em_risco)
                 return True
@@ -1407,7 +1408,7 @@ def iniciar_jogo():
                     continue  # Permite pergunta bônus
 
                 # Permite estender até a 7ª pergunta se ainda houver jogadores que nunca responderam
-                if num_pergunta >= 7 and nao_respondeu_nunca and config_data.get("extra_nao_responde", False):
+                if num_pergunta <= 7 and nao_respondeu_nunca and config_data.get("extra_nao_responde", False):
                     print("Bônus para todos responderem!")
                     continue  # Permite perguntas extras até todos responderem
 
@@ -1856,108 +1857,309 @@ def fuja_vermelho():
     global essentials
     global sair_do_jogo
     global sons
-    limpa_tela(window)
+    
+    # Loop principal para permitir reiniciar o jogo
+    jogadores = []
+    while True:
+        limpa_tela(window)
 
-    for som in sons.keys():
-        sons[som].stop()
-    sons['tema'].play(0)
-    logo_programa()
-    j = []
+        for som in sons.keys():
+            sons[som].stop()
 
-    sons['aplausos2'].play()
-    roleta.update_image('img/roleta_inicio.png')
-    img_dados.update_image('img/fv/jogador.png', x=353, y=107)
-    blit_vermelho(sair_do_jogo, essentials, j, range(0, 6))
-    pygame.display.update()
-    wait_until_enter(10)
+        sons['aplausos2'].play()
+        roleta.update_image('img/roleta_inicio.png')
+        img_dados.update_image('img/fv/jogador.png')
+        img_pergunta.update_image('img/grana.png')
 
-    iniciar_fv = Botao('INICIAR JOGO', 960, 775, tam=50, align='center')
-    input_jogador = InputBox(760, 705, 400, 45, text='')
+        
+        zonas_de_risco = [[0], [0, 3], [0, 2, 4], [0, 2, 3, 4], [0, 1, 2, 3, 4]]
 
-    pygame.display.update()
-    pygame.mixer.stop()
-    sons['start_game'].play()
-    loop_nome = True
-    while loop_nome:
+        iniciar_fv = Botao('INICIAR JOGO', 960, 775, tam=50, align='center')
+        input_jogador = InputBox(760, 705, 400, 45, text='')
 
-        window.fill('black')
-        blit_all(sair_do_jogo, essentials, j)
-        iniciar_fv.show_texto(window)
+        pygame.display.update()
+        pygame.mixer.stop()
+        sons['start_game'].play()
 
-        seu_nome = Texto('Insira seu nome!', 'FreeSansBold', 36, 960, 675)
-        seu_nome.show_texto(window, 'center')
+        if len(jogadores) > 0:
+            jogadores[0].dinheiro = 0
+            jogadores[0].eliminado = False
+            jogadores[0].move_center(fv=True)
+        
+        loop_nome = (len(jogadores) == 0)
+        while loop_nome:
 
-        regras_fv = 'As regras são simples: A cada rodada, você joga a roleta e conforme vai escapando, seu dinheiro ' \
-                    'acumula. Em cada rodada, 3 de 6 buracos contêm o \nvalor máximo, e outros, valores menores. Ao ' \
-                    'escapar, pode decidir pegar o dinheiro ou seguir até o final. Se escapar de 5 vermelhos, o \n' \
-                    'dinheiro é dobrado, podendo ter um máximo de R$ 500.000.\nPara selecionar o buraco, aperte um' \
-                    'número de 1 a 6.'
-        texto_split = regras_fv.split('\n')
+            window.fill('black')
+            blit_all(sair_do_jogo, essentials, jogadores)
+            iniciar_fv.show_texto(window)
 
-        for t, i in zip(texto_split, range(len(texto_split))):
-            txt_regras = Texto(t, 'FreeSans', 27, 960, 830 + 30 * i)
-            txt_regras.show_texto(window, 'center')
-        for ev in pygame.event.get():
-            if ev.type == pygame.QUIT:
-                pygame.quit()
-            if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
-                if sair_do_jogo.check_click():
-                    pygame.mixer.stop()
-                    return
+            seu_nome = Texto('Insira seu nome!', 'FreeSansBold', 36, 960, 675)
+            seu_nome.show_texto(window, 'center')
+
+            regras_fv = 'As regras são simples: A cada rodada, você joga a roleta e conforme vai escapando, seu dinheiro ' \
+                        'acumula. Em cada rodada, 3 de 6 buracos contêm o \nvalor máximo, e outros, valores menores. Ao ' \
+                        'escapar, pode decidir pegar o dinheiro ou seguir até o final. Se escapar de 5 vermelhos, o \n' \
+                        'dinheiro é dobrado, podendo ter um máximo de R$ 500.000.\nPara selecionar o buraco, aperte um' \
+                        'número de 1 a 6.'
+            texto_split = regras_fv.split('\n')
+
+            for t, i in zip(texto_split, range(len(texto_split))):
+                txt_regras = Texto(t, 'FreeSans', 27, 960, 830 + 30 * i)
+                txt_regras.show_texto(window, 'center')
+            for ev in pygame.event.get():
                 if ev.type == pygame.QUIT:
                     pygame.quit()
+                if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
+                    if sair_do_jogo.check_click():
+                        pygame.mixer.stop()
+                        return
                 if iniciar_fv.check_click():
                     if input_jogador.text != '':
                         new_player = Jogador(input_jogador.text, 1, 0)
                         new_player.image = Image("img/fv/milton.png", 0, 0)
                         new_player.move_center(fv=True)
-                        j.append(new_player)
+                        jogadores.append(new_player)
                         loop_nome = False
-            input_jogador.handle_event(ev)
+                if ev.type == pygame.KEYDOWN:
+                    if ev.key == pygame.K_RETURN:
+                        if input_jogador.text != '':
+                            new_player = Jogador(input_jogador.text, 1, 0)
+                            new_player.image = Image("img/fv/milton.png", 0, 0)
+                            new_player.move_center(fv=True)
+                            jogadores.append(new_player)
+                            loop_nome = False
+                input_jogador.handle_event(ev)
 
-        input_jogador.update()
-        input_jogador.draw(window)
+            input_jogador.update()
+            input_jogador.draw(window)
+
+            pygame.display.update()
+
+        # blit_all(sair_do_jogo, essentials, jogadores)
+        # pygame.display.update()
+
+        premios = [
+            [5000, 5000, 5000, 2500, 1500, 1000],
+            [20000, 20000, 20000, 10000, 7500, 5000],
+            [50000, 50000, 50000, 25000, 15000, 10000],
+            [75000, 75000, 75000, 50000, 25000, 15000],
+            [100000, 100000, 100000, 75000, 50000, 25000]
+        ]
+
+        def texto_fv(window, texto):
+            # Quebra de linha automática baseada na largura máxima (960 px)
+            font = pygame.font.Font('fonts/FreeSans.ttf', 80)
+            max_width = 1200
+            palavras = texto.split()
+            linhas = []
+            linha_atual = ""
+            
+            for palavra in palavras:
+                tentativa = f"{linha_atual} {palavra}".strip()
+                largura = font.size(tentativa)[0]
+                
+                if largura <= max_width:
+                    linha_atual = tentativa
+                else:
+                    linhas.append(linha_atual)
+                    linha_atual = palavra
+            
+            if linha_atual:
+                linhas.append(linha_atual)
+            
+            for i, t in enumerate(linhas):
+                txt_regras = Texto(t, 'FreeSansBold', 80, 960, 830 + 90 * i)
+                txt_regras.show_texto(window, 'center')
+
+        # Flag para saber se o jogo terminou
+        jogo_terminou = False
+
+        for rodada in range(5):
+            blit_all(sair_do_jogo, essentials, jogadores)
+            chances_de_cair = rodada + 1
+            valores_buraco = premios[rodada][:]
+            shuffle(valores_buraco)
+            pos_buraco = None
+
+            
+            texto_fv(window, f'Escolha um buraco! O valor máximo é de {max(valores_buraco)}!')
+            pygame.display.update()
+
+            while pos_buraco is None:
+                for ev in pygame.event.get():
+                    if ev.type == pygame.KEYDOWN:
+                        key_map = {
+                            pygame.K_1: 1, pygame.K_KP1: 1,
+                            pygame.K_2: 2, pygame.K_KP2: 2,
+                            pygame.K_3: 3, pygame.K_KP3: 3,
+                            pygame.K_4: 4, pygame.K_KP4: 4,
+                            pygame.K_5: 5, pygame.K_KP5: 5,
+                            pygame.K_0: 0, pygame.K_KP0: 0,
+                            pygame.K_6: 0, pygame.K_KP6: 0
+                        }
+                        idx = key_map.get(ev.key)
+                        if idx is not None and 0 <= idx < len(valores_buraco):
+                            valor_da_roleta = valores_buraco[idx]
+                            pos_buraco = idx
+                            break
+                    if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
+                        mouse_pos = pygame.mouse.get_pos()
+                        buraco_idx = click_on_buraco(mouse_pos)
+                        if buraco_idx is not None and 0 <= buraco_idx < len(valores_buraco):
+                            valor_da_roleta = valores_buraco[buraco_idx]
+                            pos_buraco = buraco_idx
+                            break
+                        if sair_do_jogo.check_click():
+                            pygame.mixer.stop()
+                            return
+            new_player.pos = pos_buraco
+            new_player.change_pos(pos_buraco, fv=True)
+            pygame.mixer.stop()
+            sons['quem_comeca'].play()
+            loop = True
+            blit_all(sair_do_jogo, essentials, jogadores)
+
+            # Mostra os valores de cada buraco na tela
+            pos_premios = [(1280, 450), (960, 700), (600, 450), (600, 250), (960, 50), (1280, 250)]
+            for idx, valor in enumerate(valores_buraco):
+                premio_txt = Texto(f'R$ {valor}', 'FreeSansBold', 36, pos_premios[idx][0], pos_premios[idx][1])
+                # Fundo preto, texto branco
+                pygame.draw.rect(window, (0, 0, 0), (pos_premios[idx][0] - 60, pos_premios[idx][1] - 20, 120, 40))
+                premio_txt.show_texto_cor(window, 'center', 'black')
+            texto_fv(window, f'Você escolheu o buraco {pos_buraco}, se escapar ganha R$ {valores_buraco[pos_buraco]}!')
+            pygame.display.update()
+            wait_until_enter(15)
+            blit_vermelho(sair_do_jogo, essentials, jogadores, zonas_de_risco[rodada])
+            pygame.mixer.stop()
+            sons['zonas_de_risco'].play()
+            sons['bg_errado'].play()
+            wait_until_enter(5)
+            blit_all(sair_do_jogo, essentials, jogadores)
+            pygame.display.update()
+            while loop:
+                for ev in pygame.event.get():
+                    if ev.type == pygame.QUIT:
+                        pygame.quit()
+                    if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
+                        if sair_do_jogo.check_click():
+                            pygame.mixer.stop()
+                            return
+                        if alavanca.check_click():
+                            pygame.mixer.stop()
+                            caiu_ou_nao = jogar_roleta('normal', alavanca, chances_de_cair, jogador_em_risco=new_player, jogadores=jogadores)
+                            loop = False
+                    if ev.type == pygame.KEYDOWN:
+                        if ev.key == pygame.K_SPACE:
+                            pygame.mixer.stop()
+                            caiu_ou_nao = jogar_roleta('normal', alavanca, chances_de_cair, 
+                                                       jogador_em_risco=new_player, jogadores=jogadores)
+                            loop = False
+                        if ev.key == pygame.K_F2:
+                            pygame.mixer.stop()
+                            sons['bg_errado'].play()
+                        if ev.key == pygame.K_F3:
+                            pygame.mixer.stop()
+            if caiu_ou_nao:
+                wait_until_enter(int(sons['queda'].get_length() - 1))
+                sons['tema'].play()
+                new_player.dinheiro = 0
+                jogo_terminou = True
+                break
+            else:
+                wait_until_enter(2)
+                new_player.ganha_dinheiro(valor_da_roleta, window, sair_do_jogo, essentials, jogadores, img_pergunta)
+                if rodada == 4:
+                    new_player.ganha_dinheiro(new_player.dinheiro, window, sair_do_jogo, essentials, jogadores, img_pergunta)
+                wait_until_enter(3)
+                new_player.move_center(fv=True)
+                if rodada < 4:
+                    blit_all(sair_do_jogo, essentials, jogadores, display_update=True)
+                    # Botões de decisão
+                    botao_continuar = Botao('Continuar (ENTER)', 960, 850, tam=48, align='center')
+                    botao_sair = Botao('Sair com metade do dinheiro (S)', 960, 920, tam=48, align='center')
+                    botao_continuar.show_texto(window)
+                    botao_sair.show_texto(window)
+                    pygame.display.update()
+
+                    # Lógica dos botões
+                    decisao = None
+                    while decisao is None:
+                        for ev in pygame.event.get():
+                            if ev.type == pygame.QUIT:
+                                pygame.quit()
+                            if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
+                                if sair_do_jogo.check_click():
+                                    pygame.mixer.stop()
+                                    return
+                                if botao_continuar.check_click():
+                                    decisao = 'continuar'
+                                if botao_sair.check_click():
+                                    decisao = 'sair'
+                            if ev.type == pygame.KEYDOWN:
+                                if ev.key == pygame.K_RETURN:
+                                    decisao = 'continuar'
+                                if ev.key == pygame.K_s:
+                                    decisao = 'sair'
+                        pygame.time.delay(50)
+                    pygame.event.clear()
+                    if decisao == 'sair':
+                        # Jogador recebe metade do dinheiro e encerra o minigame
+                        jogadores[0].dinheiro = jogadores[0].dinheiro // 2
+                        jogo_terminou = True
+                        break
+                # Se continuar, segue para próxima rodada
+        
+        # Se completou todas as 5 rodadas sem cair ou sair
+        if not jogo_terminou:
+            jogo_terminou = True
+        
+        # Tela final com opção de jogar novamente
+        # blit_all(sair_do_jogo, essentials, jogadores)
+        new_player.mostra_dinheiro(window, img_pergunta)
+        if new_player.dinheiro > 0:
+            sons['aplausos2'].play()
+            sons['tema'].play()
 
         pygame.display.update()
 
-    blit_all(sair_do_jogo, essentials, j)
-    pygame.display.update()
-    wait_until_enter(5)
-
-    premios = [
-        [5000, 5000, 5000, 2500, 1500, 1000],
-        [20000, 20000, 20000, 10000, 7500, 5000],
-        [50000, 50000, 50000, 25000, 15000, 10000],
-        [75000, 75000, 75000, 50000, 25000, 15000],
-        [100000, 100000, 100000, 75000, 50000, 25000]
-    ]
-
-    for rodada in range(5):
-        chances_de_cair = rodada + 1
-        valores_buraco = shuffle(premios[0])
-
-        while True:
+        wait_until_enter(10)
+        blit_all(sair_do_jogo, essentials, jogadores)
+        
+        
+        
+        # Botões de jogar novamente ou sair
+        botao_jogar_novamente = Botao('Jogar Novamente (ENTER)', 960, 750, tam=40, align='center')
+        botao_sair_final = Botao('Sair (ESC)', 960, 800, tam=40, align='center')
+        
+        pygame.display.update()
+        
+        escolha_final = None
+        while escolha_final is None:
+            blit_all(sair_do_jogo, essentials, jogadores)
+            
+            
+            botao_jogar_novamente.show_texto(window)
+            botao_sair_final.show_texto(window)
+            pygame.display.update()
+            
             for ev in pygame.event.get():
+                if ev.type == pygame.QUIT:
+                    pygame.quit()
+                if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
+                    if botao_jogar_novamente.check_click():
+                        escolha_final = 'jogar'
+                    if botao_sair_final.check_click() or sair_do_jogo.check_click():
+                        escolha_final = 'sair'
                 if ev.type == pygame.KEYDOWN:
-                    if (ev.key == pygame.K_1) or (ev.key == pygame.K_KP1):
-                        valor_da_roleta = valores_buraco[1]
-                        break
-                    if (ev.key == pygame.K_2) or (ev.key == pygame.K_KP2):
-                        valor_da_roleta = valores_buraco[2]
-                        break
-                    if (ev.key == pygame.K_3) or (ev.key == pygame.K_KP3):
-                        valor_da_roleta = valores_buraco[3]
-                        break
-                    if (ev.key == pygame.K_4) or (ev.key == pygame.K_KP4):
-                        valor_da_roleta = valores_buraco[4]
-                        break
-                    if (ev.key == pygame.K_5) or (ev.key == pygame.K_KP5):
-                        valor_da_roleta = valores_buraco[5]
-                        break
-                    if (ev.key == pygame.K_6) or (ev.key == pygame.K_KP6):
-                        valor_da_roleta = valores_buraco[0]
-                        break
-
+                    if ev.key == pygame.K_RETURN:
+                        escolha_final = 'jogar'
+                    if ev.key == pygame.K_ESCAPE:
+                        escolha_final = 'sair'
+            pygame.time.delay(50)
+        
+        if escolha_final == 'sair':
+            pygame.mixer.stop()
+            return
 
 def configuracoes():
     global window
@@ -2187,6 +2389,7 @@ def configuracoes():
         toggle_valores.draw(window)
 
         pygame.display.update()
+
 
 def mostra_regras():
     global window
@@ -2441,7 +2644,7 @@ def menu_principal():
         window.fill('black')
         roleta_logo.draw(window)
         iniciar.show_texto(window)
-        # fuja_verm.show_texto(window)
+        fuja_verm.show_texto(window)
         config.show_texto(window)
         regras.show_texto(window)
         recordes.show_texto(window)
@@ -2457,8 +2660,8 @@ def menu_principal():
             if ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 if iniciar.check_click():
                     iniciar_jogo()
-                # if fuja_verm.check_click():
-                #     fuja_vermelho()
+                if fuja_verm.check_click():
+                    fuja_vermelho()
                 if config.check_click():
                     configuracoes()
                 if regras.check_click():
@@ -2490,9 +2693,9 @@ essentials = [roleta, img_dados, alavanca]
 
 iniciar = Botao('Iniciar Jogo', 1850, 25)
 fuja_verm = Botao('Minigame - Fuja do Vermelho!', 1850, 150)
-config = Botao('Configurações', 1850, 150)
-regras = Botao('Regras', 1850, 275)
-recordes = Botao('Recordes', 1850, 400)
+config = Botao('Configurações', 1850, 275)
+regras = Botao('Regras', 1850, 400)
+recordes = Botao('Recordes', 1850, 525)
 creditos = Botao('Créditos', 1850, 850)
 sair = Botao('Sair', 1850, 950)
 sair_do_jogo = Botao('Sair do jogo', 10, 10, tam=30, align='topleft')
