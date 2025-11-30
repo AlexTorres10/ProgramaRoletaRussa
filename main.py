@@ -1148,7 +1148,7 @@ def iniciar_jogo():
             loop_jogo = True
             wait_pc = 9000
             time_limit = 25000 if escolhido.tipo == 0 else wait_pc
-
+            respondeu = False
             while loop_jogo:
                 blit_all(sair_do_jogo, essentials, jogadores, rodada)
                 blit_alternativas(pergunta, alternativas)
