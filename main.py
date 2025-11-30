@@ -2161,6 +2161,7 @@ def fuja_vermelho():
             pygame.mixer.stop()
             return
 
+
 def configuracoes():
     global window
     global volta_menu
@@ -2206,19 +2207,21 @@ def configuracoes():
     extra_nao_responde = config_data.get("extra_nao_responde", True)
     extra_escapa = config_data.get("extra_escapa", True)
     bonus_acerto_todas = config_data.get("bonus_acerto_todas", True)
+    rodada_1_estendida = config_data.get("rodada_1_estendida", True)
     valores_novos = config_data.get("valores_novos", False)
     
     # Cria os controles toggle para cada configuração
     toggle_nao_responde = ToggleButton(1640, 330, 120, 45, state=extra_nao_responde)
     toggle_escapa = ToggleButton(1640, 380, 120, 45, state=extra_escapa)
     toggle_bonus = ToggleButton(1640, 430, 120, 45, state=bonus_acerto_todas)
+    toggle_r1 = ToggleButton(1640, 480, 120, 45, state=rodada_1_estendida)
     
     # Valores do jogo (mantém OptionBox porque tem mais de 2 opções)
     valores_opcoes = [
         'R$ 1.000 - R$ 1.200 - R$ 1.500 - R$ 2.000 - R$ 5.000',
         'R$ 1.000 - R$ 1.500 - R$ 2.000 - R$ 2.500 - R$ 5.000'
     ]
-    toggle_valores = OptionBox(850, 530, 800, 45, (25, 25, 25), (120, 120, 120), 
+    toggle_valores = OptionBox(850, 580, 800, 45, (25, 25, 25), (120, 120, 120), 
                                option_list=valores_opcoes, selected=1 if valores_novos else 0)
     
     loop_config = True
@@ -2257,6 +2260,7 @@ def configuracoes():
                     config_data["extra_nao_responde"] = toggle_nao_responde.get_state()
                     config_data["extra_escapa"] = toggle_escapa.get_state()
                     config_data["bonus_acerto_todas"] = toggle_bonus.get_state()
+                    config_data["rodada_1_estendida"] = toggle_r1.get_state()
                     config_data["valores_novos"] = toggle_valores.selected == 1
                     
                     with open("config.json", "w", encoding="utf-8") as f:
@@ -2318,28 +2322,28 @@ def configuracoes():
         txt_jogadores = Texto('Jogadores', 'FreeSansBold', 48, 45, 100)
         txt_jogadores.show_texto(window, 'topleft')
 
-        txt_controles = Texto('Como jogar: ', 'FreeSansBold', 48, 45, 490)
+        txt_controles = Texto('Como jogar: ', 'FreeSansBold', 48, 45, 505)
         txt_controles.show_texto(window, 'topleft')
 
-        txt_controles_1 = Texto('ESPAÇO - Jogar a roleta ', 'FreeSans', 30, 60, 565)
+        txt_controles_1 = Texto('ESPAÇO - Jogar a roleta ', 'FreeSans', 30, 60, 580)
         txt_controles_1.show_texto(window, 'topleft')
 
         txt_controles_1 = Texto(
             'ENTER - Pular (caso alguma ação do jogo esteja demorando); Inserir resposta na rodada final',
-            'FreeSans', 30, 60, 615)
+            'FreeSans', 30, 60, 630)
         txt_controles_1.show_texto(window, 'topleft')
 
         txt_controles_2 = Texto('Para passar a pergunta - Clicar no número do jogador ou digitar o número do jogador',
-                                'FreeSans', 30, 60, 665)
+                                'FreeSans', 30, 60, 680)
         txt_controles_2.show_texto(window, 'topleft')
 
         txt_controles_2 = Texto('Para responder a pergunta - Digitar a letra da alternativa (A a D) ou o número (1 a '
                                 '4)',
-                                'FreeSans', 30, 60, 715)
+                                'FreeSans', 30, 60, 730)
         txt_controles_2.show_texto(window, 'topleft')
 
         txt_controles_2 = Texto('P - Pausar o jogo (menos na rodada final). Na rodada final, pula a pergunta.',
-                                'FreeSans', 30, 60, 765)
+                                'FreeSans', 30, 60, 780)
         txt_controles_2.show_texto(window, 'topleft')
 
         txt_volume = Texto('Volume: ' + str(int(vol * 100)) + '%', 'FreeSansBold', 48, 45, 840)
@@ -2366,8 +2370,10 @@ def configuracoes():
         
         txt_bonus_todas = Texto('Pergunta bônus se todos acertarem as 5 perguntas:', 'FreeSans', 30, 1620, 430)
         txt_bonus_todas.show_texto(window, 'midright')
+        txt_bonus_todas = Texto('1ª rodada estendida caso todos acertem:', 'FreeSans', 30, 1620, 480)
+        txt_bonus_todas.show_texto(window, 'midright')
 
-        txt_valores_titulo = Texto('Valores do Jogo', 'FreeSansBold', tam=40, x=1300, y=500)
+        txt_valores_titulo = Texto('Valores do Jogo', 'FreeSansBold', tam=40, x=1300, y=550)
         txt_valores_titulo.show_texto(window, 'center')
 
         salvar.show_texto(window)
@@ -2385,6 +2391,7 @@ def configuracoes():
         toggle_nao_responde.draw(window)
         toggle_escapa.draw(window)
         toggle_bonus.draw(window)
+        toggle_r1.draw(window)
         
         toggle_valores.draw(window)
 

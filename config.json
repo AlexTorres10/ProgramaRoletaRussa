@@ -23,6 +23,7 @@
     ],
     "extra_nao_responde": true,
     "extra_escapa": true,
-    "bonus_acerto_todas": true,
-    "valores_novos": false
+    "bonus_acerto_todas": false,
+    "valores_novos": false,
+    "rodada_1_estendida": true
 }
