@@ -1668,10 +1668,7 @@ def iniciar_jogo():
 
         # TEMPO
         time = ((72000 - (pygame.time.get_ticks() - start)) / 1000) * (60 / 72)
-        if time < 0:
-            roleta.update_image('img/roleta_final_0.png')
-            errou = True
-            break
+        
         seg = Texto(str(int(ceil(time))), 'ArialBlack', 120, 428, 924)
         qtd_certas = Texto(f"{num_certas}/8", 'FreeSansBold', 90, 150, 960)
 
@@ -1682,6 +1679,11 @@ def iniciar_jogo():
         seg.show_texto(window, 'center')
         qtd_certas.show_texto(window, 'center')
         botao_passar.show_texto(window)
+
+        if time < 0:
+            roleta.update_image('img/roleta_final_0.png')
+            errou = True
+            break
 
         # BOT
         if finalista.tipo != 0:
@@ -1721,11 +1723,15 @@ def iniciar_jogo():
                     return
                 if botao_passar.check_click():
                     num_pergunta = (num_pergunta + 1) % 8
+                    while perguntas_da_final[num_pergunta]['status']:
+                        num_pergunta = (num_pergunta + 1) % 8
             if ev.type == pygame.KEYDOWN:
                 if ev.key == pygame.K_RETURN:
                     check_resposta = True
                 if ev.key == pygame.K_p:
                     num_pergunta = (num_pergunta + 1) % 8
+                    while perguntas_da_final[num_pergunta]['status']:
+                        num_pergunta = (num_pergunta + 1) % 8
                     num_resposta = 0
                 if ev.key in [pygame.K_a, pygame.K_1, pygame.K_KP1]:
                     num_resposta = 1
