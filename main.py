@@ -472,7 +472,6 @@ def mostra_quedas():
     global quedas
     global window
 
-    sons['tema'].play()
     if quedas[0]['modo'] == 'normal':
         essentials[0].update_image('img/roleta_' + str(quedas[0]['jog_eliminado'].pos) + '.png')
     else:
@@ -482,6 +481,7 @@ def mostra_quedas():
     for q in quedas:
         alav = essentials[2]
         pygame.event.clear()
+        sons['tema'].play()
         if q['modo'] == 'normal':
             essentials[0].update_image('img/roleta_' + str(q['jog_eliminado'].pos) + '.png')
             blit_all(sair_do_jogo, essentials, q['jogadores'], display_update=True)
@@ -534,7 +534,6 @@ def mostra_quedas():
             q['jog_eliminado'].eliminar(q['jogadores'])
             blit_queda(sair_do_jogo, essentials, q['jogadores'], q['vermelhos'], q['jog_eliminado'])
 
-            wait_until_enter(int(sons['queda'].get_length()))
         else:
             essentials[0].update_image('img/roleta.png')
             alav.update_image('img/alavanca2-0.png')
@@ -588,7 +587,6 @@ def mostra_quedas():
 
                 q['jog_eliminado'].eliminar(q['jogadores'])
                 blit_queda(sair_do_jogo, essentials, q['jogadores'], q['vermelhos'], q['jog_eliminado'])
-                wait_until_enter(int(sons['queda'].get_length()))
             else:
                 wait_until_enter(1.5)
                 for i in range(12, -1, -1):
@@ -601,9 +599,8 @@ def mostra_quedas():
                 blit_varios_buracos([q['jog_eliminado'].pos], c='rodada4')
                 pygame.mixer.stop()
                 sons['queda'].play()
-                wait_until_enter(int(sons['queda'].get_length()))
-        sons['tema'].play()
-    # wait_until_enter(1)
+        wait_until_enter(int(sons['queda'].get_length()+1))
+        
     pygame.mixer.stop()
     sons['rever_quedas'].play()
     rr_quedas = Image('img/rr_quedas.png', 0, 0)
@@ -856,7 +853,7 @@ def seleciona_pergunta(rodada):
             alternativas = pergunta.split('.')[0].replace(' ou ', ', ').split(', ')
             for i in range(len(alternativas)):
                 alternativas[i] = opcoes[i] + alternativas[i]
-            list_perguntas.append({'pergunta': pergunta, 'certa': alt1, 'status': False, 'alternativas': alternativas})
+            list_perguntas.append({'pergunta': pergunta, 'certa': alt1, 'status': False, 'alternativas': alternativas, 'visualizada': False})
         for index in list_index:
             df_perguntas.loc[index, 'used'] = True
         return list_perguntas
@@ -1006,6 +1003,8 @@ def iniciar_jogo():
     roleta.update_image('img/roleta.png')
     pygame.display.update()
     nao_respondeu_nunca = [pl for pl in jogadores if not pl.eliminado]
+
+    jogadores = [Jogador('Jogador Teste', 2, 1)]
     # RODADAS ELIMINATÓRIAS
     for rodada in range(1, 5):
         certas = 0
@@ -1671,6 +1670,7 @@ def iniciar_jogo():
         
         seg = Texto(str(int(ceil(time))), 'ArialBlack', 120, 428, 924)
         qtd_certas = Texto(f"{num_certas}/8", 'FreeSansBold', 90, 150, 960)
+        pergunta['visualizada'] = True
 
         # DISPLAY
         blit_all(sair_do_jogo, essentials, jogadores, rodada)
@@ -1743,12 +1743,75 @@ def iniciar_jogo():
     pygame.mixer.stop()
 
     if errou:
+        print("Entrou aqui")
+        for q in perguntas_da_final:
+            if not q['visualizada']:
+                df_perguntas.loc[df_perguntas['pergunta'] == q['pergunta'], 'used'] = False
         sons['queda'].play()
         finalista.eliminar(jogadores)
         finalista.dinheiro += dinheiro_rodada[rodada - 1] * num_certas
         blit_varios_buracos(buracos_abertos_final[:qtd_buracos_abertos + 1])
+        start_pos_queda = pygame.time.get_ticks()
+        queda_tocou = False
+        wait_until_enter(5)
         pygame.display.update()
-        wait_until_enter(int(sons['queda'].get_length()))
+        # Mostra perguntas visualizadas e não respondidas corretamente
+        indice = num_pergunta
+        primeira_passagem = True
+        # sons['tema'].play()
+        print(perguntas_da_final)
+        while True:
+            pergunta_atual = perguntas_da_final[indice]
+            if pergunta_atual['visualizada'] and not pergunta_atual['status']:
+                # Mostra a pergunta
+                
+                blit_pergunta(pergunta_atual['pergunta'])
+                seg = Texto(str(int(ceil(time))), 'ArialBlack', 120, 428, 924)
+                qtd_certas = Texto(f"{num_certas}/8", 'FreeSansBold', 90, 150, 960)
+                seg.show_texto(window, 'center')
+                qtd_certas.show_texto(window, 'center')
+                pygame.display.update()
+
+                pergunta['visualizada'] = True
+                esperando = True
+                while esperando:
+                    for ev in pygame.event.get():
+                        if ev.type == pygame.QUIT:
+                            pygame.quit()
+                        if ev.type == pygame.KEYDOWN and ev.key == pygame.K_RETURN:
+                            esperando = False
+                    
+                    time_pos_queda = (pygame.time.get_ticks() - start_pos_queda) / 1000
+                    if int(sons['queda'].get_length()) < time_pos_queda and not queda_tocou:
+                        sons['tema'].play()
+                        queda_tocou = True
+                # Mostra a resposta correta
+                correta = ['A', 'B', 'C'].index(pergunta_atual['certa']) + 1
+                blit_pergunta(pergunta_atual['pergunta'])
+                blit_resposta_final(pergunta_atual['alternativas'], correta, cor=(0, 175, 0))
+                
+                seg = Texto(str(int(ceil(time))), 'ArialBlack', 120, 428, 924)
+                qtd_certas = Texto(f"{num_certas}/8", 'FreeSansBold', 90, 150, 960)
+                seg.show_texto(window, 'center')
+                qtd_certas.show_texto(window, 'center')
+                pygame.display.update()
+                esperando = True
+                time_pos_queda = (pygame.time.get_ticks() - start_pos_queda) / 1000
+                while esperando:
+                    for ev in pygame.event.get():
+                        if ev.type == pygame.QUIT:
+                            pygame.quit()
+                        if ev.type == pygame.KEYDOWN and ev.key == pygame.K_RETURN:
+                            esperando = False
+                    time_pos_queda = (pygame.time.get_ticks() - start_pos_queda) / 1000
+                    if int(sons['queda'].get_length()) - 1 < time_pos_queda and not queda_tocou:
+                        sons['tema'].play()
+                        queda_tocou = True
+            indice = (indice + 1) % 8
+            if indice == num_pergunta and not primeira_passagem:
+                print("breakou")
+                break
+            primeira_passagem = False
     else:
         # Acertou todas
         sons['escapou'].play()
@@ -2190,15 +2253,20 @@ def configuracoes():
     config_salva = False
     tudo_salvo = Texto('Configurações salvas com sucesso!', 'FreeSansBold', tam=36, x=1880, y=985)
     tipos = []
+    escondidos = [False] * 5
+    tipos_escondidos = [1] * 5
 
     for n, t in zip(df_jogadores['nome'], df_jogadores['tipo']):
         input_box = InputBox(x, y, 355, 45, text=n)
         input_boxes.append(input_box)
 
         option_box_tipo = OptionBox(x + 360, y, 375, 45, (25, 25, 25), (120, 120, 120), selected=t)
+        option_box_tipo.option_list.append('Dificuldade Escondida')
         opcoes_bot.append(option_box_tipo)
         tipos.append(t)
         y += 50
+
+    randomizar = Botao('Randomizar e esconder dificuldade dos bots', 60, 445, tam=36, align='topleft')
 
     txt_base = Texto('Base de perguntas', 'FreeSansBold', tam=48, x=1100, y=170)
     bases = [b for b in listdir('base') if '.csv' in b]
@@ -2256,7 +2324,7 @@ def configuracoes():
                         novos_jogadores.append(str(box.text))
                     for i in range(len(novos_jogadores)):
                         df_jogadores.loc[i, 'nome'] = novos_jogadores[i]
-                        df_jogadores.loc[i, 'tipo'] = opcoes_bot[i].selected
+                        df_jogadores.loc[i, 'tipo'] = tipos_escondidos[i] if escondidos[i] else opcoes_bot[i].selected
                     
                     # Atualiza config.json com todas as configurações
                     with open("config.json", "r", encoding="utf-8") as f:
@@ -2285,13 +2353,22 @@ def configuracoes():
                     
                     config_salva = True
                 
+                if randomizar.check_click():
+                    for i in range(len(opcoes_bot)):
+                        if opcoes_bot[i].selected != 0:
+                            tipos_escondidos[i] = randint(1, 5)
+                            escondidos[i] = True
+                            opcoes_bot[i].selected = 6
+
                 # Atualiza os toggles
                 toggle_nao_responde.update(ev)
                 toggle_escapa.update(ev)
                 toggle_bonus.update(ev)
-                
+
                 for i in range(len(tipos)):
-                    opcoes_bot[i].update(ev)
+                    ret = opcoes_bot[i].update(ev)
+                    if ret != -1 and ret != 6:
+                        escondidos[i] = False
                 base.update(ev)
                 toggle_valores.update(ev)
 
@@ -2383,6 +2460,7 @@ def configuracoes():
         txt_valores_titulo.show_texto(window, 'center')
 
         salvar.show_texto(window)
+        randomizar.show_texto(window)
 
         for op in opcoes_bot:
             if not op.draw_menu:
