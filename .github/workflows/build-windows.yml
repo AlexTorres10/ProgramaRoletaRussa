@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python 3.8
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.8'
 
@@ -43,13 +43,13 @@ jobs:
         run: makensis installer.nsi
 
       - name: Upload standalone folder
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: RoletaRussa-portable
           path: dist/RoletaRussa/
 
       - name: Upload installer EXE
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: RoletaRussa-Setup
           path: RoletaRussa-Setup.exe
