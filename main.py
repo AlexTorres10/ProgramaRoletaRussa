@@ -1,3 +1,37 @@
+import sys
+import os
+
+# Resolve asset directory — sys._MEIPASS when frozen by PyInstaller, script dir otherwise.
+# Must happen before any project imports because jogar_roleta.py loads images at module level.
+if getattr(sys, 'frozen', False):
+    _BASE_DIR = sys._MEIPASS
+else:
+    _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+os.chdir(_BASE_DIR)
+
+# Writable user data: AppData\RoletaRussa on Windows, same dir as assets in dev/Linux
+if sys.platform == 'win32':
+    _USER_DATA_DIR = os.path.join(os.environ.get('APPDATA', _BASE_DIR), 'RoletaRussa')
+else:
+    _USER_DATA_DIR = _BASE_DIR
+os.makedirs(_USER_DATA_DIR, exist_ok=True)
+
+# Seed default files on first install
+_user_config = os.path.join(_USER_DATA_DIR, 'config.json')
+if not os.path.exists(_user_config):
+    import shutil as _shutil
+    _shutil.copy2(os.path.join(_BASE_DIR, 'config.json'), _user_config)
+
+_user_records = os.path.join(_USER_DATA_DIR, 'records.json')
+if not os.path.exists(_user_records):
+    with open(_user_records, 'w', encoding='utf-8') as _f:
+        _f.write('[]')
+
+
+def data_path(filename):
+    return os.path.join(_USER_DATA_DIR, filename)
+
+
 import pygame
 
 from display import *
@@ -10,7 +44,6 @@ from os import listdir
 from math import ceil
 from random import randrange, shuffle, uniform
 import random
-import sys
 import locale
 import json
 
@@ -947,7 +980,7 @@ def iniciar_jogo():
         sons[som].stop()
     
     window.fill('black')
-    with open("config.json", "r", encoding="utf-8") as f:
+    with open(data_path("config.json"), "r", encoding="utf-8") as f:
         config_data = json.load(f)
     df_jogadores = pd.DataFrame(config_data["jogadores"])
     jogadores = []
@@ -1899,7 +1932,7 @@ def iniciar_jogo():
     sons['aplausos2'].play()
 
     if finalista.tipo == 0:
-        df_recordes = pd.read_json("records.json")
+        df_recordes = pd.read_json(data_path("records.json"))
         df_vencedor = pd.DataFrame([{
             'nome': finalista.nome,
             'dinheiro': finalista.dinheiro,
@@ -1911,7 +1944,7 @@ def iniciar_jogo():
             by=['dinheiro', 'final_certas', 'dinheiro_antes_final'],
             ascending=False
         ).head(10)
-        df_recordes.to_json("records.json", orient="records")
+        df_recordes.to_json(data_path("records.json"), orient="records")
 
     wait_until_enter(150)
 
@@ -2245,7 +2278,7 @@ def configuracoes():
     x = 60
     y = 170
 
-    with open("config.json", "r", encoding="utf-8") as f:
+    with open(data_path("config.json"), "r", encoding="utf-8") as f:
         config_data = json.load(f)
     df_jogadores = pd.DataFrame(config_data["jogadores"])
     input_boxes = []
@@ -2327,7 +2360,7 @@ def configuracoes():
                         df_jogadores.loc[i, 'tipo'] = tipos_escondidos[i] if escondidos[i] else opcoes_bot[i].selected
                     
                     # Atualiza config.json com todas as configurações
-                    with open("config.json", "r", encoding="utf-8") as f:
+                    with open(data_path("config.json"), "r", encoding="utf-8") as f:
                         config_data = json.load(f)
                     
                     config_data["jogadores"] = df_jogadores.to_dict(orient="records")
@@ -2337,7 +2370,7 @@ def configuracoes():
                     config_data["rodada_1_estendida"] = toggle_r1.get_state()
                     config_data["valores_novos"] = toggle_valores.selected == 1
                     
-                    with open("config.json", "w", encoding="utf-8") as f:
+                    with open(data_path("config.json"), "w", encoding="utf-8") as f:
                         json.dump(config_data, f, ensure_ascii=False, indent=4)
                     
                     pygame.mixer.music.set_volume(vol)
@@ -2674,7 +2707,7 @@ def mostra_recordes():
     limpa_tela(window)
     volta_menu.show_texto(window)
 
-    df_recordes = pd.read_json("records.json")
+    df_recordes = pd.read_json(data_path("records.json"))
     df_recordes = df_recordes.sort_values(by=['dinheiro', 'final_certas', 'dinheiro_antes_final'], ascending=False)
     df_recordes = df_recordes.head(10)
     sons['final_inicio'].play()
