@@ -1402,20 +1402,20 @@ def iniciar_jogo():
             # Lógica extra para perguntas após a 5ª, conforme configurações
             if num_pergunta >= 6:
                 # Bônus: todos acertaram as 5 primeiras perguntas
-                if num_pergunta == 6 and config_data.get("bonus_acerto_todas", False) and certas == 5:
+                if num_pergunta == 6 and config_data.get("bonus_acerto_todas", True) and certas == 5:
                     print("Bônus por acertar todas as 5 primeiras perguntas!")
                     continue  # Permite pergunta bônus
 
                 # Permite estender até a 7ª pergunta se ainda houver jogadores que nunca responderam
-                if num_pergunta <= 7 and nao_respondeu_nunca and config_data.get("extra_nao_responde", False):
+                if num_pergunta <= 7 and nao_respondeu_nunca and config_data.get("extra_nao_responde", True):
                     print("Bônus para todos responderem!")
                     continue  # Permite perguntas extras até todos responderem
 
-                # Caso contrário, encerra
-                break
+                if rodada == 1 and config_data.get("rodada_1_estendida", True):
+                    print("Bônus extra na rodada 1!")
+                    continue  # Permite pergunta extra na rodada 1
 
-            # Encerrar após pergunta 5 (caso não tenha entrado em nenhuma lógica anterior)
-            if num_pergunta > 5:
+                # Caso contrário, encerra
                 break
         
         if not jog_eliminado:
