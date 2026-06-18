@@ -186,6 +186,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
         pos_risco = randrange(len(em_risco))
         vermelhos_iniciais = [comeca]
         space = False
+        sons['carrasco'].play()
         for i in range(13):
             alav.update_image('img/alavanca2-' + str(i) + '.png')
             blit_all(sair_do_jogo, essentials, jogadores, display_update=True)
@@ -301,6 +302,8 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
 
         pos_azul = randrange(len(candidatos))
         space = False
+        
+        sons['carrasco'].play()
         for i in range(13):
             alav.update_image('img/alavanca2-' + str(i) + '.png')
             blit_all(sair_do_jogo, essentials, jogadores, display_update=True)
@@ -325,7 +328,7 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
                         roleta_verdadeira = candidatos[pos_azul]
                         return para_roleta('comeco', alav,
                                            jog_comeca=roleta_verdadeira, vermelhos=[comeca], jogadores=jogadores)
-            if todos_bots(jogadores) and (segundos > jogando_roleta):
+            if segundos > jogando_roleta:
                 roleta_verdadeira = candidatos[pos_azul]
                 return para_roleta('comeco', alav,
                                    jog_comeca=roleta_verdadeira, vermelhos=[comeca], jogadores=jogadores)
@@ -1037,7 +1040,6 @@ def iniciar_jogo():
     pygame.display.update()
     nao_respondeu_nunca = [pl for pl in jogadores if not pl.eliminado]
 
-    jogadores = [Jogador('Jogador Teste', 2, 1)]
     # RODADAS ELIMINATÓRIAS
     for rodada in range(1, 5):
         certas = 0
@@ -1776,7 +1778,6 @@ def iniciar_jogo():
     pygame.mixer.stop()
 
     if errou:
-        print("Entrou aqui")
         for q in perguntas_da_final:
             if not q['visualizada']:
                 df_perguntas.loc[df_perguntas['pergunta'] == q['pergunta'], 'used'] = False
@@ -1792,7 +1793,6 @@ def iniciar_jogo():
         indice = num_pergunta
         primeira_passagem = True
         # sons['tema'].play()
-        print(perguntas_da_final)
         while True:
             pergunta_atual = perguntas_da_final[indice]
             if pergunta_atual['visualizada'] and not pergunta_atual['status']:
@@ -1842,7 +1842,6 @@ def iniciar_jogo():
                         queda_tocou = True
             indice = (indice + 1) % 8
             if indice == num_pergunta and not primeira_passagem:
-                print("breakou")
                 break
             primeira_passagem = False
     else:
@@ -1911,8 +1910,8 @@ def iniciar_jogo():
         else:
             sons['queda'].play()
             wait_until_enter(int(sons['queda'].get_length()))
-    pygame.mixer.stop()
-    sons['tema'].play()
+        pygame.mixer.stop()
+        sons['tema'].play()
 
     if errou:
         vermelhos_restantes = [v for v in range(6) if v not in buracos_abertos_final[:qtd_buracos_abertos + 1]]
@@ -2486,7 +2485,7 @@ def configuracoes():
         
         txt_bonus_todas = Texto('Pergunta bônus se todos acertarem as 5 perguntas:', 'FreeSans', 30, 1620, 430)
         txt_bonus_todas.show_texto(window, 'midright')
-        txt_bonus_todas = Texto('1ª rodada estendida caso todos acertem:', 'FreeSans', 30, 1620, 480)
+        txt_bonus_todas = Texto('1ª rodada estendida até 7 perguntas:', 'FreeSans', 30, 1620, 480)
         txt_bonus_todas.show_texto(window, 'midright')
 
         txt_valores_titulo = Texto('Valores do Jogo', 'FreeSansBold', tam=40, x=1300, y=550)
