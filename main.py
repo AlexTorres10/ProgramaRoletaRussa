@@ -2004,8 +2004,8 @@ def fuja_vermelho():
 
             pygame.display.update()
 
-        # blit_all(sair_do_jogo, essentials, jogadores)
-        # pygame.display.update()
+        blit_all(sair_do_jogo, essentials, jogadores)
+        pygame.display.update()
 
         premios = [
             [5000, 5000, 5000, 2500, 1500, 1000],
