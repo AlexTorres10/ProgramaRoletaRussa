@@ -2396,6 +2396,7 @@ def configuracoes():
                 toggle_nao_responde.update(ev)
                 toggle_escapa.update(ev)
                 toggle_bonus.update(ev)
+                toggle_r1.update(ev)
 
                 for i in range(len(tipos)):
                     ret = opcoes_bot[i].update(ev)
