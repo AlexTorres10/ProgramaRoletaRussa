@@ -186,7 +186,8 @@ def jogar_roleta(modo, alav, chances_de_cair=0, jogador_em_risco=Jogador('Zé', 
         pos_risco = randrange(len(em_risco))
         vermelhos_iniciais = [comeca]
         space = False
-        sons['carrasco'].play()
+        if len(em_risco) == 1:
+            sons['carrasco'].play()
         for i in range(13):
             alav.update_image('img/alavanca2-' + str(i) + '.png')
             blit_all(sair_do_jogo, essentials, jogadores, display_update=True)
@@ -2014,15 +2015,16 @@ def fuja_vermelho():
                     if sair_do_jogo.check_click():
                         pygame.mixer.stop()
                         return
-                if iniciar_fv.check_click():
-                    if input_jogador.text != '':
-                        new_player = Jogador(input_jogador.text, 1, 0)
-                        new_player.image = Image("img/fv/milton.png", 0, 0)
-                        new_player.move_center(fv=True)
-                        jogadores.append(new_player)
-                        loop_nome = False
+                    if iniciar_fv.check_click():
+                        if input_jogador.text != '':
+                            new_player = Jogador(input_jogador.text, 1, 0)
+                            new_player.image = Image("img/fv/milton.png", 0, 0)
+                            new_player.move_center(fv=True)
+                            jogadores.append(new_player)
+                            loop_nome = False
                 if ev.type == pygame.KEYDOWN:
                     if ev.key == pygame.K_RETURN:
+                        print("Event:", pygame.event.get())
                         if input_jogador.text != '':
                             new_player = Jogador(input_jogador.text, 1, 0)
                             new_player.image = Image("img/fv/milton.png", 0, 0)
